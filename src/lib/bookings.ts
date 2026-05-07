@@ -12,11 +12,17 @@ export async function getBookingsByApartment(apartmentId: string) {
   return data;
 }
 
-export async function getBookingsByHousehold(householdId: string) {
+export async function getBookingsByHousehold(
+  householdId: string, 
+  startDate: string, 
+  endDate: string
+) {
   const { data, error } = await supabase
     .from('booking')
     .select('*, apartment!inner(household_id)')
     .eq('apartment.household_id', householdId)
+    .gte('start_time', startDate)
+    .lte('start_time', endDate)
     .order('start_time', { ascending: true });
 
   if (error) throw error;
