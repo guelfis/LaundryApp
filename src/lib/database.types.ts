@@ -1,93 +1,248 @@
-export interface Database {
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[]
+
+export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "14.5"
+  }
   public: {
     Tables: {
-      household: {
-        Row: {
-          id: string;
-          name: string;
-          address: string | null;
-          access_code: string;
-          created_at: string;
-        };
-        Insert: {
-          id?: string;
-          name: string;
-          address?: string | null;
-          access_code: string;
-          created_at?: string;
-        };
-        Update: {
-          id?: string;
-          name?: string;
-          address?: string | null;
-          access_code?: string;
-          created_at?: string;
-        };
-      };
       apartment: {
         Row: {
-          id: string;
-          household_id: string | null;
-          display_name: string;
-          password_hash: string;
-          created_at: string;
-        };
+          created_at: string | null
+          display_name: string
+          household_id: string | null
+          id: string
+          password_hash: string
+        }
         Insert: {
-          id?: string;
-          household_id?: string | null;
-          display_name: string;
-          password_hash: string;
-          created_at?: string;
-        };
+          created_at?: string | null
+          display_name: string
+          household_id?: string | null
+          id?: string
+          password_hash: string
+        }
         Update: {
-          id?: string;
-          household_id?: string | null;
-          display_name?: string;
-          password_hash?: string;
-          created_at?: string;
-        };
-      };
+          created_at?: string | null
+          display_name?: string
+          household_id?: string | null
+          id?: string
+          password_hash?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "apartment_household_id_fkey"
+            columns: ["household_id"]
+            isOneToOne: false
+            referencedRelation: "household"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       booking: {
         Row: {
-          id: string;
-          apartment_id: string | null;
-          start_time: string;
-          end_time: string;
-          created_at: string;
-        };
+          apartment_id: string | null
+          created_at: string | null
+          end_time: string
+          id: string
+          released_at: string | null
+          start_time: string
+          status: string | null
+        }
         Insert: {
-          id?: string;
-          apartment_id?: string | null;
-          start_time: string;
-          end_time: string;
-          created_at?: string;
-        };
+          apartment_id?: string | null
+          created_at?: string | null
+          end_time: string
+          id?: string
+          released_at?: string | null
+          start_time: string
+          status?: string | null
+        }
         Update: {
-          id?: string;
-          apartment_id?: string | null;
-          start_time?: string;
-          end_time?: string;
-          created_at?: string;
-        };
-      };
-    };
-    Views: Record<string, never>;
-    Functions: Record<string, never>;
-    Enums: Record<string, never>;
-  };
+          apartment_id?: string | null
+          created_at?: string | null
+          end_time?: string
+          id?: string
+          released_at?: string | null
+          start_time?: string
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "booking_apartment_id_fkey"
+            columns: ["apartment_id"]
+            isOneToOne: false
+            referencedRelation: "apartment"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      household: {
+        Row: {
+          access_code: string
+          address: string | null
+          created_at: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          access_code: string
+          address?: string | null
+          created_at?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          access_code?: string
+          address?: string | null
+          created_at?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      [_ in never]: never
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
 }
 
-export type Household = Database['public']['Tables']['household']['Row'];
-export type HouseholdInsert = Database['public']['Tables']['household']['Insert'];
-export type HouseholdUpdate = Database['public']['Tables']['household']['Update'];
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
 
-export type Apartment = Database['public']['Tables']['apartment']['Row'];
-export type ApartmentInsert = Database['public']['Tables']['apartment']['Insert'];
-export type ApartmentUpdate = Database['public']['Tables']['apartment']['Update'];
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
 
-export type Booking = Database['public']['Tables']['booking']['Row'];
-export type BookingInsert = Database['public']['Tables']['booking']['Insert'];
-export type BookingUpdate = Database['public']['Tables']['booking']['Update'];
+export type Tables<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+      Row: infer R
+    }
+    ? R
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+        Row: infer R
+      }
+      ? R
+      : never
+    : never
 
-export type ApartmentWithBookings = Apartment & { bookings: Booking[] };
-export type HouseholdWithApartments = Household & { apartments: Apartment[] };
+export type TablesInsert<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Insert: infer I
+    }
+    ? I
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Insert: infer I
+      }
+      ? I
+      : never
+    : never
+
+export type TablesUpdate<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Update: infer U
+    }
+    ? U
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Update: infer U
+      }
+      ? U
+      : never
+    : never
+
+export type Enums<
+  DefaultSchemaEnumNameOrOptions extends
+    | keyof DefaultSchema["Enums"]
+    | { schema: keyof DatabaseWithoutInternals },
+  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+    : never = never,
+> = DefaultSchemaEnumNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
+    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
+    : never
+
+export type CompositeTypes<
+  PublicCompositeTypeNameOrOptions extends
+    | keyof DefaultSchema["CompositeTypes"]
+    | { schema: keyof DatabaseWithoutInternals },
+  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    : never = never,
+> = PublicCompositeTypeNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
+    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+    : never
+
+export const Constants = {
+  public: {
+    Enums: {},
+  },
+} as const
