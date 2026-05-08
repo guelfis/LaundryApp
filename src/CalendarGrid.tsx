@@ -1,9 +1,12 @@
-import { useState } from 'react';
-import { DAYS_OF_WEEK, SLOT_TIMES } from './constants/dates';
+import { useMemo, useState } from 'react';
+import { DAYS_OF_WEEK, SLOTS } from './constants/dates';
 import MonthSwitcher from './MonthSwitcher';
-import { getDate, getDaysInMonth, getFirstDayOfMonth, getSlotKey } from './utils/datesGetter';
+import { getDate, getDaysInMonth, getFirstDayOfMonth } from './utils/datesGetter';
 import { cn } from './utils/cn';
 import { SlotStatus } from './constants/SlotStatus';
+import { useBookings } from './contexts/BookingContext';
+import { getBookingStatus, getSlotKey } from './utils/slotsUtils';
+import { Booking } from './lib/database.types';
 
 const dayColStyles = "w-24 shrink-0 px-4 py-3";
 
@@ -43,6 +46,26 @@ function CalendarGrid(
   { onSlotClick }: { onSlotClick: (dayNum: string, slot: string, slotKey: string) => void }
 ) {
       const [activeMonth, setActiveMonth] = useState(new Date().getMonth());
+
+      const { bookings } = useBookings();
+      
+      // Create a map for quick lookup of bookings by slotKey only when bookings change
+      const bookingsMap = useMemo(() => {
+      
+        const map: Record<string, Booking[]> = {};
+
+        bookings.forEach((b) => {
+          const d = new Date(b.start_time);
+          const key = `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}-${d.getHours()}`;
+          
+          if (!map[key]) {
+            map[key] = [];
+          }
+          map[key].push(b);
+        });
+
+        return map;
+      }, [bookings]);
     
       const year = new Date().getFullYear();
       const daysInMonth = getDaysInMonth(activeMonth, year);
@@ -71,13 +94,13 @@ function CalendarGrid(
         <div className={cn( dayColStyles ,  "text-xs font-semibold text-gray-500 uppercase tracking-wider border-r border-gray-200")}>
             Day
         </div>
-        {SLOT_TIMES.map((slot) => (
+        {SLOTS.map((slot) => (
         <div
-            key={slot}
+            key={slot.label}
             /* Added whitespace-nowrap to stop the break and min-w-fit to ensure it fits */
             className="flex-1 min-w-fit whitespace-nowrap px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider text-center border-r border-gray-200 last:border-r-0"
         >
-        {slot}
+        {slot.label}
         </div>
         ))}
         </div>
@@ -97,10 +120,11 @@ function CalendarGrid(
               ].join(' ')}
             >
               <DayCell dayName={dayName} dayNum={dayNum} isToday={isToday} />
-              {SLOT_TIMES.map((slot, col) => {
-                const slotKey = getSlotKey(dayNum, activeMonth, year, slot);
+              {SLOTS.map((slot, col) => {
+                const slotKey = getSlotKey(dayNum, activeMonth, year, slot.startHour);
+                const slotBookings = bookingsMap[slotKey] || [];
                 return (
-                <SlotCell key={col} onClick={() => onSlotClick(getDate(dayNum, activeMonth, year), slot, slotKey)} slotStatus={SlotStatus.AVAILABLE} />
+                <SlotCell key={col} onClick={() => onSlotClick(getDate(dayNum, activeMonth, year), slot.label, slotKey)} slotStatus={getBookingStatus(slotBookings)} />
                 )}
               )}
             </div>

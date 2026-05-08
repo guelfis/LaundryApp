@@ -4,7 +4,7 @@ import Dashboard from './Dashboard';
 import { BookingProvider } from './contexts/BookingContext';
 
 // Mock household ID for testing purposes
-const MOCK_HOUSEHOLD_ID = "tuo-uuid-da-supabase";
+const MOCK_HOUSEHOLD_ID = "450bfbaf-70f3-4888-b03d-28d6f80c7234";
 
 function App() {
   return (
