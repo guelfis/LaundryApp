@@ -4,8 +4,7 @@ import MonthSwitcher from './MonthSwitcher';
 import { getDate, getDaysInMonth, getFirstDayOfMonth } from './utils/datesGetter';
 import { cn } from './utils/cn';
 import { SlotStatus } from './constants/SlotStatus';
-import { getBookingStatus, getSlotKey } from './utils/slotsUtils';
-import { Booking } from './lib/database.types';
+import { getBookingsMap, getBookingStatus, getSlotKey } from './utils/slotsUtils';
 import { useBookingFilters, useMonthBookings } from './useBookings';
 import { LoadingSpinner } from './utils/loadingSpinner';
 
@@ -53,20 +52,7 @@ function CalendarGrid(
       
       // Create a map for quick lookup of bookings by slotKey only when bookings change
       const bookingsMap = useMemo(() => {
-      
-        const map: Record<string, Booking[]> = {};
-
-        bookings.forEach((b) => {
-          const d = new Date(b.start_time);
-          const key = `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}-${d.getHours()}`;
-          
-          if (!map[key]) {
-            map[key] = [];
-          }
-          map[key].push(b);
-        });
-
-        return map;
+        return getBookingsMap(bookings);
       }, [bookings]);
 
       if (isLoading) return <LoadingSpinner />;
