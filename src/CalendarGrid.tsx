@@ -1,12 +1,14 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { DAYS_OF_WEEK, SLOTS } from './constants/dates';
 import MonthSwitcher from './MonthSwitcher';
 import { getDate, getDaysInMonth, getFirstDayOfMonth } from './utils/datesGetter';
 import { cn } from './utils/cn';
 import { SlotStatus } from './constants/SlotStatus';
-import { useBookings } from './contexts/BookingContext';
 import { getBookingStatus, getSlotKey } from './utils/slotsUtils';
 import { Booking } from './lib/database.types';
+import { useBookingFilters, useMonthBookings } from './useBookings';
+import { LoadingSpinner } from './utils/loadingSpinner';
+
 
 const dayColStyles = "w-24 shrink-0 px-4 py-3";
 
@@ -45,9 +47,9 @@ function SlotCell(
 function CalendarGrid(
   { onSlotClick }: { onSlotClick: (dayNum: string, slot: string, slotKey: string) => void }
 ) {
-      const [activeMonth, setActiveMonth] = useState(new Date().getMonth());
-
-      const { bookings } = useBookings();
+      const { viewDate, setViewDate, householdId } = useBookingFilters();
+      const { data: bookings = [], isLoading } = useMonthBookings(householdId, viewDate); 
+      
       
       // Create a map for quick lookup of bookings by slotKey only when bookings change
       const bookingsMap = useMemo(() => {
@@ -66,8 +68,11 @@ function CalendarGrid(
 
         return map;
       }, [bookings]);
+
+      if (isLoading) return <LoadingSpinner />;
     
-      const year = new Date().getFullYear();
+      const activeMonth = viewDate.getMonth();
+      const year = viewDate.getFullYear();
       const daysInMonth = getDaysInMonth(activeMonth, year);
       const firstDay = getFirstDayOfMonth(activeMonth, year);
     
@@ -81,11 +86,16 @@ function CalendarGrid(
         return { dayNum, dayName, isToday };
       });
 
+      const handleSetMonth = (month: number) => {
+        const newDate = new Date(year, month, 1);
+          setViewDate(newDate);
+      };
+
       
       return (
     <div >
       {/* Month Switcher */}
-      <MonthSwitcher activeMonth={activeMonth} setActiveMonth={setActiveMonth}  />
+      <MonthSwitcher activeMonth={activeMonth} setActiveMonth={handleSetMonth}  />
 
       {/* Grid */}
       <div className="w-full max-w-2xl bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200">

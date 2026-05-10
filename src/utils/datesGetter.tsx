@@ -11,6 +11,6 @@ export function getDate(dayNum: number, monthIndex: number, year: number) {
     day: 'numeric',
     month: 'long',
     year: 'numeric'
-  }); // Restituisce "6 May 2026"
+  });
 }
 
