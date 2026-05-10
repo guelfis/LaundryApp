@@ -50,6 +50,7 @@ export type Database = {
         Row: {
           apartment_id: string | null
           created_at: string | null
+          created_by: string | null
           end_time: string
           id: string
           released_at: string | null
@@ -59,6 +60,7 @@ export type Database = {
         Insert: {
           apartment_id?: string | null
           created_at?: string | null
+          created_by?: string | null
           end_time: string
           id?: string
           released_at?: string | null
@@ -68,6 +70,7 @@ export type Database = {
         Update: {
           apartment_id?: string | null
           created_at?: string | null
+          created_by?: string | null
           end_time?: string
           id?: string
           released_at?: string | null
@@ -80,6 +83,13 @@ export type Database = {
             columns: ["apartment_id"]
             isOneToOne: false
             referencedRelation: "apartment"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "booking_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -108,12 +118,52 @@ export type Database = {
         }
         Relationships: []
       }
+      profiles: {
+        Row: {
+          apartment_id: string | null
+          full_name: string | null
+          id: string
+          updated_at: string | null
+        }
+        Insert: {
+          apartment_id?: string | null
+          full_name?: string | null
+          id: string
+          updated_at?: string | null
+        }
+        Update: {
+          apartment_id?: string | null
+          full_name?: string | null
+          id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_apartment_id_fkey"
+            columns: ["apartment_id"]
+            isOneToOne: false
+            referencedRelation: "apartment"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      assign_user_to_apartment: {
+        Args: { h_code: string; target_apt_id: string }
+        Returns: undefined
+      }
+      get_apartments_by_house_code: {
+        Args: { h_code: string }
+        Returns: {
+          apt_id: string
+          apt_name: string
+        }[]
+      }
+      get_my_household_id: { Args: never; Returns: string }
     }
     Enums: {
       [_ in never]: never
