@@ -7,6 +7,7 @@ import { SlotStatus } from './constants/SlotStatus';
 import { getBookingsMap, getBookingStatus, getSlotKey } from './utils/slotsUtils';
 import { useBookingFilters, useMonthBookings } from './useBookings';
 import { LoadingSpinner } from './components/loadingSpinner';
+import PageLayout from './components/PageLayout';
 
 
 const dayColStyles = "w-24 shrink-0 px-4 py-3";
@@ -55,7 +56,7 @@ function CalendarGrid(
         return getBookingsMap(bookings);
       }, [bookings]);
 
-      if (isLoading) return <LoadingSpinner />;
+      if (isLoading) return <PageLayout><LoadingSpinner /></PageLayout>;
     
       const activeMonth = viewDate.getMonth();
       const year = viewDate.getFullYear();

@@ -5,6 +5,7 @@ import AuthPage from './auth/AuthPage';
 import { BookingProvider } from './contexts/BookingContext';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider, useAuth } from './auth/AuthContext';
+import { LoadingSpinner } from './components/loadingSpinner';
 
 // create a QueryClient instance for React Query outside of the component to avoid re-creating it on every render
 const queryClient = new QueryClient();
@@ -12,7 +13,9 @@ const MOCK_HOUSEHOLD_ID = "450bfbaf-70f3-4888-b03d-28d6f80c7234";
 
 // 2. Component that defines the app routes based on authentication state
 function AppRoutes() {
-  const { session } = useAuth();
+  
+  const { session, loading } = useAuth();
+  if (loading) return <LoadingSpinner />;
 
   return (
     <Routes>

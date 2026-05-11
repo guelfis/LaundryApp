@@ -2,6 +2,7 @@ import { useBookingFilters, useMonthBookings } from './useBookings';
 import { useMemo } from 'react';
 import { LoadingSpinner } from './components/loadingSpinner';
 import { getBookingsMap, getBookingStatus } from './utils/slotsUtils';
+import BottomModal from './components/BottomModal';
 
 
 interface BookingModalProps {
@@ -41,22 +42,13 @@ export default function BookingModal({ isOpen, onClose, selectedSlot }: BookingM
 
  
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center">
-      {/* Overlay */}
-      <div 
-        className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-in fade-in duration-300" 
-        onClick={onClose} 
-      />
-      
-      {/* Bottom Sheet Container */}
-      <div className="relative w-full max-w-md bg-white rounded-t-[2.5rem] p-8 shadow-2xl animate-in slide-in-from-bottom duration-300">
-        {/* Handle to slide it up from the bottom */}
-        <div className="w-12 h-1.5 bg-gray-200 rounded-full mx-auto mb-6" />
+    <BottomModal
+            isOpen={isOpen} 
+            onClose={onClose} 
+            title={`Slot ${selectedSlot.slot}: ${slotStatus}`}
+          >
 
         <header className="mb-8">
-          <h3 className="text-2xl font-bold text-gray-900">
-            Slot {selectedSlot.slot}: {slotStatus}
-          </h3>
           <p className="text-gray-600 mt-2">
             {`You have selected ${selectedSlot.day} at ${selectedSlot.slot}`}
           </p>
@@ -79,7 +71,6 @@ export default function BookingModal({ isOpen, onClose, selectedSlot }: BookingM
             Cancel
           </button>
         </div>
-      </div>
-    </div>
+      </BottomModal>
   );
 }
