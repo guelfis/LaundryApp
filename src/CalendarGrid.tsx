@@ -6,7 +6,7 @@ import { cn } from './utils/cn';
 import { SlotStatus } from './constants/SlotStatus';
 import { getBookingsMap, getBookingStatus, getSlotKey } from './utils/slotsUtils';
 import { useBookingFilters, useMonthBookings } from './useBookings';
-import { LoadingSpinner } from './utils/loadingSpinner';
+import { LoadingSpinner } from './components/loadingSpinner';
 
 
 const dayColStyles = "w-24 shrink-0 px-4 py-3";
@@ -79,57 +79,60 @@ function CalendarGrid(
 
       
       return (
-    <div >
-      {/* Month Switcher */}
-      <MonthSwitcher activeMonth={activeMonth} setActiveMonth={handleSetMonth}  />
+        // Main Container: flex column to stack month switcher and grid, height to fill viewport minus some space for header
+    <div style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 120px)' }}>
+      
+        {/* Month Switcher: stays in place */}
+      <div style={{ flexShrink: 0 }}>
+        <MonthSwitcher activeMonth={activeMonth} setActiveMonth={handleSetMonth} />
+      </div>
 
-      {/* Grid */}
-      <div className="w-full max-w-2xl bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200">
-        {/* Header Row */}
-       <div className="flex border-b border-gray-200 bg-gray-50">
-        <div className={cn( dayColStyles ,  "text-xs font-semibold text-gray-500 uppercase tracking-wider border-r border-gray-200")}>
+      {/* Grid Container: flex-1 makes it fill the remaining space */}
+      <div className="flex-1 flex flex-col bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200">
+        
+        {/* Grid Header */}
+        <div className="flex border-b border-gray-200 bg-gray-50 shrink-0">
+          <div className={cn(dayColStyles, "text-xs font-semibold text-gray-500 uppercase tracking-wider border-r border-gray-200")}>
             Day
+          </div>
+          {SLOTS.map((slot) => (
+            <div key={slot.label} className="flex-1 min-w-fit whitespace-nowrap px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider text-center border-r border-gray-200 last:border-r-0">
+              {slot.label}
+            </div>
+          ))}
         </div>
-        {SLOTS.map((slot) => (
-        <div
-            key={slot.label}
-            /* Added whitespace-nowrap to stop the break and min-w-fit to ensure it fits */
-            className="flex-1 min-w-fit whitespace-nowrap px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider text-center border-r border-gray-200 last:border-r-0"
-        >
-        {slot.label}
-        </div>
-        ))}
-        </div>
-        {/* Day Rows */}
-        <div className="overflow-y-auto" style={{ maxHeight: '62vh' }}>
+
+        {/* Grid Body: Scrollable area for the grid cells */}
+        <div className="flex-1 overflow-y-auto overflow-x-hidden">
           {rows.map(({ dayNum, dayName, isToday }, idx) => (
             <div
               key={dayNum}
-              className={[
+              className={cn(
                 'flex border-b last:border-b-0 transition-colors',
                 isToday
                   ? 'bg-blue-50 border-blue-200 border-2'
-                  : [
-                    'border-gray-100',
-                    idx % 2 !== 0 ? 'bg-gray-50/50' : 'bg-white'
-                  ].join(' ')
-              ].join(' ')}
+                  : idx % 2 !== 0 ? 'bg-gray-50/50' : 'bg-white'
+              )}
             >
               <DayCell dayName={dayName} dayNum={dayNum} isToday={isToday} />
               {SLOTS.map((slot, col) => {
                 const slotKey = getSlotKey(dayNum, activeMonth, year, slot.startHour);
                 const slotBookings = bookingsMap[slotKey] || [];
                 return (
-                <SlotCell key={col} onClick={() => onSlotClick(getDate(dayNum, activeMonth, year), slot.label, slotKey)} slotStatus={getBookingStatus(slotBookings)} />
-                )}
-              )}
+                  <SlotCell 
+                    key={col} 
+                    onClick={() => onSlotClick(getDate(dayNum, activeMonth, year), slot.label, slotKey)} 
+                    slotStatus={getBookingStatus(slotBookings)} 
+                  />
+                )
+              })}
             </div>
           ))}
         </div>
       </div>
-
     </div>
-  );
+);
+
 }
 
 export default CalendarGrid;

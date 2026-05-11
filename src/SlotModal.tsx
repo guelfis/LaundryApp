@@ -1,6 +1,6 @@
 import { useBookingFilters, useMonthBookings } from './useBookings';
 import { useMemo } from 'react';
-import { LoadingSpinner } from './utils/loadingSpinner';
+import { LoadingSpinner } from './components/loadingSpinner';
 import { getBookingsMap, getBookingStatus } from './utils/slotsUtils';
 
 

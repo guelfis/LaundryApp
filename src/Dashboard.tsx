@@ -1,6 +1,7 @@
 import CalendarGrid from './CalendarGrid';
 import { useState } from 'react';
 import SlotModal from './SlotModal';
+import PageLayout from './components/PageLayout';
 
 function Dashboard() {
   
@@ -11,8 +12,7 @@ const handleOpenModal = (dayNum: string, time: string, slotKey: string) => {
 };
 
   return (
-    <div className="min-h-screen bg-[#dce8f5] flex flex-col items-center py-8 px-4">
-      <h1 className="text-xl font-semibold text-gray-700 mb-6 tracking-wide">Hello {localStorage.getItem('apartmentName') || 'there'}!</h1>
+    <PageLayout>
         <CalendarGrid onSlotClick={handleOpenModal}/>
         <SlotModal 
         isOpen={!!selectedSlot} 
@@ -20,7 +20,7 @@ const handleOpenModal = (dayNum: string, time: string, slotKey: string) => {
         selectedSlot={selectedSlot} 
       />
       
-    </div>
+    </PageLayout>
   );
 }
 

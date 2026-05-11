@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { supabase } from "../lib/supabase";
+import PageLayout from "../components/PageLayout";
 
 export default function AuthPage() {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -23,19 +24,21 @@ export default function AuthPage() {
   };
 
   return (
-    <form onSubmit={handleAuth} className="flex flex-col gap-4 p-10 max-w-sm mx-auto">
-      <h2 className="text-2xl font-bold">{isSignUp ? 'Create Account' : 'Login'}</h2>
-      {isSignUp && (
-        <input className="border p-2" placeholder="Full Name" onChange={e => setFullName(e.target.value)} />
-      )}
-      <input className="border p-2" type="email" placeholder="Email" onChange={e => setEmail(e.target.value)} />
-      <input className="border p-2" type="password" placeholder="Password" onChange={e => setPassword(e.target.value)} />
-      <button className="bg-blue-600 text-white p-2 rounded" type="submit">
-        {isSignUp ? 'Create Account' : 'Login'}
-      </button>
-      <button type="button" onClick={() => setIsSignUp(!isSignUp)} className="text-sm text-blue-500">
-        {isSignUp ? 'Do you have an account?' : 'New here? Sign Up'}
-      </button>
-    </form>
+    <PageLayout>
+        <form onSubmit={handleAuth} className="flex flex-col gap-4 p-10 max-w-sm mx-auto">
+        <h2 className="text-2xl font-bold">{isSignUp ? 'Create Account' : 'Login'}</h2>
+        {isSignUp && (
+            <input className="border p-2" placeholder="Full Name" onChange={e => setFullName(e.target.value)} />
+        )}
+        <input className="border p-2" type="email" placeholder="Email" onChange={e => setEmail(e.target.value)} />
+        <input className="border p-2" type="password" placeholder="Password" onChange={e => setPassword(e.target.value)} />
+        <button className="bg-blue-600 text-white p-2 rounded" type="submit">
+            {isSignUp ? 'Create Account' : 'Login'}
+        </button>
+        <button type="button" onClick={() => setIsSignUp(!isSignUp)} className="text-sm text-blue-500">
+            {isSignUp ? 'Do you have an account?' : 'New here? Sign Up'}
+        </button>
+        </form>
+    </PageLayout>
   );
 }
