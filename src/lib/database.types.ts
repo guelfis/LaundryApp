@@ -20,21 +20,18 @@ export type Database = {
           display_name: string
           household_id: string | null
           id: string
-          password_hash: string
         }
         Insert: {
           created_at?: string | null
           display_name: string
           household_id?: string | null
           id?: string
-          password_hash: string
         }
         Update: {
           created_at?: string | null
           display_name?: string
           household_id?: string | null
           id?: string
-          password_hash?: string
         }
         Relationships: [
           {
@@ -42,6 +39,76 @@ export type Database = {
             columns: ["household_id"]
             isOneToOne: false
             referencedRelation: "household"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      apartment_invitations: {
+        Row: {
+          apartment_id: string
+          created_at: string | null
+          created_by: string
+          current_uses: number | null
+          expires_at: string
+          id: string
+          max_uses: number | null
+        }
+        Insert: {
+          apartment_id: string
+          created_at?: string | null
+          created_by: string
+          current_uses?: number | null
+          expires_at?: string
+          id?: string
+          max_uses?: number | null
+        }
+        Update: {
+          apartment_id?: string
+          created_at?: string | null
+          created_by?: string
+          current_uses?: number | null
+          expires_at?: string
+          id?: string
+          max_uses?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "apartment_invitations_apartment_id_fkey"
+            columns: ["apartment_id"]
+            isOneToOne: false
+            referencedRelation: "apartment"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      apartment_members: {
+        Row: {
+          apartment_id: string
+          id: string
+          joined_at: string | null
+          role: string
+          user_id: string
+        }
+        Insert: {
+          apartment_id: string
+          id?: string
+          joined_at?: string | null
+          role?: string
+          user_id: string
+        }
+        Update: {
+          apartment_id?: string
+          id?: string
+          joined_at?: string | null
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "apartment_members_apartment_id_fkey"
+            columns: ["apartment_id"]
+            isOneToOne: false
+            referencedRelation: "apartment"
             referencedColumns: ["id"]
           },
         ]
@@ -120,32 +187,21 @@ export type Database = {
       }
       profiles: {
         Row: {
-          apartment_id: string | null
           full_name: string | null
           id: string
           updated_at: string | null
         }
         Insert: {
-          apartment_id?: string | null
           full_name?: string | null
           id: string
           updated_at?: string | null
         }
         Update: {
-          apartment_id?: string | null
           full_name?: string | null
           id?: string
           updated_at?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "profiles_apartment_id_fkey"
-            columns: ["apartment_id"]
-            isOneToOne: false
-            referencedRelation: "apartment"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
     }
     Views: {
@@ -164,6 +220,7 @@ export type Database = {
         }[]
       }
       get_my_household_id: { Args: never; Returns: string }
+      join_apartment_via_token: { Args: { token_id: string }; Returns: Json }
     }
     Enums: {
       [_ in never]: never
@@ -296,18 +353,3 @@ export const Constants = {
     Enums: {},
   },
 } as const
-
-export type Household = Database['public']['Tables']['household']['Row'];
-export type HouseholdInsert = Database['public']['Tables']['household']['Insert'];
-export type HouseholdUpdate = Database['public']['Tables']['household']['Update'];
-
-export type Apartment = Database['public']['Tables']['apartment']['Row'];
-export type ApartmentInsert = Database['public']['Tables']['apartment']['Insert'];
-export type ApartmentUpdate = Database['public']['Tables']['apartment']['Update'];
-
-export type Booking = Database['public']['Tables']['booking']['Row'];
-export type BookingInsert = Database['public']['Tables']['booking']['Insert'];
-export type BookingUpdate = Database['public']['Tables']['booking']['Update'];
-
-export type ApartmentWithBookings = Apartment & { bookings: Booking[] };
-export type HouseholdWithApartments = Household & { apartments: Apartment[] };

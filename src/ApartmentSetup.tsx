@@ -4,7 +4,7 @@ import PageLayout from './components/PageLayout';
 import { useApartments } from './useApartments';
 import { BookingContext } from './contexts/BookingContext';
 import { LoadingSpinner } from './components/loadingSpinner';
-import { Apartment } from './lib/database.types';
+import { Apartment } from './lib/databaseTypes';
 import { ApartmentPasswordModal } from './apartmentSetup/ApartmentPasswordModal';
 
 

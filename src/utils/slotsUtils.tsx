@@ -1,5 +1,5 @@
 import { SlotStatus } from '../constants/SlotStatus';
-import { Booking } from '../lib/database.types';
+import { Booking } from '../lib/databaseTypes';
 
 export const getSlotKey = (day: number, month: number, year: number, slotStartHour: number) => {
   // Format: "2026-05-06-7"
