@@ -1,5 +1,5 @@
 import { supabase } from './supabase';
-import type { ApartmentInsert, ApartmentUpdate } from './database.types';
+import type { Apartment, ApartmentInsert, ApartmentUpdate } from './databaseTypes';
 
 export async function getApartmentsByHousehold(householdId: string) {
   const { data, error } = await supabase
@@ -10,6 +10,30 @@ export async function getApartmentsByHousehold(householdId: string) {
 
   if (error) throw error;
   return data;
+}
+
+export async function getMyApartments(householdId: string) {
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) throw new Error("No authenticated user found");
+
+  const { data, error } = await supabase
+  .from('apartment_members')
+  .select(`
+    role,
+    apartment:apartment_id (
+      id,
+      display_name,
+      household_id
+    )
+  `)
+  .eq('user_id', user.id) // filter by current user
+  .eq('apartment.household_id', householdId);
+  
+  if (error) throw error;
+  
+  // Clean up the response to return a flatter structure if preferred
+  return (data?.map(m => m.apartment) || []) as Apartment[]
 }
 
 export async function getApartmentById(id: string) {

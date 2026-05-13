@@ -1,5 +1,5 @@
 import { supabase } from './supabase';
-import type { HouseholdInsert, HouseholdUpdate } from './database.types';
+import type { HouseholdInsert, HouseholdUpdate } from './databaseTypes';
 
 export async function getHouseholds() {
   const { data, error } = await supabase

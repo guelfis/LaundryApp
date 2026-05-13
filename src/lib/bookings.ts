@@ -1,5 +1,5 @@
 import { supabase } from './supabase';
-import type { BookingInsert, BookingUpdate } from './database.types';
+import type { BookingInsert, BookingUpdate } from './databaseTypes';
 
 export async function getBookingsByApartment(apartmentId: string) {
   const { data, error } = await supabase
