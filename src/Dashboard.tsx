@@ -2,6 +2,8 @@ import CalendarGrid from './CalendarGrid';
 import { useState } from 'react';
 import SlotModal from './SlotModal';
 import PageLayout from './components/PageLayout';
+import { PageHeader } from './components/PageHeader';
+import { Calendar } from 'lucide-react';
 
 function Dashboard() {
   
@@ -12,12 +14,17 @@ const handleOpenModal = (dayNum: string, time: string, slotKey: string) => {
 };
 
   return (
-    <PageLayout>
-        <CalendarGrid onSlotClick={handleOpenModal}/>
-        <SlotModal 
-        isOpen={!!selectedSlot} 
-        onClose={() => setSelectedSlot(null)} 
-        selectedSlot={selectedSlot} 
+    <PageLayout header={
+      <PageHeader 
+        title="Calendar" 
+        icon={<Calendar className="w-7 h-7 text-blue-500" />} 
+      />
+    }>
+      <CalendarGrid onSlotClick={handleOpenModal}/>
+      <SlotModal 
+      isOpen={!!selectedSlot} 
+      onClose={() => setSelectedSlot(null)} 
+      selectedSlot={selectedSlot} 
       />
       
     </PageLayout>
