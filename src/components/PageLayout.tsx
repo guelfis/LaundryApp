@@ -5,24 +5,20 @@ interface PageLayoutProps {
   children: React.ReactNode;
   header?: React.ReactNode; // Accept a custom header component as input
   footer?: React.ReactNode;
-  scrollableContent?: boolean; // Optional prop to enable/disable scrollable content
 }
 
-const PageLayout: React.FC<PageLayoutProps> = ({ children, header, footer, scrollableContent }) => {
+const PageLayout: React.FC<PageLayoutProps> = ({ children, header, footer }) => {
   return (
-    /* Main Container */
     <div style={{ 
       height: '100vh', 
       display: 'flex', 
       flexDirection: 'column', 
-      backgroundColor: '#dce8f5',
-      overflow: 'hidden' // Prevents the outer window from scrolling
+      overflow: 'hidden',
+      backgroundColor: 'var(--background-color)', /* Dynamically reads global theme */
+      color: 'var(--text-color)'                 /* Dynamically reads global theme */
     }}>
       
-      {/* Permanent Core App Header Container */}
-      <div style={{ flexShrink: 0, backgroundColor: '#dce8f5' }}>
-        
-        {/* Always Visible: App Title and Icon */}
+      <div style={{ flexShrink: 0 }}>
         <header style={{ 
           display: 'flex', 
           justifyContent: 'space-between', 
@@ -31,10 +27,10 @@ const PageLayout: React.FC<PageLayoutProps> = ({ children, header, footer, scrol
           width: '100%',
           opacity: 0.8
         }}>
+          {/* This text automatically inherits the dark/light text color */}
           <h1 style={{
             fontSize: '12px', 
             fontWeight: 'bold',
-            color: '#4A90E2',
             margin: 0,
             textTransform: 'uppercase',
             letterSpacing: '0.5px'
@@ -44,40 +40,36 @@ const PageLayout: React.FC<PageLayoutProps> = ({ children, header, footer, scrol
           <LaundryIcon/>
         </header>
 
-       {/* Conditionally Rendered Extra Header Input */}
         {header && (
           <div style={{ padding: '0 20px 10px 20px' }}>
             {header}
           </div>
         )}
-        
       </div>
 
-      {/* Scrollable Main Content */}
       <main style={{ 
         flex: 1, 
         padding: '10px',
         display: 'flex',
         flexDirection: 'column',
-        overflowY: scrollableContent ? 'auto' : 'hidden', // Dynamically sets scrolling behavior
-        WebkitOverflowScrolling: scrollableContent ? 'touch' : 'auto'  // iOS touch momentum fixes
+        minHeight: 0, 
+        overflowY: 'auto', 
+        WebkitOverflowScrolling: 'touch'
       }}>
         {children}
       </main>
 
-      {/* Permanent Fixed Bottom Layout Wrapper */}
       {footer && (
         <div style={{ 
           flexShrink: 0, 
-          backgroundColor: '#dce8f5',
-          paddingBottom: 'env(safe-area-inset-bottom)' // Native OS gesture home bar spacer
+          paddingBottom: 'env(safe-area-inset-bottom)'
         }}>
           {footer}
         </div>
       )}
-
     </div>
   );
 };
+
 
 export default PageLayout;

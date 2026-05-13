@@ -1,4 +1,4 @@
-import { LoadingSpinner } from "../components/loadingSpinner";
+import { LoadingSpinner } from "../components/LoadingSpinner";
 import { Apartment } from "../lib/databaseTypes";
 import { Lock } from 'lucide-react';
 

@@ -5,7 +5,7 @@ import AuthPage from './auth/AuthPage';
 import { BookingProvider } from './contexts/BookingContext';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider, useAuth } from './auth/AuthContext';
-import { LoadingSpinner } from './components/loadingSpinner';
+import { LoadingSpinner } from './components/LoadingSpinner';
 
 // create a QueryClient instance for React Query outside of the component to avoid re-creating it on every render
 const queryClient = new QueryClient();

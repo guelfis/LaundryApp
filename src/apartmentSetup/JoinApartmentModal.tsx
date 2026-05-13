@@ -1,6 +1,7 @@
 import BottomModal from '../components/BottomModal';
 import { Send, Clock } from 'lucide-react';
 import { useState } from 'react';
+import ModalButton from '../components/ModalButton';
 
 interface JoinRequestModalProps {
   isOpen: boolean;
@@ -34,8 +35,8 @@ export default function JoinApartmentModal({ isOpen, onClose, apartmentName, apa
       <div className="space-y-6">
         {!isSent ? (
           <>
-            <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-2xl border border-gray-100">
-              <div className="bg-white p-3 rounded-xl shadow-sm">
+            <div className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-slate-800/50 rounded-2xl border border-gray-100 dark:border-slate-800">
+              <div className="bg-white dark:bg-slate-800 p-3 rounded-xl shadow-sm">
                 <span className="text-2xl">🏠</span>
               </div>
               <div>
@@ -44,15 +45,15 @@ export default function JoinApartmentModal({ isOpen, onClose, apartmentName, apa
               </div>
             </div>
 
-            <p className="text-gray-600 text-sm leading-relaxed">
+            <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
               Once you send the request, an admin of this apartment will need to approve your access. You'll be notified once they accept.
             </p>
 
             <div className="flex flex-col gap-3 pt-2">
-              <button 
+              <ModalButton 
+                variant="primary"
                 onClick={handleSendRequest}
                 disabled={isSending}
-                className="w-full py-4 bg-blue-600 text-white font-bold rounded-2xl shadow-lg shadow-blue-100 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
               >
                 {isSending ? 'Sending...' : (
                   <>
@@ -60,28 +61,28 @@ export default function JoinApartmentModal({ isOpen, onClose, apartmentName, apa
                     Send Request
                   </>
                 )}
-              </button>
+              </ModalButton>
               
-              <button 
+              <ModalButton 
+                variant="secondary"
                 onClick={onClose}
                 disabled={isSending}
-                className="w-full py-4 bg-gray-100 text-gray-600 font-bold rounded-2xl active:scale-[0.98] transition-all"
               >
                 Cancel
-              </button>
+              </ModalButton>
             </div>
           </>
         ) : (
           <div className="text-center py-4 space-y-6">
-            <div className="w-20 h-20 bg-green-50 text-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
+            <div className="w-20 h-20 bg-green-50 dark:bg-green-950/30 text-green-500 dark:text-green-400 rounded-full flex items-center justify-center mx-auto mb-4">
               <Clock size={40} />
             </div>
-            <p className="text-gray-600">
-              Great! Your request to join <span className="font-bold">{apartmentName}</span> is now pending. 
+            <p className="text-gray-600 dark:text-gray-300">
+              Great! Your request to join <span className="font-bold text-gray-900 dark:text-white">{apartmentName}</span> is now pending. 
             </p>
             <button 
               onClick={onClose}
-              className="w-full py-4 bg-gray-900 text-white font-bold rounded-2xl"
+              className="w-full py-4 bg-gray-900 dark:bg-slate-100 text-white dark:text-slate-900 font-bold rounded-2xl active:scale-[0.98] transition-all"
             >
               Got it, thanks!
             </button>

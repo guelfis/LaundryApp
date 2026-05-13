@@ -6,7 +6,7 @@ import { cn } from './utils/cn';
 import { SlotStatus } from './constants/SlotStatus';
 import { getBookingsMap, getBookingStatus, getSlotKey } from './utils/slotsUtils';
 import { useBookingFilters, useMonthBookings } from './useBookings';
-import { LoadingSpinner } from './components/loadingSpinner';
+import { LoadingSpinner } from './components/LoadingSpinner';
 import PageLayout from './components/PageLayout';
 
 
@@ -81,7 +81,7 @@ function CalendarGrid(
       
       return (
         // Main Container: flex column to stack month switcher and grid, height to fill viewport minus some space for header
-    <div style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 120px)' }}>
+    <div style={{display: 'flex', flexDirection: 'column', width: '100%', flex: 1, minHeight: 0  }}>
       
         {/* Month Switcher: stays in place */}
       <div style={{ flexShrink: 0 }}>
@@ -89,7 +89,7 @@ function CalendarGrid(
       </div>
 
       {/* Grid Container: flex-1 makes it fill the remaining space */}
-      <div className="flex-1 flex flex-col bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200">
+      <div className="flex-1 min-h-0 flex flex-col bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200">
         
         {/* Grid Header */}
         <div className="flex border-b border-gray-200 bg-gray-50 shrink-0">
@@ -104,7 +104,7 @@ function CalendarGrid(
         </div>
 
         {/* Grid Body: Scrollable area for the grid cells */}
-        <div className="flex-1 overflow-y-auto overflow-x-hidden">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden WebkitOverflowScrolling-touch">
           {rows.map(({ dayNum, dayName, isToday }, idx) => (
             <div
               key={dayNum}

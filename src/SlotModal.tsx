@@ -1,8 +1,9 @@
 import { useBookingFilters, useMonthBookings } from './useBookings';
 import { useMemo } from 'react';
-import { LoadingSpinner } from './components/loadingSpinner';
+import { LoadingSpinner } from './components/LoadingSpinner';
 import { getBookingsMap, getBookingStatus } from './utils/slotsUtils';
 import BottomModal from './components/BottomModal';
+import ModalButton from './components/ModalButton';
 
 
 interface BookingModalProps {
@@ -49,27 +50,27 @@ export default function BookingModal({ isOpen, onClose, selectedSlot }: BookingM
           >
 
         <header className="mb-8">
-          <p className="text-gray-600 mt-2">
+          <p className="text-gray-600 dark:text-gray-300 mt-2">
             {`You have selected ${selectedSlot.day} at ${selectedSlot.slot}`}
           </p>
-          <p className="text-gray-500 text-sm">The selected slot {substring}.</p>
+          <p className="text-gray-500 dark:text-gray-400 text-sm">The selected slot {substring}.</p>
           
         </header>
 
         <div className="flex flex-col gap-4 pb-4">
-          <button 
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-2xl font-bold text-lg shadow-lg shadow-blue-200 active:scale-[0.98] transition-all"
+          <ModalButton 
+            variant="primary"
             onClick={() => console.log('Booking...', selectedSlot)}
           >
             Book Slot
-          </button>
-          
-          <button 
+          </ModalButton>
+
+          <ModalButton 
+            variant="secondary"
             onClick={onClose}
-            className="w-full bg-gray-50 text-gray-600 py-4 rounded-2xl font-semibold active:bg-gray-100 transition-colors"
           >
             Cancel
-          </button>
+          </ModalButton>
         </div>
       </BottomModal>
   );
