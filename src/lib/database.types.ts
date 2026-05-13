@@ -111,6 +111,13 @@ export type Database = {
             referencedRelation: "apartment"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "fk_apartment_members_profiles"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       booking: {

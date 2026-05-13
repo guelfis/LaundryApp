@@ -89,3 +89,21 @@ export async function deleteApartment(id: string) {
 
   if (error) throw error;
 }
+
+
+export async function getApartmentMembers(apartmentId: string) {
+  const { data, error } = await supabase
+    .from('apartment_members')
+    .select(`
+      role,
+      user_id,
+      profiles:user_id (
+        id,
+        full_name
+      )
+    `)
+    .eq('apartment_id', apartmentId);
+
+  if (error) throw error;
+  return data;
+}
