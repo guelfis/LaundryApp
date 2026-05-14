@@ -21,7 +21,7 @@ export default function InviteMemberModal({ apartmentId, apartmentName, isModalO
         try {
             const token = await generateLinkMutation.mutateAsync({ apartmentId });
             // Compose the final clean link matching your web app route configuration
-            const finalUrl = `${window.location.origin}/setup?invite=${token}`;
+            const finalUrl = `${window.location.origin}/apartment-login?invite=${token}`;
             setGeneratedLink(finalUrl);
         } catch (err) {
             console.error("Failed to generate invite:", err);

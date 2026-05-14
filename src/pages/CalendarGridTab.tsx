@@ -1,13 +1,13 @@
 import { useMemo } from 'react';
-import { DAYS_OF_WEEK, SLOTS } from './constants/dates';
-import MonthSwitcher from './MonthSwitcher';
-import { getDate, getDaysInMonth, getFirstDayOfMonth } from './utils/datesGetter';
-import { cn } from './utils/cn';
-import { SlotStatus } from './constants/SlotStatus';
-import { getBookingsMap, getBookingStatus, getSlotKey } from './utils/slotsUtils';
-import { useBookingFilters, useMonthBookings } from './useBookings';
-import { LoadingSpinner } from './components/LoadingSpinner';
-import PageLayout from './components/PageLayout';
+import { DAYS_OF_WEEK, SLOTS } from '../constants/dates';
+import MonthSwitcher from '../utils/MonthSwitcher';
+import { getDate, getDaysInMonth, getFirstDayOfMonth } from '../utils/datesGetter';
+import { cn } from '../utils/cn';
+import { SlotStatus } from '../constants/SlotStatus';
+import { getBookingsMap, getBookingStatus, getSlotKey } from '../utils/slotsUtils';
+import { useBookingFilters, useMonthBookings } from '../useBookings';
+import { LoadingSpinner } from '../components/LoadingSpinner';
+import PageLayout from '../components/PageLayout';
 
 
 const dayColStyles = "w-24 shrink-0 px-4 py-3";

@@ -37,12 +37,12 @@ export default function ApartmentLogin() {
         await joinViaLink(token);
         alert("Successfully joined the apartment!");
         // Direct pass straight to core dashboard state
-        navigate('/dashboard', { replace: true });
+        navigate('/dashboard/calendar', { replace: true });
       } catch (err) {
         console.error("Link processing error:", err);
         alert("This invitation link is invalid, expired, or fully claimed.");
         // Sanitize address line parameters
-        navigate('/setup', { replace: true });
+        navigate('/apartment-login', { replace: true });
       }
   };
 
@@ -57,7 +57,7 @@ export default function ApartmentLogin() {
   const enterApartment = (apt: Apartment) => {
     localStorage.setItem('apartmentName', apt.display_name);
     localStorage.setItem('apartmentId', apt.id);
-    navigate('/dashboard');
+    navigate('/dashboard/calendar');
   };
 
   const handleJoinRequest = (apt: Apartment) => {

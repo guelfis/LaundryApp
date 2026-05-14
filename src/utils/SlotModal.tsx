@@ -1,9 +1,9 @@
-import { useBookingFilters, useMonthBookings } from './useBookings';
+import { useBookingFilters, useMonthBookings } from '../useBookings';
 import { useMemo } from 'react';
-import { LoadingSpinner } from './components/LoadingSpinner';
-import { getBookingsMap, getBookingStatus } from './utils/slotsUtils';
-import BottomModal from './components/BottomModal';
-import ModalButton from './components/ModalButton';
+import { LoadingSpinner } from '../components/LoadingSpinner';
+import { getBookingsMap, getBookingStatus } from '../utils/slotsUtils';
+import BottomModal from '../components/BottomModal';
+import ModalButton from '../components/ModalButton';
 
 
 interface BookingModalProps {

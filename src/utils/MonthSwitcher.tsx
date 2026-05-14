@@ -1,5 +1,5 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { MONTHS } from './constants/dates';
+import { MONTHS } from '../constants/dates';
 
 type MonthSwitcherProps = {
     activeMonth: number;

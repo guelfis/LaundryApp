@@ -1,17 +1,20 @@
-import CalendarGridTab from '../CalendarGridTab';
+import CalendarGridTab from './CalendarGridTab';
 import { useEffect, useMemo, useState } from 'react';
-import SlotModal from '../SlotModal';
+import SlotModal from '../utils/SlotModal';
 import PageLayout from '../components/PageLayout';
 import { PageHeader } from '../components/PageHeader';
 import { Calendar, Home } from 'lucide-react';
 import MyApartmentTab from './MyApartmentTab';
 import useApartmentMembers, { usePendingRequests } from '../useApartments'; // Ensure correct path
 import { checkIsAdmin, getCleanStorageItem, resolveCurrentUserId } from '../auth/authUtils';
-import { Navigate, Routes, Link, Route } from 'react-router-dom';
+import { Navigate, Routes, Link, Route, useNavigate } from 'react-router-dom';
 
 
 
 function Dashboard() {
+
+  const navigate = useNavigate();
+  
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [selectedSlot, setSelectedSlot] = useState<{ day: string, slot: string, slotKey: string } | null>(null);
 
@@ -36,9 +39,9 @@ function Dashboard() {
 
   const renderHeader = () => {
     if (location.pathname.includes('/dashboard/apartment')) {
-      return <PageHeader title="Your Apartment" icon={<Home className="w-7 h-7 text-blue-500" />} />;
+      return <PageHeader title="Your Apartment" icon={<Home className="w-7 h-7 text-blue-500" />} onBack={() => navigate('/apartment-login')}/>;
     }
-    return <PageHeader title="Calendar" icon={<Calendar className="w-7 h-7 text-blue-500" />} />;
+    return <PageHeader title="Calendar" icon={<Calendar className="w-7 h-7 text-blue-500" />} onBack={() => navigate('/apartment-login')} />;
   };
 
   return (
