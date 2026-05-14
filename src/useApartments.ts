@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { getApartmentsByHousehold, getMyApartments } from "./lib/apartments";
+import { getApartmentMembers, getApartmentsByHousehold, getMyApartments } from "./lib/apartments";
 
 export const useApartments = (householdId: string) => {
 
@@ -16,5 +16,13 @@ export function useMyApartments(householdId: string) {
     queryKey: ['my-apartments', householdId],
     queryFn: () => getMyApartments(householdId),
     enabled: !!householdId, // only run if householdId is truthy
+  });
+}
+
+export default function useApartmentMembers(apartmentId: string) {
+  return useQuery({
+    queryKey: ['apartment-members', apartmentId],
+    queryFn: () => getApartmentMembers(apartmentId),
+    enabled: !!apartmentId, // only run if apartmentId is truthy
   });
 }

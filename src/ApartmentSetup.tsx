@@ -9,6 +9,7 @@ import JoinApartmentModal from './apartmentSetup/JoinApartmentModal';
 import { PageHeader } from './components/PageHeader';
 import { Home } from 'lucide-react';
 import { LoadingSpinner } from './components/LoadingSpinner';
+import SectionText from './components/SectionText';
 
 export default function ApartmentSetup() {
 
@@ -70,9 +71,7 @@ export default function ApartmentSetup() {
         {/* ALWAYS show My Apartments if they exist */}
         {myApartments.length > 0 && (
           <div className="flex flex-col">
-            <h2 className="text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400 ml-4 mb-2">
-              Your Apartments
-            </h2>
+            <SectionText title="My Apartments" />
             <ApartmentsList 
               isLoading={isLoadingMy} 
               apartments={myApartments} 
@@ -85,9 +84,7 @@ export default function ApartmentSetup() {
         {/* ALWAYS show Other Apartments if they exist */}
         {otherApartments.length > 0 && (
           <div className="flex-grow flex flex-col">
-            <h2 className="text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400 ml-4 mb-2">
-              Available apartments
-            </h2>
+            <SectionText title="Available Apartments" />
             <ApartmentsList 
               isLoading={isLoadingAll} 
               apartments={otherApartments} 
