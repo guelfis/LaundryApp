@@ -90,7 +90,7 @@ export async function deleteApartment(id: string) {
   if (error) throw error;
 }
 
-
+//  Get Members of an Apartment with User Profiles
 export async function getApartmentMembers(apartmentId: string) {
   const { data, error } = await supabase
     .from('apartment_members')
@@ -103,6 +103,71 @@ export async function getApartmentMembers(apartmentId: string) {
       )
     `)
     .eq('apartment_id', apartmentId);
+
+  if (error) throw error;
+  return data;
+}
+
+// Trigger a Request to Join a specific locked apartment
+export async function requestToJoinApartment(apartmentId: string) {
+  const { error } = await supabase.rpc('create_join_request', {
+    target_apartment_id: apartmentId
+  });
+
+  if (error) throw error;
+  return { success: true };
+}
+
+//  Handle an invitation link automatically when the app boots with a token
+export async function joinApartmentViaLink(tokenId: string) {
+  const { data, error } = await supabase.rpc('join_apartment_via_token', {
+    token_id: tokenId
+  });
+
+  if (error) throw error;
+  return data as { apartment_id: string; status: string };
+}
+
+// Generate an invitation link token (Admin only)
+export async function generateInviteLink(apartmentId: string, daysValid: number = 7, maxSlots: number = 5) {
+  const { data, error } = await supabase.rpc('generate_apartment_invite_link', {
+    target_apartment_id: apartmentId,
+    days_valid: daysValid,
+    max_slots: maxSlots
+  });
+
+  if (error) throw error;
+  
+  // Returns the unique UUID token string
+  return data as string; 
+}
+
+// Approve or decline a pending join request (Admin only)
+export async function resolveJoinRequest(requestId: string, action: 'approved' | 'rejected') {
+  const { error } = await supabase.rpc('handle_join_request', {
+    request_id: requestId,
+    action_status: action
+  });
+
+  if (error) throw error;
+  return { success: true };
+}
+
+// Get all pending requests for an apartment (Admin only)
+export async function getPendingRequests(apartmentId: string) {
+  const { data, error } = await supabase
+    .from('join_requests')
+    .select(`
+      id,
+      status,
+      created_at,
+      user_id,
+      profile:user_id (
+        full_name
+      )
+    `)
+    .eq('apartment_id', apartmentId)
+    .eq('status', 'pending');
 
   if (error) throw error;
   return data;

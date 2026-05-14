@@ -1,21 +1,24 @@
-import { useContext, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useContext, useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import PageLayout from './components/PageLayout';
-import { useApartments, useMyApartments } from './useApartments';
+import { useApartments, useMyApartments, useJoinViaLink } from './useApartments'; 
 import { BookingContext } from './contexts/BookingContext';
 import { Apartment } from './lib/databaseTypes';
 import ApartmentsList from './apartmentSetup/ApartmentsList';
-import JoinApartmentModal from './apartmentSetup/JoinApartmentModal';
+import JoinRequestModal from './apartmentSetup/JoinRequestModal'; 
 import { PageHeader } from './components/PageHeader';
 import { Home } from 'lucide-react';
 import { LoadingSpinner } from './components/LoadingSpinner';
 import SectionText from './components/SectionText';
 
 export default function ApartmentSetup() {
-
   const { householdId } = useContext(BookingContext)!;
   const { data: myApartments = [], isLoading: isLoadingMy } = useMyApartments(householdId);
   const { data: allApartments = [], isLoading: isLoadingAll } = useApartments(householdId);
+  
+  // Hook to handle incoming invitation parameters via URL
+  const [searchParams] = useSearchParams();
+  const { mutateAsync: joinViaLink, isPending: isJoining } = useJoinViaLink();
 
   const [selectedApt, setSelectedApt] = useState<Apartment | null>(null);
   const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
@@ -25,6 +28,31 @@ export default function ApartmentSetup() {
   );
 
   const navigate = useNavigate();
+
+  // Monitor incoming URL triggers on component mount
+  useEffect(() => {
+    const handleAutoJoin = async (token: string) => {
+      try {
+        // Execute database mutation block
+        await joinViaLink(token);
+        alert("Successfully joined the apartment!");
+        // Direct pass straight to core dashboard state
+        navigate('/dashboard', { replace: true });
+      } catch (err) {
+        console.error("Link processing error:", err);
+        alert("This invitation link is invalid, expired, or fully claimed.");
+        // Sanitize address line parameters
+        navigate('/setup', { replace: true });
+      }
+  };
+
+  const inviteToken = searchParams.get('invite');
+  if (inviteToken) {
+    handleAutoJoin(inviteToken);
+  }
+}, [searchParams, joinViaLink, navigate]); 
+
+ 
 
   const enterApartment = (apt: Apartment) => {
     localStorage.setItem('apartmentName', apt.display_name);
@@ -36,6 +64,18 @@ export default function ApartmentSetup() {
     setSelectedApt(apt);
     setIsJoinModalOpen(true);
   };
+
+  // Render blocking state during active database link insertions
+  if (isJoining) {
+    return (
+      <PageLayout>
+        <div className="flex flex-col items-center justify-center h-[60vh] gap-4 w-full">
+          <LoadingSpinner />
+          <p className="text-gray-500 font-medium animate-pulse">Joining apartment via invite link...</p>
+        </div>
+      </PageLayout>
+    );
+  }
 
   if (isLoadingAll || isLoadingMy) {
     return (
@@ -65,9 +105,7 @@ export default function ApartmentSetup() {
         </div>
       }
     >
-      
       <div className="flex flex-col flex-1 w-full space-y-6">
-        
         {/* ALWAYS show My Apartments if they exist */}
         {myApartments.length > 0 && (
           <div className="flex flex-col">
@@ -95,8 +133,8 @@ export default function ApartmentSetup() {
         )}
       </div>
 
-      {/* The New Modal */}
-      <JoinApartmentModal 
+      {/* Access Requesting Form Sheet overlay */}
+      <JoinRequestModal 
         isOpen={isJoinModalOpen}
         onClose={() => setIsJoinModalOpen(false)}
         apartmentName={selectedApt?.display_name || null}

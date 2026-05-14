@@ -1,19 +1,32 @@
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Plus } from "lucide-react";
 import SectionText from "./components/SectionText";
 import EditSaveButton from "./components/EditSaveButton";
 import { IconButton } from "./components/IconButton";
 import MembersList from "./components/MembersList";
 import useApartmentMembers from "./useApartments";
+import InviteMemberModal from "./InviteMemberModal";
+import { checkIsAdmin, getCleanStorageItem, resolveCurrentUserId } from "./auth/authUtils";
 
 export default function MyApartmentTab() {
-    const currentUserId = localStorage.getItem('userId');
-    const [apartmentName, setApartmentName] = React.useState(localStorage.getItem('apartmentName') || 'my apartment');
+    const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+    const [apartmentName, setApartmentName] = React.useState(getCleanStorageItem('apartmentName') || 'my apartment');
     const [isEditingName, setIsEditingName] = React.useState(false);
     const [tempName, setTempName] = useState(apartmentName);
 
-    const { data: members = [] } = useApartmentMembers(localStorage.getItem('apartmentId') || '');
-    const isUserAdmin = members.some(member => currentUserId === member.user_id && member.role === 'admin');
+    // Resolve user ID natively on mount
+    useEffect(() => {
+        resolveCurrentUserId().then(id => setCurrentUserId(id));
+    }, []);
+
+    // Invitation States
+    const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
+    
+    
+    const apartmentId = useMemo(() => getCleanStorageItem('apartmentId') || '', []);
+    const { data: members = [] } = useApartmentMembers(apartmentId);
+    
+    const isUserAdmin = useMemo(() => checkIsAdmin(members, currentUserId), [members, currentUserId]);
     
     const handleEditToggle = () => {
         if (isEditingName) {
@@ -25,11 +38,13 @@ export default function MyApartmentTab() {
         setIsEditingName(!isEditingName);
     };
 
+
     const handlePromoteToAdmin = (userId: string) => {
         console.log(`Promote user ${userId} to admin`);
     };
 
     return (
+        <>
         <div className="w-full px-4 py-2 flex flex-col gap-4 flex-1">
             {/* Apartment Name Section */}
             <SectionText title="Info" />
@@ -66,7 +81,12 @@ export default function MyApartmentTab() {
             {/* Members Section Header */}
             <div className="flex items-center justify-between gap-3 mt-2">
                 <SectionText title="Members" />
-                <IconButton onClick={() => {}} aria-label="Add member">
+                <IconButton 
+                    aria-label="Add member" 
+                    onClick={() => setIsInviteModalOpen(true)} 
+                    disabled={!isUserAdmin}
+                    className={!isUserAdmin ? "opacity-40 cursor-not-allowed" : ""}
+                >
                     <Plus className="w-5 h-5 text-gray-800 dark:text-gray-200" />
                 </IconButton>
             </div>
@@ -79,5 +99,12 @@ export default function MyApartmentTab() {
                 onPromoteToAdmin={handlePromoteToAdmin}
             />
         </div>
+        <InviteMemberModal 
+            apartmentId={apartmentId} 
+            apartmentName={apartmentName} 
+            isModalOpen={isInviteModalOpen}
+            onClose={() => setIsInviteModalOpen(false)}
+        />
+        </>
     );
 }

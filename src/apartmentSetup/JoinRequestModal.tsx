@@ -1,7 +1,8 @@
 import BottomModal from '../components/BottomModal';
-import { Send, Clock } from 'lucide-react';
+import { Send, Clock, Home } from 'lucide-react';
 import { useState } from 'react';
 import ModalButton from '../components/ModalButton';
+import { useRequestToJoin } from '../useApartments';
 
 interface JoinRequestModalProps {
   isOpen: boolean;
@@ -10,26 +11,38 @@ interface JoinRequestModalProps {
   apartmentId: string | null;
 }
 
-export default function JoinApartmentModal({ isOpen, onClose, apartmentName, apartmentId }: JoinRequestModalProps) {
-  const [isSending, setIsSending] = useState(false);
+export default function JoinRequestModal({ isOpen, onClose, apartmentName, apartmentId }: JoinRequestModalProps) {
   const [isSent, setIsSent] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  
+  // Call the custom React Query mutation hook
+  const requestToJoinMutation = useRequestToJoin();
 
   const handleSendRequest = async () => {
-    setIsSending(true);
-    // TODO: In the future, insert a row into a 'join_requests' table in Supabase
-    console.log(`Request sent for apartment ID: ${apartmentId}`);
-    
-    // Simulate a delay
-    setTimeout(() => {
-      setIsSending(false);
+    if (!apartmentId) return;
+    setErrorMessage(null);
+
+    try {
+      // Triggers the 'create_join_request' RPC function in Supabase
+      await requestToJoinMutation.mutateAsync(apartmentId);
       setIsSent(true);
-    }, 1000);
+    } catch (err) {
+      const errorInstance = err as Error;
+      console.error('Database insertion error:', errorInstance);
+      setErrorMessage(errorInstance.message || 'Failed to submit request. Please try again.');
+    }
+  };
+
+  const handleClose = () => {
+    setIsSent(false);
+    setErrorMessage(null);
+    onClose();
   };
 
   return (
     <BottomModal 
       isOpen={isOpen} 
-      onClose={onClose} 
+      onClose={handleClose} 
       title={isSent ? "Request Sent!" : "Request Access"}
     >
       <div className="space-y-6">
@@ -37,7 +50,7 @@ export default function JoinApartmentModal({ isOpen, onClose, apartmentName, apa
           <>
             <div className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-slate-800/50 rounded-2xl border border-gray-100 dark:border-slate-800">
               <div className="bg-white dark:bg-slate-800 p-3 rounded-xl shadow-sm">
-                <span className="text-2xl">🏠</span>
+                <Home size={24} className="text-blue-500 dark:text-blue-400" />
               </div>
               <div>
                 <p className="text-sm text-gray-500">You are requesting to join:</p>
@@ -49,13 +62,20 @@ export default function JoinApartmentModal({ isOpen, onClose, apartmentName, apa
               Once you send the request, an admin of this apartment will need to approve your access. You'll be notified once they accept.
             </p>
 
+            {/* Error Message banner wrapper */}
+            {errorMessage && (
+              <p className="text-sm text-red-500 font-semibold bg-red-50 dark:bg-red-950/30 p-3 rounded-xl border border-red-100 dark:border-red-900/50">
+                {errorMessage}
+              </p>
+            )}
+
             <div className="flex flex-col gap-3 pt-2">
               <ModalButton 
                 variant="primary"
                 onClick={handleSendRequest}
-                disabled={isSending}
+                disabled={requestToJoinMutation.isPending}
               >
-                {isSending ? 'Sending...' : (
+                {requestToJoinMutation.isPending ? 'Sending...' : (
                   <>
                     <Send size={18} />
                     Send Request
@@ -65,8 +85,8 @@ export default function JoinApartmentModal({ isOpen, onClose, apartmentName, apa
               
               <ModalButton 
                 variant="secondary"
-                onClick={onClose}
-                disabled={isSending}
+                onClick={handleClose}
+                disabled={requestToJoinMutation.isPending}
               >
                 Cancel
               </ModalButton>
@@ -81,7 +101,7 @@ export default function JoinApartmentModal({ isOpen, onClose, apartmentName, apa
               Great! Your request to join <span className="font-bold text-gray-900 dark:text-white">{apartmentName}</span> is now pending. 
             </p>
             <button 
-              onClick={onClose}
+              onClick={handleClose}
               className="w-full py-4 bg-gray-900 dark:bg-slate-100 text-white dark:text-slate-900 font-bold rounded-2xl active:scale-[0.98] transition-all"
             >
               Got it, thanks!
