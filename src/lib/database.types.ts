@@ -192,6 +192,38 @@ export type Database = {
         }
         Relationships: []
       }
+      join_requests: {
+        Row: {
+          apartment_id: string
+          created_at: string | null
+          id: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          apartment_id: string
+          created_at?: string | null
+          id?: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          apartment_id?: string
+          created_at?: string | null
+          id?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "join_requests_apartment_id_fkey"
+            columns: ["apartment_id"]
+            isOneToOne: false
+            referencedRelation: "apartment"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           full_name: string | null
@@ -219,6 +251,18 @@ export type Database = {
         Args: { h_code: string; target_apt_id: string }
         Returns: undefined
       }
+      create_join_request: {
+        Args: { target_apartment_id: string }
+        Returns: undefined
+      }
+      generate_apartment_invite_link: {
+        Args: {
+          days_valid?: number
+          max_slots?: number
+          target_apartment_id: string
+        }
+        Returns: string
+      }
       get_apartments_by_house_code: {
         Args: { h_code: string }
         Returns: {
@@ -227,6 +271,10 @@ export type Database = {
         }[]
       }
       get_my_household_id: { Args: never; Returns: string }
+      handle_join_request: {
+        Args: { action_status: string; request_id: string }
+        Returns: undefined
+      }
       join_apartment_via_token: { Args: { token_id: string }; Returns: Json }
     }
     Enums: {
