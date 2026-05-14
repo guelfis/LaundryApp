@@ -5,8 +5,9 @@ import EditSaveButton from "./components/EditSaveButton";
 import { IconButton } from "./components/IconButton";
 import MembersList from "./components/MembersList";
 import useApartmentMembers from "./useApartments";
-import InviteMemberModal from "./InviteMemberModal";
+import InviteMemberModal from "./myApartment/InviteMemberModal";
 import { checkIsAdmin, getCleanStorageItem, resolveCurrentUserId } from "./auth/authUtils";
+import PendingRequestsSection from "./myApartment/PendingRequestsSection";
 
 export default function MyApartmentTab() {
     const [currentUserId, setCurrentUserId] = useState<string | null>(null);
@@ -77,10 +78,15 @@ export default function MyApartmentTab() {
                     labelType="apartment name"
                 />
             </div>
+            {/* Conditionally render pending requests only for admins */}
+            {isUserAdmin && (
+                <PendingRequestsSection apartmentId={apartmentId} />
+            )}
+
 
             {/* Members Section Header */}
             <div className="flex items-center justify-between gap-3 mt-2">
-                <SectionText title="Members" />
+                <SectionText title={`Members (${members.length})`} />
                 <IconButton 
                     aria-label="Add member" 
                     onClick={() => setIsInviteModalOpen(true)} 

@@ -162,7 +162,7 @@ export async function getPendingRequests(apartmentId: string) {
       status,
       created_at,
       user_id,
-      profile:user_id (
+      profiles:user_id (
         full_name
       )
     `)

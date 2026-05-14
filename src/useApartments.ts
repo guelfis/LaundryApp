@@ -63,7 +63,8 @@ export function usePendingRequests(apartmentId: string) {
   return useQuery({
     queryKey: ['pending-requests', apartmentId],
     queryFn: () => getPendingRequests(apartmentId),
-    enabled: !!apartmentId,
+    enabled: !!apartmentId, 
+    staleTime: 1000 * 60,   // 1 minute of staleness to reduce refetch frequency
   });
 }
 
