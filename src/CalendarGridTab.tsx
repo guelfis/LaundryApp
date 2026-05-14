@@ -44,7 +44,7 @@ function SlotCell(
   )
 }
 
-function CalendarGrid(
+function CalendarGridTab(
   { onSlotClick }: { onSlotClick: (dayNum: string, slot: string, slotKey: string) => void }
 ) {
       const { viewDate, setViewDate, householdId } = useBookingFilters();
@@ -136,4 +136,4 @@ function CalendarGrid(
 
 }
 
-export default CalendarGrid;
+export default CalendarGridTab;

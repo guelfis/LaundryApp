@@ -1,13 +1,13 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Plus } from "lucide-react";
-import SectionText from "./components/SectionText";
-import EditSaveButton from "./components/EditSaveButton";
-import { IconButton } from "./components/IconButton";
-import MembersList from "./components/MembersList";
-import useApartmentMembers from "./useApartments";
-import InviteMemberModal from "./myApartment/InviteMemberModal";
-import { checkIsAdmin, getCleanStorageItem, resolveCurrentUserId } from "./auth/authUtils";
-import PendingRequestsSection from "./myApartment/PendingRequestsSection";
+import SectionText from "../components/SectionText";
+import EditSaveButton from "../components/EditSaveButton";
+import { IconButton } from "../components/IconButton";
+import MembersList from "../components/MembersList";
+import useApartmentMembers from "../useApartments";
+import InviteMemberModal from "../myApartment/InviteMemberModal";
+import { checkIsAdmin, getCleanStorageItem, resolveCurrentUserId } from "../auth/authUtils";
+import PendingRequestsSection from "../myApartment/PendingRequestsSection";
 
 export default function MyApartmentTab() {
     const [currentUserId, setCurrentUserId] = useState<string | null>(null);

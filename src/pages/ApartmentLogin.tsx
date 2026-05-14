@@ -1,17 +1,17 @@
 import { useContext, useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import PageLayout from './components/PageLayout';
-import { useApartments, useMyApartments, useJoinViaLink } from './useApartments'; 
-import { BookingContext } from './contexts/BookingContext';
-import { Apartment } from './lib/databaseTypes';
-import ApartmentsList from './apartmentSetup/ApartmentsList';
-import JoinRequestModal from './apartmentSetup/JoinRequestModal'; 
-import { PageHeader } from './components/PageHeader';
+import PageLayout from '../components/PageLayout';
+import { useApartments, useMyApartments, useJoinViaLink } from '../useApartments'; 
+import { BookingContext } from '../contexts/BookingContext';
+import { Apartment } from '../lib/databaseTypes';
+import ApartmentsList from '../apartmentSetup/ApartmentsList';
+import JoinRequestModal from '../apartmentSetup/JoinRequestModal'; 
+import { PageHeader } from '../components/PageHeader';
 import { Home } from 'lucide-react';
-import { LoadingSpinner } from './components/LoadingSpinner';
-import SectionText from './components/SectionText';
+import { LoadingSpinner } from '../components/LoadingSpinner';
+import SectionText from '../components/SectionText';
 
-export default function ApartmentSetup() {
+export default function ApartmentLogin() {
   const { householdId } = useContext(BookingContext)!;
   const { data: myApartments = [], isLoading: isLoadingMy } = useMyApartments(householdId);
   const { data: allApartments = [], isLoading: isLoadingAll } = useApartments(householdId);
