@@ -4,24 +4,28 @@ import { IconButton } from './IconButton';
 
 interface EditSaveButtonProps {
   isEditing: boolean;
-  onActionClick: () => void;
+  setIsEditing: (arg0: boolean) => void;
+  onSaveClick?: () => void;
   onCancelClick?: () => void;
   labelType?: string;
   size?: 'normal' | 'compact'; // Forward the size specification prop downward
+  disableSave?: boolean; // New prop to control save button state
 }
 
 const EditSaveButton: React.FC<EditSaveButtonProps> = ({ 
   isEditing, 
-  onActionClick, 
+  setIsEditing,
+  onSaveClick, 
   onCancelClick,
   labelType = "name",
-  size = "normal"
+  size = "normal",
+  disableSave = false,
 }) => {
   const iconClass = size === 'compact' ? "w-4 h-4" : "w-5 h-5";
 
   if (!isEditing) {
     return (
-      <IconButton size={size} onClick={onActionClick} aria-label={`Edit ${labelType}`}>
+      <IconButton size={size} onClick={() => setIsEditing(true)} aria-label={`Edit ${labelType}`}>
         <Pencil className={`${iconClass} text-gray-700 dark:text-gray-300`} />
       </IconButton>
     );
@@ -29,7 +33,7 @@ const EditSaveButton: React.FC<EditSaveButtonProps> = ({
 
   return (
     <div className="flex items-center gap-2 shrink-0">
-      <IconButton size={size} onClick={onActionClick} aria-label={`Confirm ${labelType}`}>
+      <IconButton size={size} onClick={onSaveClick} aria-label={`Confirm ${labelType}`} disabled={disableSave}>
         <Check className={`${iconClass} text-green-600 dark:text-green-400`} />
       </IconButton>
       <IconButton size={size} variant="danger" onClick={onCancelClick} aria-label={`Cancel ${labelType}`}>

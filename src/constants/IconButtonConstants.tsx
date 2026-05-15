@@ -1,6 +1,7 @@
 export const iconButtonVariants = {
-  standard: "border-gray-400 dark:border-slate-600 active:bg-gray-100 dark:active:bg-slate-700",
-  danger: "border-red-300 dark:border-red-900 active:bg-red-50 dark:active:bg-red-950/30"
+  // Added disabled:active background resets to freeze touch triggers
+  standard: "border-gray-400 dark:border-slate-600 active:bg-gray-100 dark:active:bg-slate-700 disabled:active:bg-white dark:disabled:active:bg-slate-800",
+  danger: "border-red-300 dark:border-red-900 active:bg-red-50 dark:active:bg-red-950/30 disabled:active:bg-white dark:disabled:active:bg-slate-800"
 };
 
 // Size spacing variants mapping padding dimensions

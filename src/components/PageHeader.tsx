@@ -3,7 +3,7 @@ import { ArrowLeft } from 'lucide-react';
 interface PageHeaderProps {
     title: string;
     subtitle?: string;
-    icon: React.ReactNode;
+    icon?: React.ReactNode;
     onBack?: () => void;
 }
 
@@ -26,9 +26,9 @@ export function PageHeader({ title, subtitle, icon, onBack }: PageHeaderProps) {
 
                 {/* Centered Content: Icon + Title */}
                 <div className="flex items-center gap-2 truncate">
-                    <div className="bg-transparent p-1 text-gray-900 dark:text-white shrink-0">
+                    {icon &&(<div className="bg-transparent p-1 text-gray-900 dark:text-white shrink-0">
                         {icon}
-                    </div>
+                    </div>)}
                     <h1 className="text-xl font-black text-gray-900 dark:text-white truncate">
                         {title}
                     </h1>

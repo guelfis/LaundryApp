@@ -14,12 +14,18 @@ export const IconButton: React.FC<IconButtonProps> = ({
   children, 
   variant = 'standard', 
   size = 'normal',
+  disabled,
   className = '', 
   ...props 
 }) => {
   return (
     <button
-      className={`${baseIconButtonStyles} ${iconButtonVariants[variant]} ${iconButtonSizes[size]} ${className}`}
+      className={`
+        ${baseIconButtonStyles} 
+        ${iconButtonVariants[variant]} 
+        ${iconButtonSizes[size]} 
+        ${disabled ? 'opacity-40 cursor-not-allowed bg-gray-100 dark:bg-slate-800 pointer-events-none' : ''} 
+        ${className}`}
       {...props}
     >
       {children}

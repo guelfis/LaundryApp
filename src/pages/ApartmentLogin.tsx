@@ -10,9 +10,11 @@ import { PageHeader } from '../components/PageHeader';
 import { Home } from 'lucide-react';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import SectionText from '../components/SectionText';
+import CreateApartmentModal from '../apartmentSetup/CreateApartmentModal';
 
 export default function ApartmentLogin() {
   const { householdId } = useContext(BookingContext)!;
+
   const { data: myApartments = [], isLoading: isLoadingMy } = useMyApartments(householdId);
   const { data: allApartments = [], isLoading: isLoadingAll } = useApartments(householdId);
   
@@ -22,6 +24,7 @@ export default function ApartmentLogin() {
 
   const [selectedApt, setSelectedApt] = useState<Apartment | null>(null);
   const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
+  const [isCreatAptModalOpen, setIsCreateAptModalOpen] = useState(false);
 
   const otherApartments = allApartments.filter(
     (apt) => !myApartments.some((myapt) => apt.id === myapt.id)
@@ -98,7 +101,7 @@ export default function ApartmentLogin() {
           
           <button 
             className="w-full py-4 bg-blue-600 text-white font-bold rounded-2xl shadow-lg active:bg-blue-700 dark:bg-blue-500 dark:active:bg-blue-600 transition-colors"
-            onClick={() => console.log('Apri form creazione')}
+            onClick={() => setIsCreateAptModalOpen(true)}
           >
             create a new apartment
           </button>
@@ -139,6 +142,12 @@ export default function ApartmentLogin() {
         onClose={() => setIsJoinModalOpen(false)}
         apartmentName={selectedApt?.display_name || null}
         apartmentId={selectedApt?.id || null}
+      />
+      {/* Apartment Creation Form Sheet overlay */}
+      <CreateApartmentModal 
+        isModalOpen={isCreatAptModalOpen}
+        onClose={() => setIsCreateAptModalOpen(false)}
+        householdId={householdId}
       />
     </PageLayout>
   );

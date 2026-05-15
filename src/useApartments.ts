@@ -19,7 +19,7 @@ export function useMyApartments(householdId: string) {
   });
 }
 
-export default function useApartmentMembers(apartmentId: string) {
+export function useApartmentMembers(apartmentId: string) {
   return useQuery({
     queryKey: ['apartment-members', apartmentId],
     queryFn: () => getApartmentMembers(apartmentId),
