@@ -273,6 +273,10 @@ export type Database = {
         Args: { apartment_name: string; target_household_id: string }
         Returns: Json
       }
+      delete_and_leave_apartment: {
+        Args: { target_apartment_id: string }
+        Returns: undefined
+      }
       generate_apartment_invite_link: {
         Args: {
           days_valid?: number
@@ -294,6 +298,22 @@ export type Database = {
         Returns: undefined
       }
       join_apartment_via_token: { Args: { token_id: string }; Returns: Json }
+      leave_apartment: {
+        Args: { target_apartment_id: string }
+        Returns: undefined
+      }
+      remove_apartment_member: {
+        Args: { target_apartment_id: string; target_user_id: string }
+        Returns: undefined
+      }
+      update_member_role: {
+        Args: {
+          new_role: string
+          target_apartment_id: string
+          target_user_id: string
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never

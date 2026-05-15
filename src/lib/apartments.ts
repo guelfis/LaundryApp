@@ -80,15 +80,6 @@ export async function updateApartment(id: string, payload: ApartmentUpdate) {
   return data;
 }
 
-export async function deleteApartment(id: string) {
-  const { error } = await supabase
-    .from('apartment')
-    .delete()
-    .eq('id', id);
-
-  if (error) throw error;
-}
-
 //  Get Members of an Apartment with User Profiles
 export async function getApartmentMembers(apartmentId: string) {
   const { data, error } = await supabase
@@ -170,4 +161,37 @@ export async function getPendingRequests(apartmentId: string) {
 
   if (error) throw error;
   return data;
+}
+
+export async function leaveApartment(apartmentId:string){
+  const { error } = await supabase.rpc('leave_apartment', { target_apartment_id: apartmentId });
+  if (error) throw error;
+  return {success:true};
+}
+
+export async function promoteMember(targetUserId: string, apartmentId: string){
+  const { error } = await supabase.rpc('update_member_role', {
+        target_apartment_id: apartmentId,
+        target_user_id: targetUserId,
+        new_role: 'admin'
+      });
+  if (error) throw error;
+  return {success:true};
+}
+
+export async function removeMember(targetUserId: string, apartmentId: string){
+  const { error } = await supabase.rpc('remove_apartment_member', {
+        target_apartment_id: apartmentId,
+        target_user_id: targetUserId
+      });
+    if (error) throw error;
+    return {success:true};
+}
+
+export async function deleteApartment(apartmentId:string){
+  const { error } = await supabase.rpc('delete_and_leave_apartment', { 
+        target_apartment_id: apartmentId 
+      });
+  if (error) throw error;
+  return {success:true};
 }

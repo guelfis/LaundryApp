@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createApartment, generateInviteLink, getApartmentMembers, getApartmentsByHousehold, getMyApartments, getPendingRequests, joinApartmentViaLink, requestToJoinApartment, resolveJoinRequest } from "./lib/apartments";
+import { createApartment, deleteApartment, generateInviteLink, getApartmentMembers, getApartmentsByHousehold, getMyApartments, getPendingRequests, joinApartmentViaLink, leaveApartment, promoteMember, removeMember, requestToJoinApartment, resolveJoinRequest } from "./lib/apartments";
 
 export const useApartments = (householdId: string) => {
 
@@ -103,6 +103,62 @@ export function useCreateApartment() {
       createApartment(name, householdId),
     onSuccess: () => {
       // Refresh both listings immediately so the new spot manifests under "My Apartments" and disappears from the general list
+      queryClient.invalidateQueries({ queryKey: ['my-apartments'] });
+      queryClient.invalidateQueries({ queryKey: ['household-apartments'] });
+    }
+  });
+}
+
+export function useApartmentActions(apartmentId: string) {
+  const queryClient = useQueryClient();
+
+  // Mutation to leave apartment
+  const leaveApartmentMutation = useMutation({
+    mutationFn: ({apartmentId}:{apartmentId:string}) => leaveApartment(apartmentId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['my-apartments'] });
+      localStorage.removeItem('apartmentId');
+      localStorage.removeItem('apartmentName');
+    }
+  });
+
+  // Mutation to promote a user to admin
+  const promoteMemberMutation = useMutation({
+    mutationFn: ({targetUserId,apartmentId}:{targetUserId: string, apartmentId:string}) => promoteMember(
+      targetUserId, apartmentId
+    ),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['apartment-members', apartmentId] });
+    }
+  });
+
+  // Mutation to remove a member
+  const removeMemberMutation = useMutation({
+    mutationFn: async ({targetUserId, apartmentId}:{targetUserId: string, apartmentId:string}) => removeMember(targetUserId, apartmentId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['apartment-members', apartmentId] });
+    }
+  });
+
+  return {
+    leaveApartment: leaveApartmentMutation.mutateAsync,
+    isLeaving: leaveApartmentMutation.isPending,
+    promoteMember: promoteMemberMutation.mutateAsync,
+    removeMember: removeMemberMutation.mutateAsync
+  };
+}
+
+export function useDeleteApartment() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({apartmentId}:{apartmentId: string}) => deleteApartment(apartmentId),
+    onSuccess: () => {
+      // Svuota i riferimenti dal browser immediatamente
+      localStorage.removeItem('apartmentId');
+      localStorage.removeItem('apartmentName');
+      
+      // Forza il refresh degli elenchi appartamenti globali per l'onboarding
       queryClient.invalidateQueries({ queryKey: ['my-apartments'] });
       queryClient.invalidateQueries({ queryKey: ['household-apartments'] });
     }
