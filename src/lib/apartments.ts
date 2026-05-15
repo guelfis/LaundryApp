@@ -1,5 +1,5 @@
 import { supabase } from './supabase';
-import type { Apartment, ApartmentInsert, ApartmentUpdate } from './databaseTypes';
+import type { Apartment, ApartmentUpdate } from './databaseTypes';
 
 export async function getApartmentsByHousehold(householdId: string) {
   const { data, error } = await supabase
@@ -58,15 +58,14 @@ export async function getApartmentWithBookings(id: string) {
   return data;
 }
 
-export async function createApartment(payload: ApartmentInsert) {
-  const { data, error } = await supabase
-    .from('apartment')
-    .insert(payload)
-    .select()
-    .single();
+export async function createApartment(name: string, householdId: string) {
+  const { data, error } = await supabase.rpc('create_new_apartment', {
+    apartment_name: name,
+    target_household_id: householdId
+  });
 
   if (error) throw error;
-  return data;
+  return data as { apartment_id: string; display_name: string; status: string };
 }
 
 export async function updateApartment(id: string, payload: ApartmentUpdate) {

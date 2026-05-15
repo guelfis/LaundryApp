@@ -269,6 +269,10 @@ export type Database = {
         Args: { target_apartment_id: string }
         Returns: undefined
       }
+      create_new_apartment: {
+        Args: { apartment_name: string; target_household_id: string }
+        Returns: Json
+      }
       generate_apartment_invite_link: {
         Args: {
           days_valid?: number

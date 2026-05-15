@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { generateInviteLink, getApartmentMembers, getApartmentsByHousehold, getMyApartments, getPendingRequests, joinApartmentViaLink, requestToJoinApartment, resolveJoinRequest } from "./lib/apartments";
+import { createApartment, generateInviteLink, getApartmentMembers, getApartmentsByHousehold, getMyApartments, getPendingRequests, joinApartmentViaLink, requestToJoinApartment, resolveJoinRequest } from "./lib/apartments";
 
 export const useApartments = (householdId: string) => {
 
@@ -89,6 +89,21 @@ export function useResolveJoinRequest(apartmentId: string) {
     onSuccess: () => {
       // Refresh the requests list and household state immediately
       queryClient.invalidateQueries({ queryKey: ['pending-requests', apartmentId] });
+      queryClient.invalidateQueries({ queryKey: ['household-apartments'] });
+    }
+  });
+}
+
+
+export function useCreateApartment() {
+  const queryClient =  useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ name, householdId }: { name: string; householdId: string }) => 
+      createApartment(name, householdId),
+    onSuccess: () => {
+      // Refresh both listings immediately so the new spot manifests under "My Apartments" and disappears from the general list
+      queryClient.invalidateQueries({ queryKey: ['my-apartments'] });
       queryClient.invalidateQueries({ queryKey: ['household-apartments'] });
     }
   });
