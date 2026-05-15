@@ -14,3 +14,14 @@ export type BookingUpdate = Database['public']['Tables']['booking']['Update'];
 
 export type ApartmentWithBookings = Apartment & { bookings: Booking[] };
 export type HouseholdWithApartments = Household & { apartments: Apartment[] };
+
+export interface Profile {
+  id: string;
+  full_name: string | null;
+}
+
+export interface ApartmentMember {
+  user_id: string;
+  role: string;
+  profiles: Profile;
+}

@@ -31,7 +31,6 @@ function Dashboard() {
   
   // Logical checks
   const isUserAdmin = useMemo(() => checkIsAdmin(members, currentUserId), [members, currentUserId]);  const hasNotifications = isUserAdmin && Array.isArray(requests) && requests.length > 0;
-  console.log('Dashboard Render - Members:', members, 'Pending Requests:', requests, 'Is Admin:', isUserAdmin, 'Has Notifications:', hasNotifications);
 
   const handleOpenModal = (dayNum: string, time: string, slotKey: string) => {
     setSelectedSlot({ day: dayNum, slot: time, slotKey: slotKey });

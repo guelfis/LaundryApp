@@ -109,22 +109,12 @@ export function useCreateApartment() {
   });
 }
 
-export function useApartmentActions(apartmentId: string) {
+export function useApartmentMembersActions(apartmentId: string) {
   const queryClient = useQueryClient();
-
-  // Mutation to leave apartment
-  const leaveApartmentMutation = useMutation({
-    mutationFn: ({apartmentId}:{apartmentId:string}) => leaveApartment(apartmentId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['my-apartments'] });
-      localStorage.removeItem('apartmentId');
-      localStorage.removeItem('apartmentName');
-    }
-  });
 
   // Mutation to promote a user to admin
   const promoteMemberMutation = useMutation({
-    mutationFn: ({targetUserId,apartmentId}:{targetUserId: string, apartmentId:string}) => promoteMember(
+    mutationFn: (targetUserId:string) => promoteMember(
       targetUserId, apartmentId
     ),
     onSuccess: () => {
@@ -134,25 +124,34 @@ export function useApartmentActions(apartmentId: string) {
 
   // Mutation to remove a member
   const removeMemberMutation = useMutation({
-    mutationFn: async ({targetUserId, apartmentId}:{targetUserId: string, apartmentId:string}) => removeMember(targetUserId, apartmentId),
+    mutationFn: async (targetUserId:string) => removeMember(targetUserId, apartmentId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['apartment-members', apartmentId] });
     }
   });
 
   return {
-    leaveApartment: leaveApartmentMutation.mutateAsync,
-    isLeaving: leaveApartmentMutation.isPending,
+    
     promoteMember: promoteMemberMutation.mutateAsync,
     removeMember: removeMemberMutation.mutateAsync
   };
 }
 
-export function useDeleteApartment() {
+export function useDeleteOrLeaveApartment() {
   const queryClient = useQueryClient();
 
-  return useMutation({
-    mutationFn: ({apartmentId}:{apartmentId: string}) => deleteApartment(apartmentId),
+  // Mutation to leave apartment
+  const leaveApartmentMutation = useMutation({
+    mutationFn: (apartmentId:string) => leaveApartment(apartmentId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['my-apartments'] });
+      localStorage.removeItem('apartmentId');
+      localStorage.removeItem('apartmentName');
+    }
+  });
+
+  const deleteApartmentMutation = useMutation({
+    mutationFn: (apartmentId:string) => deleteApartment(apartmentId),
     onSuccess: () => {
       // Svuota i riferimenti dal browser immediatamente
       localStorage.removeItem('apartmentId');
@@ -163,4 +162,11 @@ export function useDeleteApartment() {
       queryClient.invalidateQueries({ queryKey: ['household-apartments'] });
     }
   });
+
+  return {
+    leaveApartment: leaveApartmentMutation.mutateAsync,
+    isLeaving: leaveApartmentMutation.isPending,
+    deleteApartment: deleteApartmentMutation.mutateAsync,
+    isDeletingApartment: deleteApartmentMutation.isPending
+  }
 }
