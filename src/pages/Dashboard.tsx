@@ -1,6 +1,5 @@
 import CalendarGridTab from './CalendarGridTab';
 import { useEffect, useMemo, useState } from 'react';
-import SlotModal from '../utils/SlotModal';
 import PageLayout from '../components/PageLayout';
 import { PageHeader } from '../components/PageHeader';
 import { Calendar, Home } from 'lucide-react';
@@ -16,7 +15,6 @@ function Dashboard() {
   const navigate = useNavigate();
   
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-  const [selectedSlot, setSelectedSlot] = useState<{ day: string, slot: string, slotKey: string } | null>(null);
 
   // Safely extract the active session context
   const apartmentId = useMemo(() => getCleanStorageItem('apartmentId') || '', []);
@@ -31,10 +29,6 @@ function Dashboard() {
   
   // Logical checks
   const isUserAdmin = useMemo(() => checkIsAdmin(members, currentUserId), [members, currentUserId]);  const hasNotifications = isUserAdmin && Array.isArray(requests) && requests.length > 0;
-
-  const handleOpenModal = (dayNum: string, time: string, slotKey: string) => {
-    setSelectedSlot({ day: dayNum, slot: time, slotKey: slotKey });
-  };
 
   const renderHeader = () => {
     if (location.pathname.includes('/dashboard/apartment')) {
@@ -84,11 +78,11 @@ function Dashboard() {
         </footer>
       }
     >
-      {/* LOCAL SUB-ROUTES WITH DIRECT PROP PASSING [google:1, google:2] */}
+      {/* LOCAL SUB-ROUTES WITH DIRECT PROP PASSING  */}
       <Routes>
         <Route 
           path="calendar" 
-          element={<CalendarGridTab onSlotClick={handleOpenModal} />} 
+          element={<CalendarGridTab />} 
         />
         <Route 
           path="apartment" 
@@ -99,11 +93,7 @@ function Dashboard() {
         {/* Fallback back to base dashboard calendar route */}
         <Route path="*" element={<Navigate to="" replace />} />
       </Routes>
-      <SlotModal 
-            isOpen={!!selectedSlot} 
-            onClose={() => setSelectedSlot(null)} 
-            selectedSlot={selectedSlot} 
-          />
+      
       
     </PageLayout>
   );

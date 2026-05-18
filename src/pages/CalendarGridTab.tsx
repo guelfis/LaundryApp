@@ -1,29 +1,32 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { DAYS_OF_WEEK, SLOTS } from '../constants/dates';
 import MonthSwitcher from '../utils/MonthSwitcher';
 import { getDate, getDaysInMonth, getFirstDayOfMonth } from '../utils/datesGetter';
 import { cn } from '../utils/cn';
 import { SlotStatus } from '../constants/SlotStatus';
-import { getBookingsMap, getBookingStatus, getSlotKey } from '../utils/slotsUtils';
+import { AggregatedSlotInfo, emptySlotFallback, getAggregatedBookingsMap, getSlotKey } from '../utils/slotsUtils';
 import { useBookingFilters, useMonthBookings } from '../useBookings';
 import { LoadingSpinner } from '../components/LoadingSpinner';
-import PageLayout from '../components/PageLayout';
+import SlotModal from '../utils/SlotModal';
+import { useApartments } from '../useApartments';
+import { getCleanStorageItem } from '../auth/authUtils';
 
 
 const dayColStyles = "w-24 shrink-0 px-4 py-3";
 
 
+
 function DayCell({ dayName, dayNum, isToday }: { dayName: string; dayNum: number; isToday: boolean }) {
   const isWeekend = dayName === 'Sat' || dayName === 'Sun'; 
   return (
-            <div className={cn( dayColStyles , "border-r border-gray-200 flex items-center gap-1", isWeekend ? "bg-gray-100" : "bg-white" )}>
-                <span className={`text-sm ${isToday ? 'font-bold text-blue-700' : 'font-medium text-gray-700'}`}>
-                  {dayName}
-                </span>
-                <span className={`text-sm ${isToday ? 'font-bold text-blue-700' : 'text-gray-400'}`}>
-                  {dayNum}
-                </span>
-            </div>
+      <div className={cn( dayColStyles , "border-r border-gray-200 flex items-center gap-1", isWeekend ? "bg-gray-100" : "bg-white" )}>
+          <span className={`text-sm ${isToday ? 'font-bold text-blue-700' : 'font-medium text-gray-700'}`}>
+            {dayName}
+          </span>
+          <span className={`text-sm ${isToday ? 'font-bold text-blue-700' : 'text-gray-400'}`}>
+            {dayNum}
+          </span>
+      </div>
     )
 }
 
@@ -34,7 +37,6 @@ function SlotCell(
     return (
     <button 
       onClick={onClick}
-      // active:bg-blue-200 provides "tap" feedback on mobile
       className={cn(
         "flex-1 border-r border-gray-100 last:border-r-0 min-h-[48px]", // 48px is the mobile touch-target standard
         "active:bg-blue-100 transition-colors",
@@ -44,45 +46,59 @@ function SlotCell(
   )
 }
 
-function CalendarGridTab(
-  { onSlotClick }: { onSlotClick: (dayNum: string, slot: string, slotKey: string) => void }
-) {
-      const { viewDate, setViewDate, householdId } = useBookingFilters();
-      const { data: bookings = [], isLoading } = useMonthBookings(householdId, viewDate); 
-      
-      
-      // Create a map for quick lookup of bookings by slotKey only when bookings change
-      const bookingsMap = useMemo(() => {
-        return getBookingsMap(bookings);
-      }, [bookings]);
+function CalendarGridTab() {
 
-      if (isLoading) return <PageLayout><LoadingSpinner /></PageLayout>;
-    
-      const activeMonth = viewDate.getMonth();
-      const year = viewDate.getFullYear();
-      const daysInMonth = getDaysInMonth(activeMonth, year);
-      const firstDay = getFirstDayOfMonth(activeMonth, year);
-    
-      const today = new Date();
-      const isCurrentMonth = activeMonth === today.getMonth() && year === today.getFullYear();
-    
-      const rows = Array.from({ length: daysInMonth }, (_, i) => {
-        const dayNum = i + 1;
-        const dayName = DAYS_OF_WEEK[(firstDay + i) % 7];
-        const isToday = isCurrentMonth && dayNum === today.getDate();
-        return { dayNum, dayName, isToday };
-      });
+  const [selectedSlot, setSelectedSlot] = useState<{ day: string, slot: string } | null>(null);
+  const apartmentId = useMemo(() => getCleanStorageItem('apartmentId') || '', []);
+  
+  const [selectedBooking, setSelectedBooking] = useState<AggregatedSlotInfo>(emptySlotFallback);
+  const { viewDate, setViewDate, householdId } = useBookingFilters();
+  const { data: bookings = [], isLoading } = useMonthBookings(householdId, viewDate); 
+  const { data: apartments = [] } = useApartments(householdId);
+  
+  
+  // Create a map for quick lookup of bookings by slotKey only when bookings change
+  const apartmentsMap = useMemo(() => {
+  return Object.fromEntries(apartments.map((a) => [a.id, a.display_name]));
+}, [apartments]);
 
-      const handleSetMonth = (month: number) => {
-        const newDate = new Date(year, month, 1);
-          setViewDate(newDate);
-      };
+  const aggregatedBookingsMap = useMemo(() => {
+    return getAggregatedBookingsMap(bookings, apartmentsMap, apartmentId);
+  }, [bookings, apartmentsMap, apartmentId]);
+  
 
-      
-      return (
-        // Main Container: flex column to stack month switcher and grid, height to fill viewport minus some space for header
+  const handleOpenModal = (dayNum: string, time: string, slotInfo: AggregatedSlotInfo) => {
+    setSelectedSlot({ day: dayNum, slot: time });
+    setSelectedBooking(slotInfo);
+  };
+
+  if (isLoading) return <LoadingSpinner />;
+
+  const activeMonth = viewDate.getMonth();
+  const year = viewDate.getFullYear();
+  const daysInMonth = getDaysInMonth(activeMonth, year);
+  const firstDay = getFirstDayOfMonth(activeMonth, year);
+
+  const today = new Date();
+  const isCurrentMonth = activeMonth === today.getMonth() && year === today.getFullYear();
+
+  const rows = Array.from({ length: daysInMonth }, (_, i) => {
+    const dayNum = i + 1;
+    const dayName = DAYS_OF_WEEK[(firstDay + i) % 7];
+    const isToday = isCurrentMonth && dayNum === today.getDate();
+    return { dayNum, dayName, isToday };
+  });
+
+  const handleSetMonth = (month: number) => {
+    const newDate = new Date(year, month, 1);
+      setViewDate(newDate);
+  };
+
+  
+  return (
+    // Main Container: flex column to stack month switcher and grid, height to fill viewport minus some space for header
     <div style={{display: 'flex', flexDirection: 'column', width: '100%', flex: 1, minHeight: 0  }}>
-      
+  
         {/* Month Switcher: stays in place */}
       <div style={{ flexShrink: 0 }}>
         <MonthSwitcher activeMonth={activeMonth} setActiveMonth={handleSetMonth} />
@@ -118,12 +134,12 @@ function CalendarGridTab(
               <DayCell dayName={dayName} dayNum={dayNum} isToday={isToday} />
               {SLOTS.map((slot, col) => {
                 const slotKey = getSlotKey(dayNum, activeMonth, year, slot.startHour);
-                const slotBookings = bookingsMap[slotKey] || [];
+                const slotInfo = aggregatedBookingsMap[slotKey] ;
                 return (
                   <SlotCell 
                     key={col} 
-                    onClick={() => onSlotClick(getDate(dayNum, activeMonth, year), slot.label, slotKey)} 
-                    slotStatus={getBookingStatus(slotBookings)} 
+                    onClick={() => handleOpenModal(getDate(dayNum, activeMonth, year), slot.label, slotInfo)} 
+                    slotStatus={slotInfo.status} 
                   />
                 )
               })}
@@ -131,9 +147,16 @@ function CalendarGridTab(
           ))}
         </div>
       </div>
+        <SlotModal 
+            isOpen={!!selectedSlot}
+            onClose={() => {
+              setSelectedBooking(emptySlotFallback)
+              setSelectedSlot(null)}}
+            selectedSlot={selectedSlot} 
+            currentSlot={selectedBooking}          
+        />
     </div>
-);
-
+  );
 }
 
 export default CalendarGridTab;
