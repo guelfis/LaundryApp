@@ -6,9 +6,14 @@ export const getSlotKey = (day: number, month: number, year: number, slotStartHo
   return `${year}-${month + 1}-${day}-${slotStartHour}`;
 };
 
+export const getSlotLabel =  (interval: number[]): string => {
+    return `${interval[0]} - ${interval[1]}`;
+}
+
 export interface AggregatedSlotInfo {
   status: SlotStatus;
   bookedBy: string | null;
+  startTime: string | null;
   endTime: string | null;
   apartmentId: string | null;
   displaySubstring: string;
@@ -25,7 +30,7 @@ export const getAggregatedBookingsMap = (
   
   bookings.forEach((b) => {
     const d = new Date(b.start_time);
-    const key = `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}-${d.getHours()}`;
+    const key = getSlotKey(d.getDate(),d.getMonth(),d.getFullYear(), d.getHours() )
     if (!grouped[key]) grouped[key] = [];
     grouped[key].push(b);
   });
@@ -43,6 +48,7 @@ export const getAggregatedBookingsMap = (
       finalMap[key] = {
         status: booked_by_user ? SlotStatus.BOOKED_BY_USER : SlotStatus.BOOKED,
         bookedBy: name,
+        startTime: activeBooking.start_time,
         endTime: activeBooking.end_time,
         apartmentId: activeBooking.apartment_id,
         displaySubstring: booked_by_user 
@@ -58,6 +64,7 @@ export const getAggregatedBookingsMap = (
       finalMap[key] = {
         status: SlotStatus.RELEASED,
         bookedBy: name,
+        startTime: releasedBooking.start_time,
         endTime: releasedBooking.end_time,
         apartmentId: releasedBooking.apartment_id,
         displaySubstring: 'has been released! It can be booked again for the remaining time before the next slot starts.',
@@ -73,7 +80,23 @@ export const getAggregatedBookingsMap = (
 export const emptySlotFallback = (): AggregatedSlotInfo => ({
   status: SlotStatus.AVAILABLE,
   bookedBy: null,
+  startTime: null,
   endTime: null,
   apartmentId: null,
   displaySubstring: 'is available for booking.',
 });
+
+
+export function isSlotLiveNow(startTime: Date, endTime: Date): boolean {
+  if (!startTime || !endTime) return false;
+
+  const today = new Date();
+
+  return (
+    today.getFullYear() === startTime.getFullYear() &&
+    today.getMonth() === startTime.getMonth() &&
+    today.getDate() === startTime.getDate() &&
+    today.getHours() >= startTime.getHours() &&
+    today.getHours() < endTime.getHours()
+  );
+}

@@ -1,10 +1,10 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { DAYS_OF_WEEK, SLOTS } from '../constants/dates';
 import MonthSwitcher from '../utils/MonthSwitcher';
-import { getDate, getDaysInMonth, getFirstDayOfMonth } from '../utils/datesGetter';
+import { getDate, getDateString, getDaysInMonth, getFirstDayOfMonth } from '../utils/datesGetter';
 import { cn } from '../utils/cn';
 import { SlotStatus } from '../constants/SlotStatus';
-import { AggregatedSlotInfo, emptySlotFallback, getAggregatedBookingsMap, getSlotKey } from '../utils/slotsUtils';
+import { AggregatedSlotInfo, emptySlotFallback, getAggregatedBookingsMap, getSlotKey, getSlotLabel, isSlotLiveNow } from '../utils/slotsUtils';
 import { useBookingFilters, useMonthBookings } from '../useBookings';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import SlotModal from '../utils/SlotModal';
@@ -30,25 +30,47 @@ function DayCell({ dayName, dayNum, isToday }: { dayName: string; dayNum: number
     )
 }
 
-function SlotCell(
-  { onClick, slotStatus }: { onClick: () => void; slotStatus: SlotStatus }) {
-    const isBooked = slotStatus === SlotStatus.BOOKED;
-    // todo add check on who booked it to show different colors and avoid booking over someone else's slot
-    return (
+interface SlotCellProps {
+  onClick: () => void;
+  slotStatus: SlotStatus;
+  isCurrentTimeSlot: boolean; 
+}
+
+function SlotCell({ onClick, slotStatus, isCurrentTimeSlot }: SlotCellProps) {
+  const isBooked = slotStatus === SlotStatus.BOOKED;
+  const isYours = slotStatus === SlotStatus.BOOKED_BY_USER;
+  
+  return (
     <button 
       onClick={onClick}
       className={cn(
-        "flex-1 border-r border-gray-100 last:border-r-0 min-h-[48px]", // 48px is the mobile touch-target standard
-        "active:bg-blue-100 transition-colors",
-        isBooked ? "bg-red-50" : "bg-transparent"
+        "flex-1 min-h-[48px] border-r border-gray-100 last:border-r-0 transition-all",
+        "active:bg-gray-100/70",
+        
+        // 1. Clean Pastel Background Colors
+        isYours 
+          ? "bg-blue-100/80 text-blue-800 font-medium" // Smooth soft green for your slots
+          : isBooked 
+            ? "bg-red-100/80 text-red-800"              // Clear soft red for others slots
+            : "bg-transparent",
+            
+        // 2. The Indicator Line: ONLY active on the current live time slot
+        isCurrentTimeSlot 
+          ? "border border-blue-400/60 rounded-lg shadow-sm" 
+          : "border border-transparent"
       )}
     />       
-  )
+  );
 }
+
+
 
 function CalendarGridTab() {
 
-  const [selectedSlot, setSelectedSlot] = useState<{ day: string, slot: string } | null>(null);
+  // 1. Create a reference pointer for today's row element
+  const todayRowRef = useRef<HTMLDivElement | null>(null);
+
+  const [selectedSlot, setSelectedSlot] = useState<{ dateString: string, slotTimes: number[], isLive:boolean} | null>(null);
   const apartmentId = useMemo(() => getCleanStorageItem('apartmentId') || '', []);
   
   const [selectedBooking, setSelectedBooking] = useState<AggregatedSlotInfo>(emptySlotFallback);
@@ -67,12 +89,10 @@ function CalendarGridTab() {
   }, [bookings, apartmentsMap, apartmentId]);
   
 
-  const handleOpenModal = (dayNum: string, time: string, slotInfo: AggregatedSlotInfo) => {
-    setSelectedSlot({ day: dayNum, slot: time });
+  const handleOpenModal = (dayNum: number, slotTimes:number[] , slotInfo: AggregatedSlotInfo, isSlotLive:boolean) => {
+    setSelectedSlot({ dateString: getDateString(dayNum, activeMonth, year), slotTimes: slotTimes , isLive:isSlotLive});
     setSelectedBooking(slotInfo);
   };
-
-  if (isLoading) return <LoadingSpinner />;
 
   const activeMonth = viewDate.getMonth();
   const year = viewDate.getFullYear();
@@ -89,12 +109,24 @@ function CalendarGridTab() {
     return { dayNum, dayName, isToday };
   });
 
+  // 2. Trigger the automatic focusing scrolling logic on layout initialization
+  useEffect(() => {
+    // If today's row exists in the DOM, scroll it cleanly into view
+    if (todayRowRef.current) {
+      todayRowRef.current.scrollIntoView({
+        behavior: 'smooth', // Creates a native-like fluid sliding motion
+        block: 'start',    // Centers the active day right in the middle of the smartphone screen
+      });
+    }
+  }, [activeMonth]); // Re-runs if the user switches months so it refocuses appropriately
+
   const handleSetMonth = (month: number) => {
     const newDate = new Date(year, month, 1);
       setViewDate(newDate);
   };
 
-  
+  if (isLoading) return <LoadingSpinner />;
+
   return (
     // Main Container: flex column to stack month switcher and grid, height to fill viewport minus some space for header
     <div style={{display: 'flex', flexDirection: 'column', width: '100%', flex: 1, minHeight: 0  }}>
@@ -112,11 +144,13 @@ function CalendarGridTab() {
           <div className={cn(dayColStyles, "text-xs font-semibold text-gray-500 uppercase tracking-wider border-r border-gray-200")}>
             Day
           </div>
-          {SLOTS.map((slot) => (
-            <div key={slot.label} className="flex-1 min-w-fit whitespace-nowrap px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider text-center border-r border-gray-200 last:border-r-0">
-              {slot.label}
+          {SLOTS.map((slot) => {
+            const label = getSlotLabel(slot);
+            return (
+            <div key={label} className="flex-1 min-w-fit whitespace-nowrap px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider text-center border-r border-gray-200 last:border-r-0">
+              {label}
             </div>
-          ))}
+          )})}
         </div>
 
         {/* Grid Body: Scrollable area for the grid cells */}
@@ -124,6 +158,8 @@ function CalendarGridTab() {
           {rows.map(({ dayNum, dayName, isToday }, idx) => (
             <div
               key={dayNum}
+              ref={isToday ? todayRowRef : null}
+              id={isToday ? 'today-calendar-row' : undefined}
               className={cn(
                 'flex border-b last:border-b-0 transition-colors',
                 isToday
@@ -133,13 +169,18 @@ function CalendarGridTab() {
             >
               <DayCell dayName={dayName} dayNum={dayNum} isToday={isToday} />
               {SLOTS.map((slot, col) => {
-                const slotKey = getSlotKey(dayNum, activeMonth, year, slot.startHour);
-                const slotInfo = aggregatedBookingsMap[slotKey] ;
+                const slotKey = getSlotKey(dayNum, activeMonth, year, slot[0]);
+                const slotInfo = aggregatedBookingsMap[slotKey] ??  emptySlotFallback;
+                const startTime = getDate(dayNum, activeMonth, year, slot[0]);
+                const endTime = getDate(dayNum, activeMonth, year, slot[1]);
+                const isSlotLive = isSlotLiveNow(startTime, endTime);
+
                 return (
                   <SlotCell 
                     key={col} 
-                    onClick={() => handleOpenModal(getDate(dayNum, activeMonth, year), slot.label, slotInfo)} 
+                    onClick={() => handleOpenModal(dayNum, slot, slotInfo, isSlotLive)} 
                     slotStatus={slotInfo.status} 
+                    isCurrentTimeSlot={isSlotLive}
                   />
                 )
               })}
@@ -153,7 +194,7 @@ function CalendarGridTab() {
               setSelectedBooking(emptySlotFallback)
               setSelectedSlot(null)}}
             selectedSlot={selectedSlot} 
-            currentSlot={selectedBooking}          
+            currentSlot={selectedBooking}        
         />
     </div>
   );
