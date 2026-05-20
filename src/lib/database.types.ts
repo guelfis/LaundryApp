@@ -136,7 +136,7 @@ export type Database = {
           id: string
           released_at: string | null
           start_time: string
-          status: string | null
+          status: Database["public"]["Enums"]["booking_status"]
         }
         Insert: {
           apartment_id?: string | null
@@ -146,7 +146,7 @@ export type Database = {
           id?: string
           released_at?: string | null
           start_time: string
-          status?: string | null
+          status?: Database["public"]["Enums"]["booking_status"]
         }
         Update: {
           apartment_id?: string | null
@@ -156,7 +156,7 @@ export type Database = {
           id?: string
           released_at?: string | null
           start_time?: string
-          status?: string | null
+          status?: Database["public"]["Enums"]["booking_status"]
         }
         Relationships: [
           {
@@ -265,6 +265,15 @@ export type Database = {
         Args: { h_code: string; target_apt_id: string }
         Returns: undefined
       }
+      book_laundry_slot: {
+        Args: {
+          booking_date: string
+          end_hour: number
+          start_hour: number
+          target_apartment_id: string
+        }
+        Returns: Json
+      }
       create_join_request: {
         Args: { target_apartment_id: string }
         Returns: undefined
@@ -302,6 +311,10 @@ export type Database = {
         Args: { target_apartment_id: string }
         Returns: undefined
       }
+      release_laundry_slot: {
+        Args: { target_booking_id: string }
+        Returns: Json
+      }
       remove_apartment_member: {
         Args: { target_apartment_id: string; target_user_id: string }
         Returns: undefined
@@ -316,7 +329,7 @@ export type Database = {
       }
     }
     Enums: {
-      [_ in never]: never
+      booking_status: "active" | "released"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -443,6 +456,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      booking_status: ["active", "released"],
+    },
   },
 } as const

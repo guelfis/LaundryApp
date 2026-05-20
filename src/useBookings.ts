@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getBookingsByHousehold, createBooking } from './lib/bookings';
+import { getBookingsByHousehold, releaseLaundrySlot, bookLaundrySlot } from './lib/bookings';
 import { useContext } from 'react';
 import { BookingContext } from './contexts/BookingContext';
 
@@ -24,16 +24,38 @@ export const useMonthBookings = (householdId: string, viewDate: Date) => {
   });
 };
 
-// Hook for the mutation to add a booking
-export const useAddBooking = () => {
+interface BookSlotParams {
+  apartmentId: string;
+  dateStr: string;   // Format 'YYYY-MM-DD'
+  startHour: number; // es. 7, 12, 17
+  endHour: number;   // es. 12, 17, 22
+}
+
+export function useBookingActions() {
   const queryClient = useQueryClient();
 
-  return useMutation({
-    mutationFn: createBooking,
+  // mutation: books the remaining time of the slot or an entire one. 
+  const bookSlotMutation = useMutation({
+    mutationFn: async ({ apartmentId, dateStr, startHour, endHour }: BookSlotParams) => bookLaundrySlot(apartmentId, dateStr, startHour, endHour),
     onSuccess: () => {
-      // Invalidate and refetch bookings after a new booking is added
-      queryClient.invalidateQueries({ queryKey: ['bookings'] });
-    },
+      // forces the refresh of the calendar to show the new slots
+      queryClient.invalidateQueries({ queryKey: ['calendar-bookings'] });
+    }
   });
-};
 
+  // mutation, releases a slot if ongoing, deletes it if in the future
+  const releaseSlotMutation = useMutation({
+    mutationFn: async (bookingId: string) => releaseLaundrySlot(bookingId),
+    onSuccess: () => {
+      // updated the calendar to not show the released slot
+      queryClient.invalidateQueries({ queryKey: ['calendar-bookings'] });
+    }
+  });
+
+  return {
+    bookSlot: bookSlotMutation.mutateAsync,
+    isBooking: bookSlotMutation.isPending,
+    releaseSlot: releaseSlotMutation.mutateAsync,
+    isReleasing: releaseSlotMutation.isPending
+  };
+}

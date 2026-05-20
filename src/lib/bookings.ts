@@ -1,5 +1,4 @@
 import { supabase } from './supabase';
-import type { BookingInsert, BookingUpdate } from './databaseTypes';
 
 export async function getBookingsByApartment(apartmentId: string) {
   const { data, error } = await supabase
@@ -52,34 +51,23 @@ export async function getUpcomingBookings(apartmentId: string) {
   return data;
 }
 
-export async function createBooking(payload: BookingInsert) {
-  const { data, error } = await supabase
-    .from('booking')
-    .insert(payload)
-    .select()
-    .single();
+export async function bookLaundrySlot(apartmentId: string, dateStr: string, startH: number, endH: number) {
+  const { data, error } = await supabase.rpc('book_laundry_slot', {
+    target_apartment_id: apartmentId,
+    booking_date: dateStr,
+    start_hour: startH,
+    end_hour: endH
+  });
 
   if (error) throw error;
-  return data;
+  return data as { booking_id: string; status: string };
 }
 
-export async function updateBooking(id: string, payload: BookingUpdate) {
-  const { data, error } = await supabase
-    .from('booking')
-    .update(payload)
-    .eq('id', id)
-    .select()
-    .single();
+export async function releaseLaundrySlot(bookingId: string) {
+  const { data, error } = await supabase.rpc('release_laundry_slot', {
+    target_booking_id: bookingId
+  });
 
   if (error) throw error;
-  return data;
-}
-
-export async function deleteBooking(id: string) {
-  const { error } = await supabase
-    .from('booking')
-    .delete()
-    .eq('id', id);
-
-  if (error) throw error;
+  return data as { action: 'deleted' | 'released'; message: string };
 }
