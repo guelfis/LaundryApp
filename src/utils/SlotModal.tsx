@@ -1,8 +1,11 @@
+import { useMemo } from 'react';
 import BottomModal from '../components/BottomModal';
 import ModalButton from '../components/ModalButton';
 import StatusDot from '../components/StatusDot';
 import { SlotStatus } from '../constants/SlotStatus';
+import { useBookingActions } from '../useBookings';
 import { AggregatedSlotInfo, getSlotLabel } from './slotsUtils';
+import { getCleanStorageItem } from '../auth/authUtils';
 
 interface BookingModalProps {
   isOpen: boolean;
@@ -18,7 +21,36 @@ export default function BookingModal({
   currentSlot,
 }: BookingModalProps) {
 
+  
+  const apartmentId = useMemo(() => getCleanStorageItem('apartmentId') || '', []);
+  const { bookSlot, isBooking, releaseSlot, isReleasing } = useBookingActions();
+
   if (!isOpen || !selectedSlot) return null;
+  const handleBook = async () => {
+    try {
+      await bookSlot({
+        apartmentId,
+        dateStr: selectedSlot.dateString, 
+        startHour: selectedSlot.slotTimes[0],
+        endHour: selectedSlot.slotTimes[1]
+      });
+      onClose();
+    } catch (err) {
+      const errorInstance = err as Error;
+      alert(errorInstance.message); 
+    }
+  };
+   const handleRelease = async () => {
+    if (!currentSlot.id) return;
+    try {
+      const response = await releaseSlot(currentSlot.id);
+      alert(response.message); // released or deleted
+      onClose();
+    } catch (err) {
+      const errorInstance = err as Error;
+      alert(errorInstance.message);
+    }
+  };
       
   const slotLabel = getSlotLabel(selectedSlot.slotTimes);
   const isYours = currentSlot.status === SlotStatus.BOOKED_BY_USER;
@@ -87,25 +119,17 @@ export default function BookingModal({
         
         {/* CASE A: Slot is empty or has been fully released -> Anyone can book */}
         {(currentSlot.status === SlotStatus.AVAILABLE || currentSlot.status === SlotStatus.RELEASED) && (
-          <ModalButton variant="primary" onClick={() => console.log('Creating booking...', selectedSlot)}>
+          <ModalButton variant="primary" disabled={isBooking} onClick={() => handleBook()}>
             Book Slot
           </ModalButton>
         )}
 
         {/* CASE B: Slot is active and belongs to MY apartment -> I can release it */}
-        {currentSlot.status === SlotStatus.BOOKED_BY_USER && selectedSlot.isLive && (
-          <ModalButton variant="danger" onClick={() => console.log('Releasing my slot...', selectedSlot)}>
-            Release Slot Early
+        {currentSlot.status === SlotStatus.BOOKED_BY_USER && (
+          <ModalButton variant="danger" disabled={isReleasing} onClick={() => handleRelease}>
+            Release Slot
           </ModalButton>
         )}
-
-        {/* CASE B: Slot is active and belongs to MY apartment -> I can release it */}
-        {currentSlot.status === SlotStatus.BOOKED_BY_USER && !selectedSlot.isLive && (
-          <ModalButton variant="danger" onClick={() => console.log('Releasing my slot...', selectedSlot)}>
-            Cancel Booking
-          </ModalButton>
-        )}
-
 
         {/* CASE C: Slot is active but belongs to SOMEONE ELSE -> View only state */}
         {currentSlot.status === SlotStatus.BOOKED && (
@@ -114,7 +138,7 @@ export default function BookingModal({
           </div>
         )}
 
-        <ModalButton variant="secondary" onClick={onClose}>
+        <ModalButton variant="secondary" disabled={isBooking || isReleasing} onClick={onClose}>
           Close
         </ModalButton>
       </div>

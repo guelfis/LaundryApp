@@ -11,6 +11,7 @@ export const getSlotLabel =  (interval: number[]): string => {
 }
 
 export interface AggregatedSlotInfo {
+  id: string;
   status: SlotStatus;
   bookedBy: string | null;
   startTime: string | null;
@@ -46,6 +47,7 @@ export const getAggregatedBookingsMap = (
       const booked_by_user = activeBooking.apartment_id === currentApartmentId;
       const name = apartments[activeBooking.apartment_id ?? ''] || 'Another Apartment';
       finalMap[key] = {
+        id: activeBooking.id,
         status: booked_by_user ? SlotStatus.BOOKED_BY_USER : SlotStatus.BOOKED,
         bookedBy: name,
         startTime: activeBooking.start_time,
@@ -62,6 +64,7 @@ export const getAggregatedBookingsMap = (
     if (releasedBooking) {
       const name = apartments[releasedBooking.apartment_id ?? ''] || 'Another Apartment';
       finalMap[key] = {
+        id: releasedBooking.id,
         status: SlotStatus.RELEASED,
         bookedBy: name,
         startTime: releasedBooking.start_time,
@@ -78,6 +81,7 @@ export const getAggregatedBookingsMap = (
 
 // Fallback constant helper to return empty slot states safely without breaking renders
 export const emptySlotFallback = (): AggregatedSlotInfo => ({
+  id:'',
   status: SlotStatus.AVAILABLE,
   bookedBy: null,
   startTime: null,
