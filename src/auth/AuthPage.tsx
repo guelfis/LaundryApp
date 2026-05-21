@@ -30,8 +30,21 @@ export default function AuthPage() {
         {isSignUp && (
             <input className="border p-2" placeholder="Full Name" onChange={e => setFullName(e.target.value)} />
         )}
-        <input className="border p-2" type="email" placeholder="Email" onChange={e => setEmail(e.target.value)} />
-        <input className="border p-2" type="password" placeholder="Password" onChange={e => setPassword(e.target.value)} />
+        <input 
+          className="border border-gray-300 dark:border-slate-700 p-2.5 rounded-xl bg-white dark:bg-slate-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-500 focus:outline-none focus:border-blue-500" 
+          type="email" 
+          placeholder="Email" 
+          value={email}
+          onChange={e => setEmail(e.target.value)} 
+        />
+
+        <input 
+          className="border border-gray-300 dark:border-slate-700 p-2.5 rounded-xl bg-white dark:bg-slate-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-500 focus:outline-none focus:border-blue-500" 
+          type="password" 
+          placeholder="Password" 
+          value={password}
+          onChange={e => setPassword(e.target.value)} 
+        />
         <button className="bg-blue-600 text-white p-2 rounded" type="submit">
             {isSignUp ? 'Create Account' : 'Login'}
         </button>

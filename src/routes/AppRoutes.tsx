@@ -4,11 +4,11 @@ import { useAuth } from '../auth/AuthContext';
 import AuthPage from '../auth/AuthPage';
 import Dashboard from '../pages/Dashboard'; 
 import ApartmentLogin from '../pages/ApartmentLogin';
+import { getCleanStorageItem } from '../auth/authUtils';
 
 export default function AppRoutes() {
   const { session, loading } = useAuth();
 
-  // Block rendering while Supabase resolves the token
   if (loading) {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-gray-50 dark:bg-slate-900">
@@ -17,21 +17,26 @@ export default function AppRoutes() {
     );
   }
 
+  // 1. Dynamic Check: Does the user have an active apartment linked?
+  const hasApartment = !!getCleanStorageItem('apartmentId');
+
   return (
     <Routes>
       {!session ? (
-        /* Public Shell Rules */
         <Route path="*" element={<AuthPage />} />
       ) : (
-        /* Private App Shell Rules */
         <>
           <Route path="/apartment-login" element={<ApartmentLogin />} />
-          
-          {/* NOTICE: The trailing /* allows the dashboard to manage sub-routes [google:1, google:2] */}
-          <Route path="/dashboard/*" element={<Dashboard />}/>
+          <Route path="/dashboard/*" element={<Dashboard />} />
 
-          {/* Catch-all fallback */}
-          <Route path="*" element={<Navigate to="/dashboard" replace />} />
+          {/* 
+            2. FIXED DYNAMIC ROUTING FALLBACK:
+            If they have an apartment, send them to the dashboard.
+            If they don't, gracefully drop them onto the setup screen!
+          */}
+          <Route path="*" element={
+            <Navigate to={hasApartment ? "/dashboard" : "/apartment-login"} replace />
+          } />
         </>
       )}
     </Routes>

@@ -40,7 +40,7 @@ export default function ApartmentLogin() {
         await joinViaLink(token);
         alert("Successfully joined the apartment!");
         // Direct pass straight to core dashboard state
-        navigate('/dashboard/calendar', { replace: true });
+        navigate('/dashboard/', { replace: true });
       } catch (err) {
         console.error("Link processing error:", err);
         alert("This invitation link is invalid, expired, or fully claimed.");
@@ -60,7 +60,7 @@ export default function ApartmentLogin() {
   const enterApartment = (apt: Apartment) => {
     localStorage.setItem('apartmentName', apt.display_name);
     localStorage.setItem('apartmentId', apt.id);
-    navigate('/dashboard/calendar');
+    navigate('/dashboard/');
   };
 
   const handleJoinRequest = (apt: Apartment) => {
