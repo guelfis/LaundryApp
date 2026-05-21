@@ -93,21 +93,21 @@ export type Database = {
           apartment_id: string
           id: string
           joined_at: string | null
-          role: string
+          role: Database["public"]["Enums"]["apartment_role"]
           user_id: string
         }
         Insert: {
           apartment_id: string
           id?: string
           joined_at?: string | null
-          role?: string
+          role?: Database["public"]["Enums"]["apartment_role"]
           user_id: string
         }
         Update: {
           apartment_id?: string
           id?: string
           joined_at?: string | null
-          role?: string
+          role?: Database["public"]["Enums"]["apartment_role"]
           user_id?: string
         }
         Relationships: [
@@ -329,6 +329,7 @@ export type Database = {
       }
     }
     Enums: {
+      apartment_role: "admin" | "member"
       booking_status: "active" | "released"
     }
     CompositeTypes: {
@@ -457,6 +458,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      apartment_role: ["admin", "member"],
       booking_status: ["active", "released"],
     },
   },

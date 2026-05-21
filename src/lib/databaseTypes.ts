@@ -16,6 +16,7 @@ export type ApartmentWithBookings = Apartment & { bookings: Booking[] };
 export type HouseholdWithApartments = Household & { apartments: Apartment[] };
 
 export type BookingStatus = Database["public"]["Enums"]["booking_status"];
+export type ApartmentRole = Database["public"]["Enums"]["apartment_role"];
 
 export interface Profile {
   id: string;
