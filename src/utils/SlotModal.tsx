@@ -4,13 +4,14 @@ import ModalButton from '../components/ModalButton';
 import StatusDot from '../components/StatusDot';
 import { SlotStatus } from '../constants/SlotStatus';
 import { useBookingActions } from '../useBookings';
-import { AggregatedSlotInfo, getSlotLabel } from './slotsUtils';
+import { AggregatedSlotInfo, getSlotLabel, SlotTimeState } from './slotsUtils';
 import { getCleanStorageItem } from '../auth/authUtils';
+import { Lock } from 'lucide-react';
 
 interface BookingModalProps {
   isOpen: boolean;
   onClose: () => void;
-  selectedSlot: { dateString: string; slotTimes: number[], isLive: boolean } | null;
+  selectedSlot: { dateString: string; slotTimes: number[], slotTimeState: SlotTimeState; } | null;
   currentSlot: AggregatedSlotInfo;
 }
 
@@ -71,18 +72,18 @@ export default function BookingModal({
         </span>
         {isYours ? (
           <span className="flex items-center gap-1.5 bg-blue-100 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400 font-bold text-xs px-3 py-1.5 rounded-xl">
-            <StatusDot color="blue" pulse={selectedSlot.isLive} />
+            <StatusDot color="blue" pulse={selectedSlot.slotTimeState === 'live'} />
             Reserved
           </span>
           
         ) : isBooked ? (
           <span className="flex items-center gap-1.5 bg-red-100 dark:bg-red-950/40 text-red-700 dark:text-red-400 font-bold text-xs px-3 py-1.5 rounded-xl">
-            <StatusDot color="red" pulse={selectedSlot.isLive} />
+            <StatusDot color="red" pulse={selectedSlot.slotTimeState === 'live'} />
             Booked
           </span>
         ) : (
           <span className="flex items-center gap-1.5 bg-green-100 dark:bg-green-950/40 text-green-700 dark:text-green-400 font-bold text-xs px-3 py-1.5 rounded-xl">
-            <StatusDot color="green" pulse={selectedSlot.isLive} />
+            <StatusDot color="green" pulse={selectedSlot.slotTimeState === 'live'} />
             Free
           </span>
         )}
@@ -106,36 +107,45 @@ export default function BookingModal({
       </div>
 
       {/* 3. EXPLANATORY DYNAMIC DESCRIPTION */}
-      <p className="text-sm text-gray-600 dark:text-slate-300 leading-relaxed px-1">
-        {isYours 
-          ? "You are holding this laundry spot. If you no longer need to use the machines, please release it so other apartments can book it."
-          : `The selected timeframe ${currentSlot.displaySubstring}`
-        }
-      </p>
+        <p className="text-sm text-gray-600 dark:text-slate-300 leading-relaxed px-1">
+          {selectedSlot.slotTimeState ==='past' 
+            ? "This slot is in the past and cannot be modified." 
+            :  isYours 
+            ?  "You are holding this laundry spot. If you no longer need to use the machines, please release it so other apartments can book it."
+            :`The selected timeframe ${currentSlot.displaySubstring}`
+          }
+        </p>
+      
     </div>
 
       {/* 3. Logical User Actions Blueprint Structure Wrapper */}
       <div className="flex flex-col gap-4 pb-4">
-        
-        {/* CASE A: Slot is empty or has been fully released -> Anyone can book */}
-        {(currentSlot.status === SlotStatus.AVAILABLE || currentSlot.status === SlotStatus.RELEASED) && (
-          <ModalButton variant="primary" disabled={isBooking} onClick={() => handleBook()}>
-            Book Slot
-          </ModalButton>
-        )}
+          
+        {/* BLOCK PAST SLOTS COMPLETELY */}
+        {selectedSlot.slotTimeState !== 'past' && (
+          <>
+            {/* CASE A: Slot is empty -> Anyone can book */}
+            {(currentSlot.status === SlotStatus.AVAILABLE || currentSlot.status === SlotStatus.RELEASED) && (
+              <ModalButton variant="primary" disabled={isBooking} onClick={handleBook}>
+                Book Slot
+              </ModalButton>
+            )}
 
-        {/* CASE B: Slot is active and belongs to MY apartment -> I can release it */}
-        {currentSlot.status === SlotStatus.BOOKED_BY_USER && (
-          <ModalButton variant="danger" disabled={isReleasing} onClick={() => handleRelease}>
-            Release Slot
-          </ModalButton>
-        )}
+            {/* CASE B: Slot is active and belongs to MY apartment -> I can release it */}
+            {currentSlot.status === SlotStatus.BOOKED_BY_USER && (
+              <ModalButton variant="danger" disabled={isReleasing} onClick={handleRelease}>
+                Release Slot
+              </ModalButton>
+            )}
 
-        {/* CASE C: Slot is active but belongs to SOMEONE ELSE -> View only state */}
-        {currentSlot.status === SlotStatus.BOOKED && (
-          <div className="p-3 bg-gray-100 dark:bg-slate-800 rounded-xl text-center text-sm text-gray-500">
-            🔒 You cannot modify bookings owned by other apartments.
-          </div>
+            {/* CASE C: Slot is active but belongs to SOMEONE ELSE */}
+            {currentSlot.status === SlotStatus.BOOKED && (
+              <div className="flex flex-center gap-1.5 p-3 bg-gray-100 dark:bg-slate-800 rounded-xl text-center text-sm text-gray-500">
+                <Lock />
+                You cannot modify bookings owned by other apartments.
+              </div>
+            )}
+          </>
         )}
 
         <ModalButton variant="secondary" disabled={isBooking || isReleasing} onClick={onClose}>

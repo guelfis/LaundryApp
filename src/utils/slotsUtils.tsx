@@ -10,6 +10,8 @@ export const getSlotLabel =  (interval: number[]): string => {
     return `${interval[0]} - ${interval[1]}`;
 }
 
+export type SlotTimeState = 'past' | 'live' | 'future';
+
 export interface AggregatedSlotInfo {
   id: string;
   status: SlotStatus;
@@ -91,16 +93,23 @@ export const emptySlotFallback = (): AggregatedSlotInfo => ({
 });
 
 
-export function isSlotLiveNow(startTime: Date, endTime: Date): boolean {
-  if (!startTime || !endTime) return false;
+export function getSlotTimeState(startTime: Date, endTime: Date): SlotTimeState {
+  if (!startTime || !endTime) return 'past';
 
   const today = new Date();
+  
+  // Create comparable timestamps (stripping milliseconds/seconds for accuracy if needed)
+  const nowTime = today.getTime();
+  const startTimer = startTime.getTime();
+  const endTimer = endTime.getTime();
 
-  return (
-    today.getFullYear() === startTime.getFullYear() &&
-    today.getMonth() === startTime.getMonth() &&
-    today.getDate() === startTime.getDate() &&
-    today.getHours() >= startTime.getHours() &&
-    today.getHours() < endTime.getHours()
-  );
+  if (nowTime >= startTimer && nowTime < endTimer) {
+    return 'live';
+  }
+  
+  if (nowTime >= endTimer) {
+    return 'past';
+  }
+
+  return 'future';
 }

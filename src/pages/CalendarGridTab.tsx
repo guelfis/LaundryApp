@@ -4,7 +4,7 @@ import MonthSwitcher from '../utils/MonthSwitcher';
 import { getDate, getDateString, getDaysInMonth, getFirstDayOfMonth } from '../utils/datesGetter';
 import { cn } from '../utils/cn';
 import { SlotStatus } from '../constants/SlotStatus';
-import { AggregatedSlotInfo, emptySlotFallback, getAggregatedBookingsMap, getSlotKey, getSlotLabel, isSlotLiveNow } from '../utils/slotsUtils';
+import { AggregatedSlotInfo, emptySlotFallback, getAggregatedBookingsMap, getSlotKey, getSlotLabel, getSlotTimeState, SlotTimeState } from '../utils/slotsUtils';
 import { useBookingFilters, useMonthBookings } from '../useBookings';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import SlotModal from '../utils/SlotModal';
@@ -70,7 +70,7 @@ function CalendarGridTab() {
   // 1. Create a reference pointer for today's row element
   const todayRowRef = useRef<HTMLDivElement | null>(null);
 
-  const [selectedSlot, setSelectedSlot] = useState<{ dateString: string, slotTimes: number[], isLive:boolean} | null>(null);
+  const [selectedSlot, setSelectedSlot] = useState<{ dateString: string, slotTimes: number[], slotTimeState:SlotTimeState} | null>(null);
   const apartmentId = useMemo(() => getCleanStorageItem('apartmentId') || '', []);
   
   const [selectedBooking, setSelectedBooking] = useState<AggregatedSlotInfo>(emptySlotFallback);
@@ -89,8 +89,8 @@ function CalendarGridTab() {
   }, [bookings, apartmentsMap, apartmentId]);
   
 
-  const handleOpenModal = (dayNum: number, slotTimes:number[] , slotInfo: AggregatedSlotInfo, isSlotLive:boolean) => {
-    setSelectedSlot({ dateString: getDateString(dayNum, activeMonth, year), slotTimes: slotTimes , isLive:isSlotLive});
+  const handleOpenModal = (dayNum: number, slotTimes:number[] , slotInfo: AggregatedSlotInfo, slotTimeState:SlotTimeState) => {
+    setSelectedSlot({ dateString: getDateString(dayNum, activeMonth, year), slotTimes: slotTimes , slotTimeState:slotTimeState});
     setSelectedBooking(slotInfo);
   };
 
@@ -173,14 +173,14 @@ function CalendarGridTab() {
                 const slotInfo = aggregatedBookingsMap[slotKey] ??  emptySlotFallback;
                 const startTime = getDate(dayNum, activeMonth, year, slot[0]);
                 const endTime = getDate(dayNum, activeMonth, year, slot[1]);
-                const isSlotLive = isSlotLiveNow(startTime, endTime);
+                const slotTimeState = getSlotTimeState(startTime, endTime);
 
                 return (
                   <SlotCell 
                     key={col} 
-                    onClick={() => handleOpenModal(dayNum, slot, slotInfo, isSlotLive)} 
+                    onClick={() => handleOpenModal(dayNum, slot, slotInfo, slotTimeState)} 
                     slotStatus={slotInfo.status} 
-                    isCurrentTimeSlot={isSlotLive}
+                    isCurrentTimeSlot={slotTimeState === 'live'}
                   />
                 )
               })}
