@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { DAYS_OF_WEEK, SLOTS } from '../constants/dates';
+import { SLOTS } from '../constants/dates';
 import MonthSwitcher from '../utils/MonthSwitcher';
-import { getDate, getDateString, getDaysInMonth, getFirstDayOfMonth } from '../utils/datesGetter';
+import { getDate, getDateString, getDaysInMonth, getFirstDayOfMonth, getLocalizedDaysOfWeek } from '../utils/datesGetter';
 import { cn } from '../utils/cn';
 import { SlotStatus } from '../constants/SlotStatus';
 import { AggregatedSlotInfo, emptySlotFallback, getAggregatedBookingsMap, getSlotKey, getSlotLabel, getSlotTimeState, SlotTimeState } from '../utils/slotsUtils';
@@ -10,14 +10,16 @@ import { LoadingSpinner } from '../components/LoadingSpinner';
 import SlotModal from '../utils/SlotModal';
 import { useApartments } from '../useApartments';
 import { getCleanStorageItem } from '../auth/authUtils';
+import { useTranslation } from 'react-i18next';
 
 
 const dayColStyles = "w-24 shrink-0 px-4 py-3";
 
 
 
-function DayCell({ dayName, dayNum, isToday }: { dayName: string; dayNum: number; isToday: boolean }) {
-  const isWeekend = dayName === 'Sat' || dayName === 'Sun'; 
+function DayCell({ dayName, dayNum, isToday, dayOfWeekIndex }: { dayName: string; dayNum: number; isToday: boolean, dayOfWeekIndex:number }) {
+  // 0 is Sunday, 6 is Saturday
+  const isWeekend = dayOfWeekIndex === 0 || dayOfWeekIndex === 6; 
   return (
       <div className={cn( dayColStyles , "border-r border-gray-200 flex items-center gap-1", isWeekend ? "bg-gray-100" : "bg-white" )}>
           <span className={`text-sm ${isToday ? 'font-bold text-blue-700' : 'font-medium text-gray-700'}`}>
@@ -69,6 +71,8 @@ function CalendarGridTab() {
 
   // 1. Create a reference pointer for today's row element
   const todayRowRef = useRef<HTMLDivElement | null>(null);
+  const { t } = useTranslation();
+  const days = getLocalizedDaysOfWeek();
 
   const [selectedSlot, setSelectedSlot] = useState<{ dateString: string, slotTimes: number[], slotTimeState:SlotTimeState} | null>(null);
   const apartmentId = useMemo(() => getCleanStorageItem('apartmentId') || '', []);
@@ -104,9 +108,10 @@ function CalendarGridTab() {
 
   const rows = Array.from({ length: daysInMonth }, (_, i) => {
     const dayNum = i + 1;
-    const dayName = DAYS_OF_WEEK[(firstDay + i) % 7];
+    const dayName = days[(firstDay + i) % 7];
+    const dayOfWeekIndex = (firstDay + i) % 7; 
     const isToday = isCurrentMonth && dayNum === today.getDate();
-    return { dayNum, dayName, isToday };
+    return { dayNum, dayName, isToday, dayOfWeekIndex};
   });
 
   // 2. Trigger the automatic focusing scrolling logic on layout initialization
@@ -142,7 +147,7 @@ function CalendarGridTab() {
         {/* Grid Header */}
         <div className="flex border-b border-gray-200 bg-gray-50 shrink-0">
           <div className={cn(dayColStyles, "text-xs font-semibold text-gray-500 uppercase tracking-wider border-r border-gray-200")}>
-            Day
+            {t('calendarGrid.day')}
           </div>
           {SLOTS.map((slot) => {
             const label = getSlotLabel(slot);
@@ -155,7 +160,7 @@ function CalendarGridTab() {
 
         {/* Grid Body: Scrollable area for the grid cells */}
         <div className="flex-1 overflow-y-auto overflow-x-hidden WebkitOverflowScrolling-touch">
-          {rows.map(({ dayNum, dayName, isToday }, idx) => (
+          {rows.map(({ dayNum, dayName, isToday, dayOfWeekIndex }, idx) => (
             <div
               key={dayNum}
               ref={isToday ? todayRowRef : null}
@@ -167,7 +172,7 @@ function CalendarGridTab() {
                   : idx % 2 !== 0 ? 'bg-gray-50/50' : 'bg-white'
               )}
             >
-              <DayCell dayName={dayName} dayNum={dayNum} isToday={isToday} />
+              <DayCell dayName={dayName} dayNum={dayNum} isToday={isToday} dayOfWeekIndex={dayOfWeekIndex} />
               {SLOTS.map((slot, col) => {
                 const slotKey = getSlotKey(dayNum, activeMonth, year, slot[0]);
                 const slotInfo = aggregatedBookingsMap[slotKey] ??  emptySlotFallback;

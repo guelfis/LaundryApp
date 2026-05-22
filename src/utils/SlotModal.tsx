@@ -7,6 +7,7 @@ import { useBookingActions } from '../useBookings';
 import { AggregatedSlotInfo, getSlotLabel, SlotTimeState } from './slotsUtils';
 import { getCleanStorageItem } from '../auth/authUtils';
 import { Lock } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface BookingModalProps {
   isOpen: boolean;
@@ -22,7 +23,7 @@ export default function BookingModal({
   currentSlot,
 }: BookingModalProps) {
 
-  
+  const { t } = useTranslation();
   const apartmentId = useMemo(() => getCleanStorageItem('apartmentId') || '', []);
   const { bookSlot, isBooking, releaseSlot, isReleasing } = useBookingActions();
 
@@ -62,29 +63,29 @@ export default function BookingModal({
     <BottomModal
       isOpen={isOpen} 
       onClose={onClose} 
-      title={isYours ? "Your Booking" : isBooked ? "Slot Occupied" : "Available Slot"}
+      title={isYours ? t('slotModal.title_yours') : isBooked ? t('slotModal.title_occupied') : t('slotModal.title_available')}
     >
       <div className="space-y-6 mt-4 mb-4">
       {/* 1. STATUS CONTEXT BADGE (Dynamic UI indicator) */}
       <div className="flex items-center justify-between px-1">
         <span className="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-slate-500">
-          Timeframe Summary
+          Slot Summary
         </span>
         {isYours ? (
           <span className="flex items-center gap-1.5 bg-blue-100 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400 font-bold text-xs px-3 py-1.5 rounded-xl">
             <StatusDot color="blue" pulse={selectedSlot.slotTimeState === 'live'} />
-            Reserved
+            {t('slotStatus.reserved')}
           </span>
           
         ) : isBooked ? (
           <span className="flex items-center gap-1.5 bg-red-100 dark:bg-red-950/40 text-red-700 dark:text-red-400 font-bold text-xs px-3 py-1.5 rounded-xl">
             <StatusDot color="red" pulse={selectedSlot.slotTimeState === 'live'} />
-            Booked
+            {t('slotStatus.booked')}
           </span>
         ) : (
           <span className="flex items-center gap-1.5 bg-green-100 dark:bg-green-950/40 text-green-700 dark:text-green-400 font-bold text-xs px-3 py-1.5 rounded-xl">
             <StatusDot color="green" pulse={selectedSlot.slotTimeState === 'live'} />
-            Free
+            {t('slotStatus.free')}
           </span>
         )}
       </div>
@@ -92,14 +93,14 @@ export default function BookingModal({
       {/* 2. SPECIFICATION BLOCK: Clean, Scannable Grid Card */}
       <div className="bg-gray-50 dark:bg-slate-800/60 border border-gray-100 dark:border-slate-800 rounded-2xl p-4 space-y-3">
         <div className="flex justify-between items-center border-b border-gray-200/60 dark:border-slate-700/50 pb-2.5">
-          <span className="text-sm text-gray-500 dark:text-slate-400">Date</span>
+          <span className="text-sm text-gray-500 dark:text-slate-400">{t('slotModal.date')}</span>
           <span className="font-semibold text-gray-800 dark:text-gray-200">
             {selectedSlot.dateString}
           </span>
         </div>
         
         <div className="flex justify-between items-center">
-          <span className="text-sm text-gray-500 dark:text-slate-400">Hours Block</span>
+          <span className="text-sm text-gray-500 dark:text-slate-400">{t('slotModal.hours')}</span>
           <span className="font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/20 px-2.5 py-1 rounded-lg text-sm">
             {slotLabel}
           </span>
@@ -109,10 +110,10 @@ export default function BookingModal({
       {/* 3. EXPLANATORY DYNAMIC DESCRIPTION */}
         <p className="text-sm text-gray-600 dark:text-slate-300 leading-relaxed px-1">
           {selectedSlot.slotTimeState ==='past' 
-            ? "This slot is in the past and cannot be modified." 
+            ? t('slotModal.message_past')
             :  isYours 
-            ?  "You are holding this laundry spot. If you no longer need to use the machines, please release it so other apartments can book it."
-            :`The selected timeframe ${currentSlot.displaySubstring}`
+            ?  t('slotModal.message_is_yours')
+            :`${t('slotModal.message_selected')} ${currentSlot.displaySubstring}`
           }
         </p>
       
@@ -127,14 +128,14 @@ export default function BookingModal({
             {/* CASE A: Slot is empty -> Anyone can book */}
             {(currentSlot.status === SlotStatus.AVAILABLE || currentSlot.status === SlotStatus.RELEASED) && (
               <ModalButton variant="primary" disabled={isBooking} onClick={handleBook}>
-                Book Slot
+                {t('slotModal.book_button')}
               </ModalButton>
             )}
 
             {/* CASE B: Slot is active and belongs to MY apartment -> I can release it */}
             {currentSlot.status === SlotStatus.BOOKED_BY_USER && (
               <ModalButton variant="danger" disabled={isReleasing} onClick={handleRelease}>
-                Release Slot
+                {t('slotModal.release_button')}
               </ModalButton>
             )}
 
@@ -142,14 +143,14 @@ export default function BookingModal({
             {currentSlot.status === SlotStatus.BOOKED && (
               <div className="flex flex-center gap-1.5 p-3 bg-gray-100 dark:bg-slate-800 rounded-xl text-center text-sm text-gray-500">
                 <Lock />
-                You cannot modify bookings owned by other apartments.
+              {t('slotModal.not_editable')}
               </div>
             )}
           </>
         )}
 
         <ModalButton variant="secondary" disabled={isBooking || isReleasing} onClick={onClose}>
-          Close
+          {t('common.button_close')}
         </ModalButton>
       </div>
     </BottomModal>

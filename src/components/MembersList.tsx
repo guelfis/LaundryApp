@@ -2,7 +2,7 @@ import React from 'react';
 import { Plus } from "lucide-react";
 import { MemberCard } from './MemberCard';
 import { ApartmentMember } from '../lib/databaseTypes';
-
+import { useTranslation } from "react-i18next";
 
 interface MembersListProps {
   members: ApartmentMember[];
@@ -26,12 +26,14 @@ const MembersList: React.FC<MembersListProps> = ({
   onAddMemberClick,
   clickEnabled
 }) => {
+  const { t } = useTranslation();
+
   return (
     <div className="flex flex-col gap-1 w-full">
       
       {/* WHATSAPP PATTERN: Interactive 'Add Member' row fixed at index 0 */}
       <MemberCard
-        isClickable={clickEnabled} // Only clickable if the active user is an Admin
+        isClickable={clickEnabled} 
         onClick={onAddMemberClick}
         avatarBgClass={
           clickEnabled 
@@ -41,14 +43,14 @@ const MembersList: React.FC<MembersListProps> = ({
         avatarContent={<Plus className="w-5 h-5" />}
         title={
           <span className={clickEnabled ? "text-blue-600 dark:text-blue-400 font-bold" : "text-gray-400 cursor-not-allowed"}>
-            Add member
+            {t('membersList.btn_add_member', 'Add member')}
           </span>
         }
-        subtitle="Invite a new resident via link"
+        subtitle={t('membersList.subtitle_add_member', 'Invite a new resident via link')}
         subtitleClass="text-gray-400 dark:text-slate-500"
       />
 
-      {/* RENDER LIST ENTRYS */}
+      {/* RENDER LIST ENTRIES */}
       {members.map((member) => {
         const isSelf = member.user_id === currentUserId;
         const initials = getInitials(member.profiles.full_name);
@@ -65,11 +67,17 @@ const MembersList: React.FC<MembersListProps> = ({
               <>
                 {member.profiles.full_name}{" "}
                 {isSelf && (
-                  <span className="text-xs text-blue-500 font-normal ml-0.5">(You)</span>
+                  <span className="text-xs text-blue-500 font-normal ml-0.5">
+                    {t('membersList.label_self', '(You)')}
+                  </span>
                 )}
               </>
             }
-            subtitle={member.role === 'admin' ? 'Apartment Admin' : 'Regular Resident'}
+            subtitle={
+              member.role === 'admin' 
+                ? t('membersList.role_admin', 'Apartment Admin') 
+                : t('membersList.role_resident', 'Regular Resident')
+            }
             subtitleClass={member.role === 'admin' ? 'text-amber-600 dark:text-amber-400 font-bold' : 'text-gray-500'}
           />
         );

@@ -3,6 +3,7 @@ import { Send, Clock, Home } from 'lucide-react';
 import { useState } from 'react';
 import ModalButton from '../components/ModalButton';
 import { useRequestToJoin } from '../useApartments';
+import { useTranslation } from 'react-i18next';
 
 interface JoinRequestModalProps {
   isOpen: boolean;
@@ -12,10 +13,10 @@ interface JoinRequestModalProps {
 }
 
 export default function JoinRequestModal({ isOpen, onClose, apartmentName, apartmentId }: JoinRequestModalProps) {
+  const { t } = useTranslation();
   const [isSent, setIsSent] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   
-  // Call the custom React Query mutation hook
   const requestToJoinMutation = useRequestToJoin();
 
   const handleSendRequest = async () => {
@@ -23,13 +24,13 @@ export default function JoinRequestModal({ isOpen, onClose, apartmentName, apart
     setErrorMessage(null);
 
     try {
-      // Triggers the 'create_join_request' RPC function in Supabase
       await requestToJoinMutation.mutateAsync(apartmentId);
       setIsSent(true);
     } catch (err) {
       const errorInstance = err as Error;
       console.error('Database insertion error:', errorInstance);
-      setErrorMessage(errorInstance.message || 'Failed to submit request. Please try again.');
+      // Fallback to standard global translation string if message is empty
+      setErrorMessage(errorInstance.message || t('common.error'));
     }
   };
 
@@ -43,7 +44,8 @@ export default function JoinRequestModal({ isOpen, onClose, apartmentName, apart
     <BottomModal 
       isOpen={isOpen} 
       onClose={handleClose} 
-      title={isSent ? "Request Sent!" : "Request Access"}
+      /* Title swaps dynamically based on translation state */
+      title={isSent ? t('joinRequest.title_sent', 'Request Sent!') : t('joinRequest.title_request', 'Request Access')}
     >
       <div className="space-y-6">
         {!isSent ? (
@@ -53,16 +55,15 @@ export default function JoinRequestModal({ isOpen, onClose, apartmentName, apart
                 <Home size={24} className="text-blue-500 dark:text-blue-400" />
               </div>
               <div>
-                <p className="text-sm text-gray-500">You are requesting to join:</p>
+                <p className="text-sm text-gray-500">{t('joinRequest.requesting_to_join', 'You are requesting to join:')}</p>
                 <p className="font-bold text-gray-900 text-lg">{apartmentName}</p>
               </div>
             </div>
 
             <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
-              Once you send the request, an admin of this apartment will need to approve your access. You'll be notified once they accept.
+              {t('joinRequest.description', "Once you send the request, an admin of this apartment will need to approve your access. You'll be notified once they accept.")}
             </p>
 
-            {/* Error Message banner wrapper */}
             {errorMessage && (
               <p className="text-sm text-red-500 font-semibold bg-red-50 dark:bg-red-950/30 p-3 rounded-xl border border-red-100 dark:border-red-900/50">
                 {errorMessage}
@@ -75,20 +76,21 @@ export default function JoinRequestModal({ isOpen, onClose, apartmentName, apart
                 onClick={handleSendRequest}
                 disabled={requestToJoinMutation.isPending}
               >
-                {requestToJoinMutation.isPending ? 'Sending...' : (
+                {requestToJoinMutation.isPending ? t('joinRequest.status_sending', 'Sending...') : (
                   <>
                     <Send size={18} />
-                    Send Request
+                    {t('joinRequest.btn_send', 'Send Request')}
                   </>
                 )}
               </ModalButton>
               
+              {/* Using generic action path for Cancel button */}
               <ModalButton 
                 variant="secondary"
                 onClick={handleClose}
                 disabled={requestToJoinMutation.isPending}
               >
-                Cancel
+                {t('common.cancel', 'Cancel')}
               </ModalButton>
             </div>
           </>
@@ -97,14 +99,15 @@ export default function JoinRequestModal({ isOpen, onClose, apartmentName, apart
             <div className="w-20 h-20 bg-green-50 dark:bg-green-950/30 text-green-500 dark:text-green-400 rounded-full flex items-center justify-center mx-auto mb-4">
               <Clock size={40} />
             </div>
+            {/* Interpolating dynamic context safely with secondary options parameters */}
             <p className="text-gray-600 dark:text-gray-300">
-              Great! Your request to join <span className="font-bold text-gray-900 dark:text-white">{apartmentName}</span> is now pending. 
+              {t('joinRequest.success_msg', 'Great! Your request to join {{name}} is now pending.', { name: apartmentName })}
             </p>
             <button 
               onClick={handleClose}
               className="w-full py-4 bg-gray-900 dark:bg-slate-100 text-white dark:text-slate-900 font-bold rounded-2xl active:scale-[0.98] transition-all"
             >
-              Got it, thanks!
+              {t('joinRequest.btn_success_close', 'Got it, thanks!')}
             </button>
           </div>
         )}

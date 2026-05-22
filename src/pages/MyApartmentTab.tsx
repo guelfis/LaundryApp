@@ -11,10 +11,13 @@ import { LogOut, Trash2 } from "lucide-react";
 import MemberModal from "../myApartment/MemberModal";
 import { ApartmentMember } from "../lib/databaseTypes";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 const destructiveButtonStyle = "flex items-center justify-center gap-2 py-3 px-6 text-red-600 dark:text-red-400 text-base bg-transparent border-none rounded-xl active:bg-red-50 dark:active:bg-red-950/20 active:scale-[0.98] transition-all disabled:opacity-40";
 
 export default function MyApartmentTab() {
+
+    const {t} = useTranslation();
 
     const navigate = useNavigate();
 
@@ -47,29 +50,29 @@ export default function MyApartmentTab() {
     
 
     const handleDeleteApartment = async () => {
-        const confirmFirst = window.confirm("WARNING: This action is permanent! Are you sure you want to completely delete this apartment and all its booking logs?");
+        const confirmFirst = window.confirm(t('myApartmentTab.delete_warning'));
         if (confirmFirst) {
             try {
                 await deleteApartment(apartmentId);
-                alert("Apartment successfully deleted.");
+                alert(t('myApartmentTab.delete_success'));
                 navigate('/apartment-login', { replace: true }); 
             } catch (err) {
                 const errorInstance = err as Error;
-                console.error("Failed to Delete the apartment", err);
-                alert(`Could not delete the apartment: ${errorInstance.message}`);
+                console.error(t('myApartmentTab.delete_fail'), err);
+                alert(`${t('myApartmentTab.delete_fail')}: ${errorInstance.message}`);
             }
         }
     };
 
     const handleLeaveApartment = async () => {
-        if (window.confirm("Are you sure you want to leave this apartment?")) {
+        if (window.confirm(t('myApartmentTab.release_warning'))) {
             try {
                 await leaveApartment(apartmentId);
                 navigate('/apartment-login', { replace: true });
             } catch (err) {
                 const errorInstance = err as Error;
-                console.error("Failed to Leave the apartment", err);
-                alert(`Could not leave the apartment: ${errorInstance.message}`);
+                console.error(t('myApartmentTab.release_fail'), err);
+                alert(`${t('myApartmentTab.release_fail')}: ${errorInstance.message}`);
             }
         }
     };
@@ -130,7 +133,7 @@ export default function MyApartmentTab() {
                             className={destructiveButtonStyle}
                             >
                             <Trash2 size={18} className="text-red-600 dark:text-red-400" />
-                            <span>{isDeletingApartment ? "Deleting..." : "Delete Apartment"}</span>
+                            <span>{isDeletingApartment ? t('myApartmentTab.deleting') : t('myApartmentTab.delete')}</span>
                         </button>
                     ) : (
                         /* DISCRETE TEXT-ONLY LEAVE ACTION */
@@ -141,7 +144,7 @@ export default function MyApartmentTab() {
                             className={destructiveButtonStyle}
                         >
                             <LogOut size={18} className="text-red-600 dark:text-red-400" />
-                            <span>{isLeaving ? "Leaving..." : "Leave Apartment"}</span>
+                            <span>{isLeaving ? t('myApartmentTab.leaving') : t('myApartmentTab.leave')}</span>
                         </button>
                     )}
                 </div>

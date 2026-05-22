@@ -1,0 +1,122 @@
+{
+    "common":{
+        "button_cancel": "Cancel",
+        "button_close": "Close",
+        "error": "Failed to submit request. Please try again."
+    },
+    "slotModal": {
+    "title_yours": "Your Booking",
+    "title_occupied": "Slot Occupied",
+    "title_available": "Available Slot",
+    "book_button": "Book Slot",
+    "release_button": "Release Slot",
+    "not_editable": "You cannot modify bookings owned by other apartments.",
+    "message_past": "This slot is in the past and cannot be modified.",
+    "message_is_yours": "You are holding this laundry spot. If you no longer need to use the machines, please release it so other apartments can book it.",
+    "message_selected": "The selected timeframe",
+    "date": "Date",
+    "hours": "Hours Block"
+  },
+  "slotSubstring": {
+    "booked_by_you": "is booked by your apartment.",
+    "booked_by": "is already booked by",
+    "released": "has been released! It can be booked again for the remaining time before the next slot starts.",
+    "available": "is available for booking",
+    "another_apartment": "another apartment"
+  },
+  "slotStatus":{
+    "booked": "Booked",
+    "free": "Free",
+    "reserved": "Reserved"
+  },
+  "dashboard":{
+    "calendar": "Calendar",
+    "apartment": "Apartment",
+    "your_apartment": "Your Apartment"
+  },
+  "calendarGrid":{
+    "day":"Day"
+  },
+  "myApartmentTab":{
+    "delete_warning":"WARNING: This action is permanent! Are you sure you want to completely delete this apartment and all its booking logs?",
+    "delete_fail": "Failed to Delete the apartment",
+    "delete_success": "Apartment successfully deleted.",
+    "release_warning": "Are you sure you want to leave this apartment?",
+    "release_fail": "Failed to Leave the apartment",
+    "deleting": "Deleting ...",
+    "delete": "Delete Apartment",
+    "leaving": "Leaving ...",
+    "leave": "Leave Apartment"
+  },
+  "createApartment": {
+    "title": "Create New Apartment",
+    "status_creating": "Creating...",
+    "btn_create": "Create Apartment"
+  },
+  "joinRequest": {
+    "title_request": "Request Access",
+    "title_sent": "Request Sent!",
+    "requesting_to_join": "You are requesting to join:",
+    "description": "Once you send the request, an admin of this apartment will need to approve your access. You'll be notified once they accept.",
+    "status_sending": "Sending...",
+    "btn_send": "Send Request",
+    "success_msg": "Great! Your request to join {{name}} is now pending.",
+    "btn_success_close": "Got it, thanks!"
+  },
+  "apartmentLogin": {
+    "page_title": "Apartment Setup",
+    "loading_invite": "Joining apartment via invite link...",
+    "alert_join_success": "Successfully joined the apartment!",
+    "alert_join_error": "This invitation link is invalid, expired, or fully claimed.",
+    "footer_question": "Your apartment is not on the list?",
+    "btn_create_apt": "Create a New Apartment",
+    "section_my_apts": "My Apartments",
+    "section_available_apts": "Available Apartments"
+  },
+  "inviteMember": {
+    "title": "Invite Roommate",
+    "description": "Generate a secure link to add an active member straight to ",
+    "status_generating": "Generating...",
+    "btn_generate": "Generate Invitation Link",
+    "btn_share": "Share Link",
+    "share_title": "Join {{name}}",
+    "share_text": "Use this invitation link to join our apartment schedule!"
+  },
+  "memberModal": {
+    "btn_make_admin": "Make admin",
+    "btn_remove_member": "Remove member",
+    "alert_promote_error": "Could not promote member: {{error}}",
+    "alert_remove_error": "Could not remove member: {{error}}"
+  },
+  "pendingRequests": {
+    "section_title": "Join Requests ({{count}})",
+    "unknown_user": "Unknown User",
+    "subtitle_intent": "wants to join your apartment",
+    "aria_reject": "Reject user",
+    "aria_approve": "Approve user",
+    "alert_update_error": "Error updating request: {{error}}"
+  },
+  "apartmentNameSection": {
+    "label_name": "Name:",
+    "label_type": "apartment name",
+    "error_empty": "Can't be empty",
+    "error_taken": "Name taken"
+  },
+  "authPage": {
+    "title_login": "Login",
+    "title_signup": "Create Account",
+    "placeholder_name": "Full Name",
+    "placeholder_email": "Email",
+    "placeholder_password": "Password",
+    "link_have_account": "Do you have an account?",
+    "link_new_user": "New here? Sign Up",
+    "alert_signup_confirm": "Check your email for the confirmation link!"
+  },
+  "membersList": {
+    "btn_add_member": "Add member",
+    "subtitle_add_member": "Invite a new resident via link",
+    "label_self": "(You)",
+    "role_admin": "Apartment Admin",
+    "role_resident": "Regular Resident"
+  }
+}

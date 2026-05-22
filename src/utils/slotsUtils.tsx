@@ -1,5 +1,6 @@
 import { SlotStatus } from '../constants/SlotStatus';
 import { Booking } from '../lib/databaseTypes';
+import i18n from '../locales/i18n';
 
 export const getSlotKey = (day: number, month: number, year: number, slotStartHour: number) => {
   // Format: "2026-05-06-7"
@@ -47,7 +48,7 @@ export const getAggregatedBookingsMap = (
     if (activeBooking) {
 
       const booked_by_user = activeBooking.apartment_id === currentApartmentId;
-      const name = apartments[activeBooking.apartment_id ?? ''] || 'Another Apartment';
+      const name = apartments[activeBooking.apartment_id ?? ''] || i18n.t('slotSubstring.another_apartment');
       finalMap[key] = {
         id: activeBooking.id,
         status: booked_by_user ? SlotStatus.BOOKED_BY_USER : SlotStatus.BOOKED,
@@ -56,15 +57,15 @@ export const getAggregatedBookingsMap = (
         endTime: activeBooking.end_time,
         apartmentId: activeBooking.apartment_id,
         displaySubstring: booked_by_user 
-            ? 'is booked by your apartment.' 
-            : `is already booked by ${name}.`,
+            ? i18n.t('slotSubstring.booked_by_you') 
+            : `${i18n.t('slotSubstring.booked_by')} ${name}.`,
       };
       return;
     }
 
     const releasedBooking = slotBookings.find((b) => b.status === 'released');
     if (releasedBooking) {
-      const name = apartments[releasedBooking.apartment_id ?? ''] || 'Another Apartment';
+      const name = apartments[releasedBooking.apartment_id ?? ''] || i18n.t('slotSubstring.another_apartment');
       finalMap[key] = {
         id: releasedBooking.id,
         status: SlotStatus.RELEASED,
@@ -72,7 +73,7 @@ export const getAggregatedBookingsMap = (
         startTime: releasedBooking.start_time,
         endTime: releasedBooking.end_time,
         apartmentId: releasedBooking.apartment_id,
-        displaySubstring: 'has been released! It can be booked again for the remaining time before the next slot starts.',
+        displaySubstring: i18n.t('slotSubstring.released'),
       };
       return;
     }
@@ -89,7 +90,7 @@ export const emptySlotFallback = (): AggregatedSlotInfo => ({
   startTime: null,
   endTime: null,
   apartmentId: null,
-  displaySubstring: 'is available for booking.',
+  displaySubstring: i18n.t('slotSubstring.available'),
 });
 
 

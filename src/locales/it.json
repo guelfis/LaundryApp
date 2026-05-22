@@ -1,0 +1,123 @@
+{
+  "common":{
+    "button_cancel": "Indietro",
+    "button_close": "Chiudi",
+    "error": "Richieta fallita. Prova di nuovo."
+
+  },
+  "slotModal": {
+    "title_yours": "La tua Prenotazione",
+    "title_occupied": "Slot Occupato",
+    "title_available": "Slot Libero",
+    "book_button": "Pronota lo Slot",
+    "release_button": "Rilascia lo Slot",
+    "not_editable": "Non puoi modificare le prenotazioni degli altri appartamenti.",
+    "message_past": "Questo slot e'passato e non puo' essere modificato.",
+    "message_is_yours": "Hai prenotato tu questo slot. Se hai finito, per favore rilascialo cosi' altri possono usarlo",
+    "message_selected": "Lo slot selezionato",
+    "date": "Data",
+    "hours": "Blocco orario"
+  },
+  "slotSubstring": {
+    "booked_by_you": "e' prenotato dal tuo appartamento.",
+    "booked_by": "e' gia prenotato da",
+    "released": "e' stato liberato. Ora puo' essere pronotato per il tempo rimanente.",
+    "available": "e' libero e puo' essere prenotato.",
+    "another_apartment": "un altro appartamento"
+  },
+  "slotStatus":{
+    "booked": "Occupato",
+    "free": "Libero",
+    "reserved": "Riservato"
+  },
+  "dashboard":{
+    "calendar": "Calendario",
+    "apartment": "Appartmento",
+    "your_apartment": "Il Tuo Appartamento"
+  },
+  "calendarGrid":{
+    "day":"Giorno"
+  },
+  "myApartmentTab":{
+    "delete_warning":"ATTENZIONE: Questa azione e' permanente! Sei sicuro di voler rimuovere completamente l'appartamento e tutta la cronologia delle prenotazioni?",
+    "delete_fail": "Errore durante la rimozione dell'appartamento",
+    "delete_success": "L'appartamento e' stato cancellato con successo.",
+    "release_warning": "Sei sicuro di voler lasciare l'appartamento?",
+    "release_fail": "Errore durante il rilascio dell'appartamento",
+    "deleting": "Deleting ...",
+    "delete": "Rimuovi L'Appartmento",
+    "leaving": "Leaving ...",
+    "leave": "Lascia L'Appartmento"
+  },
+  "createApartment": {
+    "title": "Crea un nuovo Appartamento",
+    "status_creating": "Creating...",
+    "btn_create": "Crea Appartmento"
+  },
+  "joinRequest": {
+    "title_request": "Richiedi l'accesso",
+    "title_sent": "Richiesta inviata!",
+    "requesting_to_join": "Stai richiedendo di unirti a:",
+    "description": "Una volta inviata la richiesta, an amministratore dell'appartamento dovra' aprovarla. Riceverai una notifica quando e' stata accettata.",
+    "status_sending": "Inviando...",
+    "btn_send": "Invia Richiesta",
+    "success_msg": "Perfetto! La tua richiesta di unirti a {{name}} e' in attesa.",
+    "btn_success_close": "Fatto, Grazie!"
+  },
+  "apartmentLogin": {
+    "page_title": "Configurazione Appartamento",
+    "loading_invite": "Accesso all'appartamento tramite link di invito...",
+    "alert_join_success": "Ti sei unito all'appartamento con successo!",
+    "alert_join_error": "Questo link di invito non è valido, è scaduto o è già stato utilizzato.",
+    "footer_question": "Il tuo appartamento non è nella lista?",
+    "btn_create_apt": "Crea un Nuovo Appartamento",
+    "section_my_apts": "I Miei Appartamenti",
+    "section_available_apts": "Appartamenti Disponibili"
+  },
+  "inviteMember": {
+    "title": "Invita Inquilino",
+    "description": "Genera un link sicuro per aggiungere un membro attivo direttamente su ",
+    "status_generating": "Generazione in corso...",
+    "btn_generate": "Genera Link di Invito",
+    "btn_share": "Condividi Link",
+    "share_title": "Unisciti a {{name}}",
+    "share_text": "Usa questo link di invito per unirti al calendario del nostro appartamento!"
+  },"memberModal": {
+    "btn_make_admin": "Rendi admin",
+    "btn_remove_member": "Rimuovi membro",
+    "alert_promote_error": "Impossibile nominare il membro come amministratore: {{error}}",
+    "alert_remove_error": "Impossibile rimuovere il membro: {{error}}"
+  },
+  "pendingRequests": {
+    "section_title": "Richieste di Accesso ({{count}})",
+    "unknown_user": "Utente Sconosciuto",
+    "subtitle_intent": "vorrebbe entrare nel tuo appartamento",
+    "aria_reject": "Rifiuta utente",
+    "aria_approve": "Approva utente",
+    "alert_update_error": "Errore durante l'aggiornamento della richiesta: {{error}}"
+  },
+  "apartmentNameSection": {
+    "label_name": "Nome:",
+    "label_type": "nome dell'appartamento",
+    "error_empty": "Non può essere vuoto",
+    "error_taken": "Nome già in uso"
+  },
+  "authPage": {
+    "title_login": "Accedi",
+    "title_signup": "Crea Account",
+    "placeholder_name": "Nome Completo",
+    "placeholder_email": "Email",
+    "placeholder_password": "Password",
+    "link_have_account": "Hai già un account? Accedi",
+    "link_new_user": "Nuovo qui? Registrati",
+    "alert_signup_confirm": "Controlla la tua email per il link di conferma!"
+  },
+  "membersList": {
+    "btn_add_member": "Aggiungi membro",
+    "subtitle_add_member": "Invita un nuovo inquilino tramite link",
+    "label_self": "(Tu)",
+    "role_admin": "Amministratore",
+    "role_resident": "Inquilino"
+  }
+
+}

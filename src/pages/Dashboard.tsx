@@ -8,12 +8,14 @@ import { usePendingRequests,useApartmentMembers } from '../useApartments'; // En
 import { checkIsAdmin, getCleanStorageItem, resolveCurrentUserId } from '../auth/authUtils';
 import { Navigate, Routes, Link, Route, useNavigate } from 'react-router-dom';
 import MyDashboard from './MyDashboard';
+import { useTranslation } from 'react-i18next';
 
 
 
 function Dashboard() {
 
   const navigate = useNavigate();
+  const { t } = useTranslation();
   
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
@@ -33,10 +35,10 @@ function Dashboard() {
 
   const renderHeader = () => {
     if (location.pathname.includes('/dashboard/apartment')) {
-      return <PageHeader title="Your Apartment" icon={<Home className="w-7 h-7 text-blue-500" />} onBack={() => navigate('/apartment-login')}/>;
+      return <PageHeader title={t('dashboard.your_apartment')} icon={<Home className="w-7 h-7 text-blue-500" />} onBack={() => navigate('/apartment-login')}/>;
     }
     if(location.pathname.includes('/dashboard/calendar')) {
-      return <PageHeader title="Calendar" icon={<Calendar className="w-7 h-7 text-blue-500" />} onBack={() => navigate('/apartment-login')} />;
+      return <PageHeader title={t('dashboard.calendar')} icon={<Calendar className="w-7 h-7 text-blue-500" />} onBack={() => navigate('/apartment-login')} />;
     }
     return <PageHeader title="Dashboard" icon={<LayoutDashboard className="w-7 h-7 text-blue-500" />} onBack={() => navigate('/apartment-login')} />;
   };
@@ -56,7 +58,7 @@ function Dashboard() {
                 }`}
             >
               <LayoutDashboard className="w-5 h-5" />
-              <span>dashboard</span>
+              <span>Dashboard</span>
             </Link>
             <Link 
               to="/dashboard/calendar" // Base dashboard URL maps to the calendar index
@@ -67,7 +69,7 @@ function Dashboard() {
                 }`}
             >
               <Calendar className="w-5 h-5" />
-              <span>calendar</span>
+              <span>{t('dashboard.calendar')}</span>
             </Link>
             
             <Link 
@@ -87,7 +89,7 @@ function Dashboard() {
                   </span>
                 )}
               </div>
-              <span>apartment</span>
+              <span>{t('dashboard.apartment')}</span>
             </Link>
           </nav>
         </footer>
