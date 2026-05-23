@@ -43,7 +43,7 @@ export function useBookingActions() {
     mutationFn: async ({ apartmentId, dateStr, startHour, endHour }: BookSlotParams) => bookLaundrySlot(apartmentId, dateStr, startHour, endHour),
     onSuccess: () => {
       // forces the refresh of the calendar to show the new slots
-      queryClient.invalidateQueries({ queryKey: ['calendar-bookings'] });
+      queryClient.invalidateQueries({ queryKey: ['bookings'] });
     }
   });
 
@@ -52,7 +52,7 @@ export function useBookingActions() {
     mutationFn: async (bookingId: string) => releaseLaundrySlot(bookingId),
     onSuccess: () => {
       // updated the calendar to not show the released slot
-      queryClient.invalidateQueries({ queryKey: ['calendar-bookings'] });
+      queryClient.invalidateQueries({ queryKey: ['bookings'] });
     }
   });
 
