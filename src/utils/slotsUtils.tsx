@@ -34,7 +34,8 @@ export const getAggregatedBookingsMap = (
   
   bookings.forEach((b) => {
     const d = new Date(b.start_time);
-    const key = getSlotKey(d.getDate(),d.getMonth(),d.getFullYear(), d.getHours() )
+    const key = getSlotKey(d.getUTCDate(),d.getUTCMonth(),d.getUTCFullYear(), d.getUTCHours() );
+    console.log(d);
     if (!grouped[key]) grouped[key] = [];
     grouped[key].push(b);
   });

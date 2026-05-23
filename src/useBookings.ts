@@ -12,17 +12,21 @@ export const useBookingFilters = () => {
   return context;
 };
 
-// hook for the monthly bookings query
 export const useMonthBookings = (householdId: string, viewDate: Date) => {
-  const firstDay = new Date(viewDate.getFullYear(), viewDate.getMonth(), 1).toISOString();
-  const lastDay = new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 0, 23, 59, 59).toISOString();
+  // uses UTC timezone
+  const year = viewDate.getUTCFullYear();
+  const month = viewDate.getUTCMonth();
+
+  const firstDay = new Date(Date.UTC(year, month, 1, 0, 0, 0)).toISOString();
+  const lastDay = new Date(Date.UTC(year, month + 1, 0, 23, 59, 59, 999)).toISOString();
 
   return useQuery({
-    // when the householdId or viewDate changes, React Query will automatically refetch the data
     queryKey: ['bookings', householdId, firstDay], 
     queryFn: () => getBookingsByHousehold(householdId, firstDay, lastDay),
+    enabled: !!householdId,
   });
 };
+
 
 interface BookSlotParams {
   apartmentId: string;

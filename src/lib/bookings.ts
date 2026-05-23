@@ -39,17 +39,19 @@ export async function getBookingById(id: string) {
   return data;
 }
 
-export async function getUpcomingBookings(apartmentId: string) {
+export async function getUpcomingBookings(apartmentId: string, maxEntries: number = 5) {
   const { data, error } = await supabase
     .from('booking')
     .select('*')
     .eq('apartment_id', apartmentId)
-    .gte('start_time', new Date().toISOString())
-    .order('start_time', { ascending: true });
+    .gte('start_time', 'now()') // Uses centralized DB UTC clock
+    .order('start_time', { ascending: true })
+    .limit(maxEntries); // ⚡️ Restricts the database payload size
 
   if (error) throw error;
   return data;
 }
+
 
 export async function bookLaundrySlot(apartmentId: string, dateStr: string, startH: number, endH: number) {
   const { data, error } = await supabase.rpc('book_laundry_slot', {

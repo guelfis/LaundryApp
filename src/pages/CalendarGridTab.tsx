@@ -81,7 +81,7 @@ function CalendarGridTab() {
   const { viewDate, setViewDate, householdId } = useBookingFilters();
   const { data: bookings = [], isLoading } = useMonthBookings(householdId, viewDate); 
   const { data: apartments = [] } = useApartments(householdId);
-  
+  console.log(bookings);
   
   // Create a map for quick lookup of bookings by slotKey only when bookings change
   const apartmentsMap = useMemo(() => {
@@ -91,26 +91,25 @@ function CalendarGridTab() {
   const aggregatedBookingsMap = useMemo(() => {
     return getAggregatedBookingsMap(bookings, apartmentsMap, apartmentId);
   }, [bookings, apartmentsMap, apartmentId]);
-  
 
   const handleOpenModal = (dayNum: number, slotTimes:number[] , slotInfo: AggregatedSlotInfo, slotTimeState:SlotTimeState) => {
     setSelectedSlot({ dateString: getDateString(dayNum, activeMonth, year), slotTimes: slotTimes , slotTimeState:slotTimeState});
     setSelectedBooking(slotInfo);
   };
 
-  const activeMonth = viewDate.getMonth();
-  const year = viewDate.getFullYear();
+  const activeMonth = viewDate.getUTCMonth();
+  const year = viewDate.getUTCFullYear();
   const daysInMonth = getDaysInMonth(activeMonth, year);
   const firstDay = getFirstDayOfMonth(activeMonth, year);
 
   const today = new Date();
-  const isCurrentMonth = activeMonth === today.getMonth() && year === today.getFullYear();
+  const isCurrentMonth = activeMonth === today.getUTCMonth() && year === today.getUTCFullYear();
 
   const rows = Array.from({ length: daysInMonth }, (_, i) => {
     const dayNum = i + 1;
     const dayName = days[(firstDay + i) % 7];
     const dayOfWeekIndex = (firstDay + i) % 7; 
-    const isToday = isCurrentMonth && dayNum === today.getDate();
+    const isToday = isCurrentMonth && dayNum === today.getUTCDate();
     return { dayNum, dayName, isToday, dayOfWeekIndex};
   });
 
@@ -126,7 +125,7 @@ function CalendarGridTab() {
   }, [activeMonth]); // Re-runs if the user switches months so it refocuses appropriately
 
   const handleSetMonth = (month: number) => {
-    const newDate = new Date(year, month, 1);
+    const newDate = new Date(Date.UTC(year, month, 1, 0, 0, 0));
       setViewDate(newDate);
   };
 
@@ -179,7 +178,6 @@ function CalendarGridTab() {
                 const startTime = getDate(dayNum, activeMonth, year, slot[0]);
                 const endTime = getDate(dayNum, activeMonth, year, slot[1]);
                 const slotTimeState = getSlotTimeState(startTime, endTime);
-
                 return (
                   <SlotCell 
                     key={col} 
