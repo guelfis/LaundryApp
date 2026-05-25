@@ -13,15 +13,23 @@ export const useBookingFilters = () => {
 };
 
 export const useMonthBookings = (householdId: string, viewDate: Date) => {
-  // uses UTC timezone
-  const year = viewDate.getUTCFullYear();
-  const month = viewDate.getUTCMonth();
+  // FIX: Extract year and month based on the building's calendar view, not raw local/UTC phone switches
+  const year = viewDate.getFullYear();
+  const month = viewDate.getMonth();
 
-  const firstDay = new Date(Date.UTC(year, month, 1, 0, 0, 0)).toISOString();
-  const lastDay = new Date(Date.UTC(year, month + 1, 0, 23, 59, 59, 999)).toISOString();
+  // FIX: Generate timezone-safe boundary strings representing the actual building wall-clock months 
+  const paddedMonth = String(month + 1).padStart(2, '0');
+  const nextPaddedMonth = String(month + 2).padStart(2, '0');
+  
+  // Format: "2026-05-01T00:00:00" interpreted in the building's real location 
+  const firstDay = `${year}-${paddedMonth}-01T00:00:00`;
+  const lastDay = month === 11 
+    ? `${year + 1}-01-01T00:00:00` 
+    : `${year}-${nextPaddedMonth}-01T00:00:00`;
 
   return useQuery({
-    queryKey: ['bookings', householdId, firstDay], 
+    // OPTIMIZATION: Keep queryKeys clean using just integers to maximize React Query structural caching
+    queryKey: ['bookings', householdId, year, month], 
     queryFn: () => getBookingsByHousehold(householdId, firstDay, lastDay),
     enabled: !!householdId,
   });
@@ -31,8 +39,8 @@ export const useMonthBookings = (householdId: string, viewDate: Date) => {
 interface BookSlotParams {
   apartmentId: string;
   dateStr: string;   // Format 'YYYY-MM-DD'
-  startHour: number; // es. 7, 12, 17
-  endHour: number;   // es. 12, 17, 22
+  startHour: number; // e.g. 7, 12, 17
+  endHour: number;   // e.g. 12, 17, 22
 }
 
 export function useBookingActions() {
@@ -40,10 +48,13 @@ export function useBookingActions() {
 
   // mutation: books the remaining time of the slot or an entire one. 
   const bookSlotMutation = useMutation({
-    mutationFn: async ({ apartmentId, dateStr, startHour, endHour }: BookSlotParams) => bookLaundrySlot(apartmentId, dateStr, startHour, endHour),
+    mutationFn: async ({ apartmentId, dateStr, startHour, endHour }: BookSlotParams) => 
+      bookLaundrySlot(apartmentId, dateStr, startHour, endHour),
     onSuccess: () => {
-      // forces the refresh of the calendar to show the new slots
+      // FIX: Clear both calendar lists AND home dashboard caches simultaneously to avoid split-screen lag
       queryClient.invalidateQueries({ queryKey: ['bookings'] });
+      queryClient.invalidateQueries({ queryKey: ['upcoming-bookings'] });
+      queryClient.invalidateQueries({ queryKey: ['next-available-slots'] });
     }
   });
 
@@ -53,6 +64,8 @@ export function useBookingActions() {
     onSuccess: () => {
       // updated the calendar to not show the released slot
       queryClient.invalidateQueries({ queryKey: ['bookings'] });
+      queryClient.invalidateQueries({ queryKey: ['upcoming-bookings'] });
+      queryClient.invalidateQueries({ queryKey: ['next-available-slots'] });
     }
   });
 

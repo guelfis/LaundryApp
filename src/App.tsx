@@ -5,10 +5,10 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from './auth/AuthContext';
 import AppRoutes from './routes/AppRoutes';
 import { getCleanStorageItem } from './auth/authUtils';
+import { MOCK_HOUSEHOLD_ID } from './constants/temporary';
 
 // create a QueryClient instance for React Query outside of the component to avoid re-creating it on every render
 const queryClient = new QueryClient();
-const MOCK_HOUSEHOLD_ID = "450bfbaf-70f3-4888-b03d-28d6f80c7234";
 
 // 3. Main App component that wraps everything with providers
 function App() {

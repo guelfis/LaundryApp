@@ -182,6 +182,7 @@ export type Database = {
           created_at: string | null
           id: string
           name: string
+          timezone: string
         }
         Insert: {
           access_code: string
@@ -189,6 +190,7 @@ export type Database = {
           created_at?: string | null
           id?: string
           name: string
+          timezone?: string
         }
         Update: {
           access_code?: string
@@ -196,6 +198,7 @@ export type Database = {
           created_at?: string | null
           id?: string
           name?: string
+          timezone?: string
         }
         Relationships: []
       }

@@ -1,15 +1,17 @@
 import { SlotStatus } from '../constants/SlotStatus';
+import { BUILDING_TIMEZONE } from '../constants/temporary';
 import { Booking } from '../lib/databaseTypes';
 import i18n from '../locales/i18n';
+import { getBuildingHour } from './datesGetter';
 
 export const getSlotKey = (day: number, month: number, year: number, slotStartHour: number) => {
-  // Format: "2026-05-06-7"
+  // Format standard string dictionary mapping reference token: "2026-5-25-17"
   return `${year}-${month + 1}-${day}-${slotStartHour}`;
 };
 
 export const getSlotLabel =  (interval: number[]): string => {
     return `${interval[0]} - ${interval[1]}`;
-}
+};
 
 export type SlotTimeState = 'past' | 'live' | 'future';
 
@@ -23,31 +25,46 @@ export interface AggregatedSlotInfo {
   displaySubstring: string;
 }
 
+/**
+ * Groups and indexes raw database arrays into mapped keys by translating UTC records into the building's timezone [google:4].
+ */
 export const getAggregatedBookingsMap = (
   bookings: Booking[], 
   apartments: Record<string, string>,
   currentApartmentId: string,
 ): Record<string, AggregatedSlotInfo> => {
   
-  // 1. Group raw bookings by their hourly date string keys
   const grouped: Record<string, Booking[]> = {};
   
   bookings.forEach((b) => {
     const d = new Date(b.start_time);
-    const key = getSlotKey(d.getUTCDate(),d.getUTCMonth(),d.getUTCFullYear(), d.getUTCHours() );
-    console.log(d);
+    
+    // 1. EXTRACT BUILDING DATETIME METRICS: Translates universal dates into local building variables [google:4]
+    const formatter = new Intl.DateTimeFormat('en-US', { 
+      timeZone: BUILDING_TIMEZONE, 
+      year: 'numeric', 
+      month: 'numeric', 
+      day: 'numeric' 
+    });
+    const parts = formatter.formatToParts(d);
+    
+    const bYear = parseInt(parts.find(p => p.type === 'year')!.value, 10);
+    const bMonth = parseInt(parts.find(p => p.type === 'month')!.value, 10) - 1; // Normalize to 0-indexed month
+    const bDay = parseInt(parts.find(p => p.type === 'day')!.value, 10);
+    const bHour = getBuildingHour(d); // Translates 15:00 UTC cleanly into 17 [google:4]
+
+    const key = getSlotKey(bDay, bMonth, bYear, bHour);
     if (!grouped[key]) grouped[key] = [];
     grouped[key].push(b);
   });
 
-  // 2. Reduce those grouped arrays into your final unified slot states
+  // 2. Reduce the groups into aggregated display nodes
   const finalMap: Record<string, AggregatedSlotInfo> = {};
 
   Object.entries(grouped).forEach(([key, slotBookings]) => {
     const activeBooking = slotBookings.find((b) => b.status === 'active');
     
     if (activeBooking) {
-
       const booked_by_user = activeBooking.apartment_id === currentApartmentId;
       const name = apartments[activeBooking.apartment_id ?? ''] || i18n.t('slotSubstring.another_apartment');
       finalMap[key] = {
@@ -83,7 +100,6 @@ export const getAggregatedBookingsMap = (
   return finalMap;
 };
 
-// Fallback constant helper to return empty slot states safely without breaking renders
 export const emptySlotFallback = (): AggregatedSlotInfo => ({
   id:'',
   status: SlotStatus.AVAILABLE,
@@ -94,13 +110,14 @@ export const emptySlotFallback = (): AggregatedSlotInfo => ({
   displaySubstring: i18n.t('slotSubstring.available'),
 });
 
-
+/**
+ * Calculates time status by comparing pure absolute Unix epoch milliseconds [google:1].
+ * Highly resilient against timezone shifting as it measures absolute elapsed time [google:1].
+ */
 export function getSlotTimeState(startTime: Date, endTime: Date): SlotTimeState {
   if (!startTime || !endTime) return 'past';
 
   const today = new Date();
-  
-  // Create comparable timestamps (stripping milliseconds/seconds for accuracy if needed)
   const nowTime = today.getTime();
   const startTimer = startTime.getTime();
   const endTimer = endTime.getTime();

@@ -1,4 +1,15 @@
+import { BUILDING_TIMEZONE } from '../constants/temporary';
 import i18n from '../locales/i18n'; // Import to read current app language
+
+/**
+ * Extracts the exact numeric hour of a date object interpreted within the building's localized timezone.
+ */
+export const getBuildingHour = (date: Date): number => {
+  return parseInt(
+    date.toLocaleTimeString('en-US', { timeZone: BUILDING_TIMEZONE, hour: 'numeric', hour12: false }), 
+    10
+  );
+};
 
 export function getDaysInMonth(monthIndex: number, year: number) {
   // Using day 0 of the next month extracts the last day of the target month natively
@@ -10,22 +21,39 @@ export function getFirstDayOfMonth(monthIndex: number, year: number) {
   return new Date(Date.UTC(year, monthIndex, 1)).getUTCDay();
 }
 
-export function getDate(dayNum: number, monthIndex: number, year: number, hour: number) {
-  // Forced pure UTC creation sequence to align with database queries perfectly
-  return new Date(Date.UTC(year, monthIndex, dayNum, hour, 0, 0));
+/**
+ * Generates a JavaScript Date object synchronized with the building's clock .
+ * This calculates the precise universal millisecond timestamp representing when hour "X" happens at the building .
+ */
+export function getDate(dayNum: number, monthIndex: number, year: number, hour: number): Date {
+  // 1. Create a baseline date using the smartphone's local execution clock
+  const baseDate = new Date(year, monthIndex, dayNum, hour, 0, 0);
+  
+  // 2. Compute the exact difference in milliseconds between the smartphone's location and the building's location
+  const tzBuilding = baseDate.toLocaleString('en-US', { timeZone: BUILDING_TIMEZONE }); 
+  const tzLocal = baseDate.toLocaleString('en-US');
+  
+  const diffInMilliseconds = Date.parse(tzLocal) - Date.parse(tzBuilding);
+  
+  // 3. Return the absolute timestamp shifted cleanly by the timezone discrepancy gap 
+  return new Date(baseDate.getTime() + diffInMilliseconds);
 }
 
-export function getDateString(dayNum: number, monthIndex: number, year: number) {
-  const utcDate = new Date(Date.UTC(year, monthIndex, dayNum));
+/**
+ * Formats the calendar row title string by looking at the date AT THE BUILDING.
+ * This stops date roll-overs (e.g., a late 23:00 building slot showing up as the next day due to UTC compression) .
+ */
+export function getDateString(dayNum: number, monthIndex: number, year: number): string {
+  // Create a safe reference point at noon to prevent any daytime edge leaks
+  const baseDate = new Date(year, monthIndex, dayNum, 12, 0, 0);
   const locale = i18n.language || 'en-GB';
 
-  // Explicitly passing 'UTC' to the timeZone parameter forces Intl to format the raw date,
-  // bypassing the device's default smartphone timezone offset shift entirely.
-  return utcDate.toLocaleDateString(locale, {
+  // Explicitly passing BUILDING_TIMEZONE ensures Intl formats the text string exactly as seen at the building .
+  return baseDate.toLocaleDateString(locale, {
     day: 'numeric',
     month: 'long',
     year: 'numeric',
-    timeZone: 'UTC'
+    timeZone: BUILDING_TIMEZONE
   });
 }
 
