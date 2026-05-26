@@ -7,7 +7,7 @@ import MyApartmentTab from './MyApartmentTab';
 import { usePendingRequests,useApartmentMembers } from '../useApartments'; // Ensure correct path
 import { checkIsAdmin, getCleanStorageItem, resolveCurrentUserId } from '../auth/authUtils';
 import { Navigate, Routes, Link, Route, useNavigate } from 'react-router-dom';
-import MyDashboard from './MyDashboard';
+import MyDashboard from './UserDashboard';
 import { useTranslation } from 'react-i18next';
 
 

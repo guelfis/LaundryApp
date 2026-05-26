@@ -57,6 +57,30 @@ export function getDateString(dayNum: number, monthIndex: number, year: number):
   });
 }
 
+export function getDateStringFromDate(date: Date): string {
+  const locale = i18n.language || 'en-GB';
+
+  // Explicitly passing BUILDING_TIMEZONE ensures Intl formats the text string exactly as seen at the building .
+  return date.toLocaleDateString(locale, {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    timeZone: BUILDING_TIMEZONE
+  });
+}
+
+export const getTimeSlotString = (startHour: Date, endHour: Date): string => {
+      const formatBuildingHour = (date: Date) => {
+      return date.toLocaleTimeString('en-US', { 
+        timeZone: BUILDING_TIMEZONE, 
+        hour: 'numeric', 
+        minute: '2-digit', 
+        hour12: false 
+      });
+    };
+    return `${formatBuildingHour(startHour)} - ${formatBuildingHour(endHour)}`;
+};
+
 // Generates localized month names dynamically without data mutations
 export const getLocalizedMonths = (): string[] => {
   const locale = i18n.language || 'en';

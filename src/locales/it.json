@@ -118,6 +118,29 @@
     "label_self": "(Tu)",
     "role_admin": "Amministratore",
     "role_resident": "Inquilino"
+  },
+  "userDashboard": {
+    "closed": "Chiuso",
+    "confirm_release": "Vuoi terminare la sessione in anticipo? Questo libererà il tempo rimanente per i tuoi coinquilini.",
+    "error_release": "Impossibile rilasciare lo slot",
+    "pending_requests_count": "Hai {{count}} richiesta di accesso in attesa nella scheda del tuo appartamento.",
+    "pending_requests_count_other": "Hai {{count}} richieste di accesso in attesa nella scheda del tuo appartamento.",
+    "live_status": "Stato in Tempo Reale",
+    "next_reservations": "Prossime Prenotazioni",
+    "mine": "Mio",
+    "no_bookings": "Nessuna prenotazione futura registrata nell'appartamento."
+  },
+  "dashboardSlotCard": {
+    "your_session": "Tua Sessione Attiva",
+    "your_session_desc": "La lavanderia è attualmente riservata al tuo profilo.",
+    "slot_occupied": "Slot Occupato",
+    "slot_occupied_desc": "Un coinquilino sta attualmente utilizzando la sessione di lavanderia dell'appartamento.",
+    "afterHour": "Dopo l'orario",
+    "afterHour_desc": "Questo slot è dopo l'orario prenotabile. Torna più tardi per prenotarlo."
+  },
+  "travelingBanner":{
+    "title": "Modalità Viaggio Attiva",
+    "description": "Il tuo dispositivo è impostato su {{userTz}}. Gli orari del dashboard sono bloccati al fuso orario dell'edificio ({{buildingTz}}) così puoi gestire gli slot con precisione."
   }
 
 }

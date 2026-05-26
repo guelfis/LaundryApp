@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getBookingsByHousehold, releaseLaundrySlot, bookLaundrySlot } from './lib/bookings';
+import { getBookingsByHousehold, releaseLaundrySlot, bookLaundrySlot, getUpcomingBookings } from './lib/bookings';
 import { useContext } from 'react';
 import { BookingContext } from './contexts/BookingContext';
 
@@ -35,6 +35,16 @@ export const useMonthBookings = (householdId: string, viewDate: Date) => {
   });
 };
 
+export const useBookings = (householdId: string, startDate: Date, endDate: Date) => {
+  const startDateString = startDate.toISOString();
+  const endDateString = endDate.toISOString();
+
+  return useQuery({
+    queryKey: ['bookings', householdId, startDateString], 
+    queryFn: () => getBookingsByHousehold(householdId, startDateString, endDateString),
+    enabled: !!householdId,
+  });
+};
 
 interface BookSlotParams {
   apartmentId: string;
@@ -62,7 +72,6 @@ export function useBookingActions() {
   const releaseSlotMutation = useMutation({
     mutationFn: async (bookingId: string) => releaseLaundrySlot(bookingId),
     onSuccess: () => {
-      // updated the calendar to not show the released slot
       queryClient.invalidateQueries({ queryKey: ['bookings'] });
       queryClient.invalidateQueries({ queryKey: ['upcoming-bookings'] });
       queryClient.invalidateQueries({ queryKey: ['next-available-slots'] });
@@ -75,4 +84,12 @@ export function useBookingActions() {
     releaseSlot: releaseSlotMutation.mutateAsync,
     isReleasing: releaseSlotMutation.isPending
   };
+}
+
+export function useUpcomingBookings(apartmentId: string) {
+  return useQuery({
+    queryKey: ['upcoming-bookings', apartmentId],
+    queryFn: () => getUpcomingBookings(apartmentId),
+    enabled: !!apartmentId,
+  });
 }

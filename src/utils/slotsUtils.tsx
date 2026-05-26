@@ -9,7 +9,36 @@ export const getSlotKey = (day: number, month: number, year: number, slotStartHo
   return `${year}-${month + 1}-${day}-${slotStartHour}`;
 };
 
-export const getSlotLabel =  (interval: number[]): string => {
+/**
+ * Resolves the dynamic localized unique slotKey identifier for the current moment based on the building's clock.
+ * Returns null if the current hour falls outside of operational boundaries (e.g., at night).
+ */
+export const getCurrentSlotKey = (slots: number[][]): string | null => {
+  const today = new Date();
+  
+  // 1. Convert the universal current moment into the exact time matching the building's physical wall-clock [google:4]
+  const formatter = new Intl.DateTimeFormat('en-US', {
+    timeZone: BUILDING_TIMEZONE,
+    year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', hour12: false
+  });
+  
+  const parts = formatter.formatToParts(today);
+  const year = parseInt(parts.find(p => p.type === 'year')!.value, 10);
+  const monthIndex = parseInt(parts.find(p => p.type === 'month')!.value, 10) - 1; // Reverts to 0-indexed format
+  const dayNum = parseInt(parts.find(p => p.type === 'day')!.value, 10);
+  const currentBuildingHour = parseInt(parts.find(p => p.type === 'hour')!.value, 10);
+  
+  // 2. Scan your static source operational metrics using the building's current hour
+  const activeSlot = slots.find(([start, end]) => currentBuildingHour >= start && currentBuildingHour < end);
+  
+  // Safety Fallback: Exit cleanly if opened outside operational columns (e.g., past 22:00 building time)
+  if (!activeSlot) return null;
+
+  // 3. Return the clean synchronized layout lookup key token string
+  return getSlotKey(dayNum, monthIndex, year, activeSlot[0]);
+};
+
+export const getSlotLabel = (interval: number[]): string => {
     return `${interval[0]} - ${interval[1]}`;
 };
 

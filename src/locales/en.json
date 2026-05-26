@@ -118,5 +118,30 @@
     "label_self": "(You)",
     "role_admin": "Apartment Admin",
     "role_resident": "Regular Resident"
+  },
+  "userDashboard": {
+    "closed": "Closed",
+    "confirm_release": "Do you want to finish your session early? This will open up the remaining time for your roommates.",
+    "error_release": "Could not release slot",
+    "pending_requests_count": "You have {{count}} pending access request to handle in your apartment tab.",
+    "pending_requests_count_other": "You have {{count}} pending access requests to handle in your apartment tab.",
+    "live_status": "Live Status",
+    "next_reservations": "Next Reservations",
+    "mine": "Mine",
+    "no_bookings": "No upcoming apartment bookings logged yet."
+  },
+  "dashboardSlotCard": {
+    "laundry_free": "Laundry Room is Free",
+    "laundry_free_desc": "No active bookings for the current time block",
+    "slot_occupied": "Slot Occupied",
+    "slot_occupied_desc": "A roommate is currently holding the active laundry slot session.",
+    "your_session": "Your Active Session",
+    "your_session_desc": "The laundry room is currently reserved under your profile.",
+    "afterHour": "Off Hours",
+    "afterHour_desc": "The laundry facility is currently closed for the night. Operational blocks will restart tomorrow morning."
+  },
+  "travelingBanner":{
+    "title": "Traveling Mode Active",
+    "description": "Your device is set to {{userTz}}. The dashboard schedules are locked to the physical building's timezone ({{buildingTz}}) so you can manage slots accurately."
   }
 }
