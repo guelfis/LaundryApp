@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import SectionText from "../components/SectionText";
-import { useApartmentMembers, useApartments, usePendingRequests } from "../useApartments";
-import { useUpcomingBookings, useBookings, useBookingFilters } from "../useBookings";
+import { useApartmentMembers, useApartments, usePendingRequests } from "../hooks/useApartments";
+import { useUpcomingBookings, useBookings, useBookingFilters } from "../hooks/useBookings";
 import { getCleanStorageItem, resolveCurrentUserId, checkIsAdmin } from "../auth/authUtils";
 import { Calendar } from "lucide-react"; 
 import { LoadingSpinner } from "../components/LoadingSpinner";

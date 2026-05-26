@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getBookingsByHousehold, releaseLaundrySlot, bookLaundrySlot, getUpcomingBookings } from './lib/bookings';
+import { getBookingsByHousehold, releaseLaundrySlot, bookLaundrySlot, getUpcomingBookings } from '../lib/bookings';
 import { useContext } from 'react';
-import { BookingContext } from './contexts/BookingContext';
+import { BookingContext } from '../contexts/BookingContext';
 
 // hook to access the BookingContext
 export const useBookingFilters = () => {

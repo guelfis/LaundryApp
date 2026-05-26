@@ -181,6 +181,8 @@ export type Database = {
           address: string | null
           created_at: string | null
           id: string
+          latitude: number | null
+          longitude: number | null
           name: string
           timezone: string
         }
@@ -189,6 +191,8 @@ export type Database = {
           address?: string | null
           created_at?: string | null
           id?: string
+          latitude?: number | null
+          longitude?: number | null
           name: string
           timezone?: string
         }
@@ -197,10 +201,48 @@ export type Database = {
           address?: string | null
           created_at?: string | null
           id?: string
+          latitude?: number | null
+          longitude?: number | null
           name?: string
           timezone?: string
         }
         Relationships: []
+      }
+      household_admins: {
+        Row: {
+          created_at: string | null
+          household_id: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          household_id: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          household_id?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "household_admins_household_id_fkey"
+            columns: ["household_id"]
+            isOneToOne: false
+            referencedRelation: "household"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "household_admins_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       join_requests: {
         Row: {
@@ -281,6 +323,16 @@ export type Database = {
         }
         Returns: Json
       }
+      create_household_as_landlord: {
+        Args: {
+          formatted_address: string
+          household_name: string
+          target_lat: number
+          target_lng: number
+          target_timezone: string
+        }
+        Returns: Json
+      }
       create_join_request: {
         Args: { target_apartment_id: string }
         Returns: undefined
@@ -312,6 +364,10 @@ export type Database = {
       handle_join_request: {
         Args: { action_status: string; request_id: string }
         Returns: undefined
+      }
+      handover_household_admin: {
+        Args: { new_admin_user_id: string; target_household_id: string }
+        Returns: Json
       }
       join_apartment_via_token: { Args: { token_id: string }; Returns: Json }
       leave_apartment: {

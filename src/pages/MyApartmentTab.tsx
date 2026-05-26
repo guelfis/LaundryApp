@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useMemo, useState } from "react";
 import SectionText from "../components/SectionText";
 import MembersList from "../components/MembersList";
-import {useApartmentMembers, useDeleteOrLeaveApartment} from "../useApartments";
+import {useApartmentMembers, useDeleteOrLeaveApartment} from "../hooks/useApartments";
 import InviteMemberModal from "../myApartment/InviteMemberModal";
 import { checkIsAdmin, getCleanStorageItem, resolveCurrentUserId } from "../auth/authUtils";
 import PendingRequestsSection from "../myApartment/PendingRequestsSection";

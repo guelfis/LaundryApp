@@ -75,3 +75,30 @@ export async function deleteHousehold(id: string) {
 
   if (error) throw error;
 }
+
+interface CreateHouseholdParams {
+  name: string;
+  formattedAddress: string;
+  latitude: number;
+  longitude: number;
+  timezone: string; // Dynamic text value from maps API (e.g., 'Europe/Zurich')
+}
+
+export async function createHouseholdAsLandlord({
+  name,
+  formattedAddress,
+  latitude,
+  longitude,
+  timezone
+}: CreateHouseholdParams) {
+  const { data, error } = await supabase.rpc('create_household_as_landlord', {
+    household_name: name,
+    formatted_address: formattedAddress,
+    target_lat: latitude,
+    target_lng: longitude,
+    target_timezone: timezone
+  });
+
+  if (error) throw error;
+  return data as { status: string; household_id: string; access_code: string; message: string };
+}

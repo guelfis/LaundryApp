@@ -4,7 +4,7 @@ import PageLayout from '../components/PageLayout';
 import { PageHeader } from '../components/PageHeader';
 import { Calendar, Home, LayoutDashboard } from 'lucide-react';
 import MyApartmentTab from './MyApartmentTab';
-import { usePendingRequests,useApartmentMembers } from '../useApartments'; // Ensure correct path
+import { usePendingRequests,useApartmentMembers } from '../hooks/useApartments'; // Ensure correct path
 import { checkIsAdmin, getCleanStorageItem, resolveCurrentUserId } from '../auth/authUtils';
 import { Navigate, Routes, Link, Route, useNavigate } from 'react-router-dom';
 import MyDashboard from './UserDashboard';

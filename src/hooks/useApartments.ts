@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createApartment, deleteApartment, generateInviteLink, getApartmentMembers, getApartmentsByHousehold, getMyApartments, getPendingRequests, joinApartmentViaLink, leaveApartment, promoteMember, removeMember, requestToJoinApartment, resolveJoinRequest } from "./lib/apartments";
+import { createApartment, deleteApartment, generateInviteLink, getApartmentMembers, getApartmentsByHousehold, getMyApartments, getPendingRequests, joinApartmentViaLink, leaveApartment, promoteMember, removeMember, requestToJoinApartment, resolveJoinRequest } from "../lib/apartments";
 
 export const useApartments = (householdId: string) => {
 

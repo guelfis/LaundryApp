@@ -143,5 +143,9 @@
   "travelingBanner":{
     "title": "Traveling Mode Active",
     "description": "Your device is set to {{userTz}}. The dashboard schedules are locked to the physical building's timezone ({{buildingTz}}) so you can manage slots accurately."
+  },
+  "useHousehold":{
+    "success": "Household created successfully. Code assigned:",
+    "failure": "Failed to commit landlord household setup:"
   }
 }

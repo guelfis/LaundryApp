@@ -3,7 +3,7 @@ import BottomModal from '../components/BottomModal';
 import ModalButton from '../components/ModalButton';
 import StatusDot from '../components/StatusDot';
 import { SlotStatus } from '../constants/SlotStatus';
-import { useBookingActions } from '../useBookings';
+import { useBookingActions } from '../hooks/useBookings';
 import { AggregatedSlotInfo, getSlotLabel, SlotTimeState } from './slotsUtils';
 import { getCleanStorageItem } from '../auth/authUtils';
 import { Lock } from 'lucide-react';
