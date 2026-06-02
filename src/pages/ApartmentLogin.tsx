@@ -7,11 +7,12 @@ import { Apartment } from '../lib/databaseTypes';
 import ApartmentsList from '../apartmentSetup/ApartmentsList';
 import JoinRequestModal from '../apartmentSetup/JoinRequestModal'; 
 import { PageHeader } from '../components/PageHeader';
-import { Home } from 'lucide-react';
+import { Home, Plus } from 'lucide-react';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import SectionText from '../components/SectionText';
 import CreateApartmentModal from '../apartmentSetup/CreateApartmentModal';
 import { useTranslation } from 'react-i18next';
+import FooterSection from '../components/FooterSection';
 
 export default function ApartmentLogin() {
   const { t } = useTranslation();
@@ -92,18 +93,7 @@ export default function ApartmentLogin() {
         <PageHeader title={t('apartmentLogin.page_title', 'Apartment Setup')} icon={<Home className="w-7 h-7 text-blue-500 dark:text-blue-400" />} />
       }
       footer={
-        <div className="px-4 py-6">
-          <p className="text-center text-gray-600 dark:text-gray-400 text-sm mt-4 mb-2">
-            {t('apartmentLogin.footer_question', 'Your apartment is not on the list?')}
-          </p>
-          
-          <button 
-            className="w-full py-4 bg-blue-600 text-white font-bold rounded-2xl shadow-lg active:bg-blue-700 dark:bg-blue-500 dark:active:bg-blue-600 transition-colors uppercase tracking-wide text-sm"
-            onClick={() => setIsCreateAptModalOpen(true)}
-          >
-            {t('apartmentLogin.btn_create_apt', 'create a new apartment')}
-          </button>
-        </div>
+        <FooterSection buttonLabel={t('apartmentLogin.btn_create_apt', 'create a new apartment')} onButtonClick={() => setIsCreateAptModalOpen(true)} text={t('apartmentLogin.footer_question', 'Your apartment is not on the list?')} buttonIcon={<Plus className="w-4 h-4" />}  />
       }
     >
       <div className="flex flex-col flex-1 w-full space-y-6">
