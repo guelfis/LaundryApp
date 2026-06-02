@@ -2,7 +2,9 @@
     "common":{
         "button_cancel": "Cancel",
         "button_close": "Close",
-        "error": "Failed to submit request. Please try again."
+        "error": "Failed to submit request. Please try again.",
+        "system_error": "An unexpected error occurred",
+        "btn_settings": "Settings"
     },
     "slotModal": {
     "title_yours": "Your Booking",
@@ -159,6 +161,17 @@
     "btn_scan_qr": "Scan Building QR Code",
     "btn_create_new": "Register a New Building",
     "code_error": "The entry code provided matches no registered household structure.",
-    "footer_description": "The Household is not registered yet?"
+  },
+  "settings": {
+    "page_title": "Settings",
+    "profile_header": "Logged In Account",
+    "loading_user": "Loading email...",
+    "section_preferences": "Preferences",
+    "section_account": "Account & Security",
+    "row_language": "Change Language",
+    "row_dark_mode": "Dark Mode",
+    "row_privacy": "Privacy Policy",
+    "btn_logout": "Log Out",
+    "logout_failed": "Sign out failed. Please try again."
   }
 }

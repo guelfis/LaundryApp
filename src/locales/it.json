@@ -2,8 +2,9 @@
   "common":{
     "button_cancel": "Indietro",
     "button_close": "Chiudi",
-    "error": "Richieta fallita. Prova di nuovo."
-
+    "error": "Richieta fallita. Prova di nuovo.",
+    "system_error": "Si è verificato un errore inaspettato",
+    "btn_settings": "Impostazioni"
   },
   "slotModal": {
     "title_yours": "La tua Prenotazione",
@@ -157,6 +158,17 @@
     "btn_scan_qr": "Scansiona QR Code del Palazzo",
     "btn_create_new": "Registra un Nuovo Condominio",
     "code_error": "Il codice inserito non corrisponde a nessun edificio registrato.",
-    "footer_description": "Il condominio non e' ancora registrato?"
+  },
+  "settings": {
+    "page_title": "Impostazioni",
+    "profile_header": "Account Connesso",
+    "loading_user": "Caricamento email...",
+    "section_preferences": "Preferenze",
+    "section_account": "Account e Sicurezza",
+    "row_language": "Cambia Lingua",
+    "row_dark_mode": "Modalità Scura",
+    "row_privacy": "Informativa sulla Privacy",
+    "btn_logout": "Disconnetti",
+    "logout_failed": "Disconnessione fallita. Riprova."
   }
 }

@@ -32,15 +32,18 @@ function Dashboard() {
   
   // Logical checks
   const isUserAdmin = useMemo(() => checkIsAdmin(members, currentUserId), [members, currentUserId]);  const hasNotifications = isUserAdmin && Array.isArray(requests) && requests.length > 0;
+  const onBack = () => {
+    navigate('/apartment-login');
+  }
 
   const renderHeader = () => {
     if (location.pathname.includes('/dashboard/apartment')) {
-      return <PageHeader title={t('dashboard.your_apartment')} icon={<Home className="w-7 h-7 text-blue-500" />} onBack={() => navigate('/apartment-login')}/>;
+      return <PageHeader title={t('dashboard.your_apartment')} icon={<Home className="w-7 h-7 text-blue-500" />} onBack={onBack} />;
     }
     if(location.pathname.includes('/dashboard/calendar')) {
-      return <PageHeader title={t('dashboard.calendar')} icon={<Calendar className="w-7 h-7 text-blue-500" />} onBack={() => navigate('/apartment-login')} />;
+      return <PageHeader title={t('dashboard.calendar')} icon={<Calendar className="w-7 h-7 text-blue-500" />} onBack={onBack} />;
     }
-    return <PageHeader title="Dashboard" icon={<LayoutDashboard className="w-7 h-7 text-blue-500" />} onBack={() => navigate('/apartment-login')} />;
+    return <PageHeader title="Dashboard" icon={<LayoutDashboard className="w-7 h-7 text-blue-500" />} onBack={onBack} />;
   };
 
   return (

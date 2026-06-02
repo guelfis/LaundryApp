@@ -1,4 +1,5 @@
 import { supabase } from "../lib/supabase";
+import i18n from "../locales/i18n";
 
 /**
  * Clean and retrieve a string value safely from localStorage, 
@@ -45,4 +46,26 @@ export async function resolveCurrentUserId(): Promise<string | null> {
 
   // Priority 2: Alternative standard storage keys
   return getCleanStorageItem('userId') || getCleanStorageItem('user_id');
+}
+
+export async function resolveCurrentUserEmail(): Promise<string | null> {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    return user?.email ?? null;
+  } catch (e) {
+    console.warn("Supabase user email retrieval failed:", e);
+    return null;
+  }
+}
+
+export async function signOutUser(): Promise<boolean> {
+  try {
+    const { error } = await supabase.auth.signOut();
+    if (error) throw error;
+    return true; // Success hook indicator
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error(`${i18n.t('common.system_error')}: ${errorMessage}`);
+    return false; // Failed operation state
+  }
 }
