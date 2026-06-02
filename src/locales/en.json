@@ -147,5 +147,18 @@
   "useHousehold":{
     "success": "Household created successfully. Code assigned:",
     "failure": "Failed to commit landlord household setup:"
+},
+  "createHousehold":{
+    "title": "Create Household"
+  },
+  "householdLogin":{
+    "page_title": "Household Login",
+    "header_your_buildings": "Your Managed Buildings",
+    "header_join_existing": "Search your household",
+    "placeholder_code": "Enter 6-digit access code",
+    "btn_scan_qr": "Scan Building QR Code",
+    "btn_create_new": "Register a New Building",
+    "code_error": "The entry code provided matches no registered household structure.",
+    "footer_description": "The Household is not registered yet?"
   }
 }

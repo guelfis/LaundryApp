@@ -2,7 +2,7 @@ import React from 'react';
 import { cn } from '../utils/cn';
 
 interface SlotCardProps {
-  icon: React.ReactNode;
+  icon?: React.ReactNode;
   iconBgClass?: string;
   title: React.ReactNode;
   subtitle: React.ReactNode;

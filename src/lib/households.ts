@@ -102,3 +102,18 @@ export async function createHouseholdAsLandlord({
   if (error) throw error;
   return data as { status: string; household_id: string; access_code: string; message: string };
 }
+
+export async function getUserHouseholds(){
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) throw new Error("No authenticated user found");
+
+  const { data, error } = await supabase
+    .from("household_admins")
+    .select("household_id, household(name, address, timezone)")
+    .eq("user_id", user.id);
+        
+  if (error) throw error;
+  return data || [];
+        
+}

@@ -1,6 +1,6 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { createHouseholdAsLandlord } from '../lib/households';
+import { createHouseholdAsLandlord, getUserHouseholds } from '../lib/households';
 
 interface CreateHouseholdVariables {
   name: string;
@@ -30,5 +30,12 @@ export function useCreateHousehold() {
       // Graceful error capturing fallback for standard logging monitors
       console.error(t('useHousehold.failure'), error);
     }
+  });
+}
+
+export function useGetUserHouselds(){
+  return useQuery({
+    queryKey: ["user-administered-buildings"],
+    queryFn: () => getUserHouseholds(),
   });
 }

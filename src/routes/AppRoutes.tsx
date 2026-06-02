@@ -5,6 +5,8 @@ import AuthPage from '../auth/AuthPage';
 import Dashboard from '../pages/Dashboard'; 
 import ApartmentLogin from '../pages/ApartmentLogin';
 import { getCleanStorageItem } from '../auth/authUtils';
+import HouseholdLogin from '../pages/HouseholdLogin';
+import CreateHousehold from '../pages/CreateHousehold';
 
 export default function AppRoutes() {
   const { session, loading } = useAuth();
@@ -26,6 +28,8 @@ export default function AppRoutes() {
         <Route path="*" element={<AuthPage />} />
       ) : (
         <>
+          <Route path="/household-login" element={<HouseholdLogin />} />
+          <Route path="/household-setup" element={<CreateHousehold />} />
           <Route path="/apartment-login" element={<ApartmentLogin />} />
           <Route path="/dashboard/*" element={<Dashboard />} />
 

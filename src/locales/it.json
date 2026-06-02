@@ -145,6 +145,18 @@
   "useHousehold":{
     "success": "Household creata con successo. Codice assegnato:",
     "failure": "Errore nella creazione del setup dell'household:"
+  },
+  "createHousehold":{
+    "title": "Crea un Palazzo"
+  },
+  "householdLogin":{
+    "page_title": "Login nel palazzo",
+    "header_your_buildings": "I tuoi Stabili in Gestione",
+    "header_join_existing": "Cerca il tuo condominio",
+    "placeholder_code": "Inserisci il codice a 6 cifre",
+    "btn_scan_qr": "Scansiona QR Code del Palazzo",
+    "btn_create_new": "Registra un Nuovo Condominio",
+    "code_error": "Il codice inserito non corrisponde a nessun edificio registrato.",
+    "footer_description": "Il condominio non e' ancora registrato?"
   }
-
 }
