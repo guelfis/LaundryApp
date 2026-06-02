@@ -1,7 +1,7 @@
 import { useContext, useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import PageLayout from '../components/PageLayout';
-import { useApartments, useMyApartments, useJoinViaLink } from '../useApartments'; 
+import { useApartments, useMyApartments, useJoinViaLink } from '../hooks/useApartments'; 
 import { BookingContext } from '../contexts/BookingContext';
 import { Apartment } from '../lib/databaseTypes';
 import ApartmentsList from '../apartmentSetup/ApartmentsList';

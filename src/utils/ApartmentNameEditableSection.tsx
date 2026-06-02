@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import TextInput from "../components/TextInput";
 import EditSaveButton from "../components/EditSaveButton";
-import { useApartments } from "../useApartments";
+import { useApartments } from "../hooks/useApartments";
 import { useTranslation } from "react-i18next";
 
 interface ApartmentNameEditableSectionProps {

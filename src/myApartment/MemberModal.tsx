@@ -1,7 +1,7 @@
 import { LogOut, Shield } from "lucide-react";
 import BottomModal from "../components/BottomModal";
 import { ApartmentMember } from "../lib/databaseTypes";
-import { useApartmentMembersActions } from "../useApartments";
+import { useApartmentMembersActions } from "../hooks/useApartments";
 import { useTranslation } from "react-i18next";
 
 const destructiveButtonStyle = "flex items-center justify-center gap-2 py-3 px-6 text-red-600 dark:text-red-400 text-base bg-transparent border-none rounded-xl active:bg-red-50 dark:active:bg-red-950/20 active:scale-[0.98] transition-all disabled:opacity-40";

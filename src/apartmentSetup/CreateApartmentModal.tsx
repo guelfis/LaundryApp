@@ -2,7 +2,7 @@ import { useState } from "react";
 import BottomModal from "../components/BottomModal";
 import ModalButton from "../components/ModalButton";
 import ApartmentNameEditableSection from "../utils/ApartmentNameEditableSection";
-import { useCreateApartment } from "../useApartments";
+import { useCreateApartment } from "../hooks/useApartments";
 import { Send } from "lucide-react";
 import { useTranslation } from "react-i18next";
 

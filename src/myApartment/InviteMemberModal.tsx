@@ -1,6 +1,6 @@
 import { useState } from "react";
 import BottomModal from "../components/BottomModal";
-import { useGenerateInviteLink } from "../useApartments";
+import { useGenerateInviteLink } from "../hooks/useApartments";
 import { Check, Copy, Link2, Share2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 

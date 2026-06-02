@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { usePendingRequests, useResolveJoinRequest } from '../useApartments';
+import { usePendingRequests, useResolveJoinRequest } from '../hooks/useApartments';
 import { Check, X, User } from 'lucide-react';
 import SectionText from '../components/SectionText';
 import { LoadingSpinner } from '../components/LoadingSpinner';
