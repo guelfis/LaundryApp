@@ -117,3 +117,13 @@ export async function getUserHouseholds(){
   return data || [];
         
 }
+
+export async function searchHouseholdByCoords(lat: number, lng: number) {
+  const { data, error } = await supabase.rpc('search_household_by_coords', {
+    search_lat: lat,
+    search_lng: lng
+  });
+
+  if (error) throw error;
+  return data && data.length > 0 ? data[0] : null; // Return the matched row or null
+}

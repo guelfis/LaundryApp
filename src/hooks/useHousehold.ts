@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { createHouseholdAsLandlord, getUserHouseholds } from '../lib/households';
+import { createHouseholdAsLandlord, getUserHouseholds, searchHouseholdByCoords } from '../lib/households';
 
 interface CreateHouseholdVariables {
   name: string;
@@ -26,9 +26,9 @@ export function useCreateHousehold() {
       
       console.log(t('useHousehold.success'), data.access_code);
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       // Graceful error capturing fallback for standard logging monitors
-      console.error(t('useHousehold.failure'), error);
+      console.error(t('useHousehold.failure'), error.message);
     }
   });
 }
@@ -37,5 +37,13 @@ export function useGetUserHouselds(){
   return useQuery({
     queryKey: ["user-administered-buildings"],
     queryFn: () => getUserHouseholds(),
+  });
+}
+
+export function useSearchHousehold() {
+  return useMutation({
+    mutationFn: async ({ lat, lng }: { lat: number; lng: number }) => {
+      return await searchHouseholdByCoords(lat, lng);
+    }
   });
 }

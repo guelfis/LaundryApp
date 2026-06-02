@@ -382,6 +382,16 @@ export type Database = {
         Args: { target_apartment_id: string; target_user_id: string }
         Returns: undefined
       }
+      search_household_by_coords: {
+        Args: { search_lat: number; search_lng: number }
+        Returns: {
+          access_code: string
+          address: string
+          id: string
+          name: string
+          timezone: string
+        }[]
+      }
       update_member_role: {
         Args: {
           new_role: string
