@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { createHouseholdAsLandlord, getUserHouseholds, searchHouseholdByCoords } from '../lib/households';
+import { createHouseholdAsLandlord, getUserHouseholds, searchHouseholdByCoords, verifyHouseholdAccessById } from '../lib/households';
 
 interface CreateHouseholdVariables {
   name: string;
@@ -46,5 +46,21 @@ export function useSearchHousehold(lat: number, lng: number, options: { enabled:
     queryFn: () => searchHouseholdByCoords(parseFloat(lat.toFixed(6)), parseFloat(lng.toFixed(6))),
     enabled: options.enabled && lat !== 0 && lng !== 0,
     staleTime: 0, // Ensures clean network re-fetch execution on coordinate updates
+  });
+}
+
+export function useVerifyHouseholdAccess() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ householdId, inputCode }: { householdId: string; inputCode: string }) => 
+      verifyHouseholdAccessById(householdId, inputCode),
+    onSuccess: (data) => {
+      if (data.success) {
+        // CRITICAL: Tells React Query to wipe old caches and fetch fresh 
+        // household lists now that the user successfully unlocked a new building!
+        queryClient.invalidateQueries({ queryKey: ["user-households"] });
+      }
+    }
   });
 }

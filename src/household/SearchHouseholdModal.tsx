@@ -3,17 +3,32 @@ import BottomModal from "../components/BottomModal";
 import AddressSearch, { LocationResolution } from "./AddressSearch";
 import { LoadingSpinner } from "../components/LoadingSpinner";
 import SlotCard from "../components/SlotCard";
+// import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { useSearchHousehold } from "../hooks/useHousehold";
+import { useSearchHousehold, useVerifyHouseholdAccess } from "../hooks/useHousehold";
+import { Lock, ArrowLeft, CheckCircle2, Building } from "lucide-react";
 
 interface SearchHouseholdModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
+// Explicit definition tracker for local step wizard positioning
+enum ModalStep {
+  SEARCH_ADDRESS = 'search_address',
+  VERIFY_CODE = 'verify_code'
+}
+
 export default function SearchHouseholdModal({ isOpen, onClose }: SearchHouseholdModalProps) {
   const { t } = useTranslation();
+  // const navigate = useNavigate();
+  
+  // State Machine parameters
+  const [currentStep, setCurrentStep] = useState<ModalStep>(ModalStep.SEARCH_ADDRESS);
   const [selectedLocation, setSelectedLocation] = useState<LocationResolution | null>(null);
+  const [accessCode, setAccessCode] = useState('');
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const { mutateAsync: verifyAccess, isPending: isVerifying } = useVerifyHouseholdAccess();
 
   const { 
     data: resolvedHousehold = null,
@@ -25,10 +40,13 @@ export default function SearchHouseholdModal({ isOpen, onClose }: SearchHousehol
     { enabled: !!selectedLocation }
   );
 
-  //  Reset state whenever modal closing transitions complete
+  // Flush states completely on modal exit transitions
   useEffect(() => {
     if (!isOpen) {
       setSelectedLocation(null);
+      setCurrentStep(ModalStep.SEARCH_ADDRESS);
+      setAccessCode('');
+      setErrorMessage(null);
     }
   }, [isOpen]);
 
@@ -40,34 +58,144 @@ export default function SearchHouseholdModal({ isOpen, onClose }: SearchHousehol
     setSelectedLocation(location); 
   };
 
+  // Step 2 Action handler logic: Validates password code parameter straight to Supabase
+  const handleVerifyAccessCode = async () => {
+    if (!accessCode.trim()) {
+      setErrorMessage("Please enter a code.");
+      return;
+    }
+    if (!resolvedHousehold?.id) return;
+
+    setErrorMessage(null);
+
+    try {
+      // Execute the hook mutation triggers
+      const result = await verifyAccess({ 
+        householdId: resolvedHousehold.id, 
+        inputCode: accessCode.trim() 
+      });
+
+      if (result.success) {
+        onClose();
+        // navigate(`/dashboard/household/${result.household_id}`);
+      } else {
+        setErrorMessage(t('searchHousehold.error_invalid_code', 'Incorrect access code. Please try again.'));
+      }
+    } catch (err: unknown) {
+      setErrorMessage(`${t('common.system_error', 'Incorrect access code. Please try again.')} (${err instanceof Error ? err.message : String(err)})`);
+    }
+  };
+
   return (
     <BottomModal 
       isOpen={isOpen} 
       onClose={onClose} 
-      title={t('searchHousehold.title', 'Search Household')}
+      title={
+        currentStep === ModalStep.SEARCH_ADDRESS 
+          ? t('searchHousehold.title', 'Search Household')
+          : t('searchHousehold.title_verify', 'Enter Access Code')
+      }
     >
-      {/* added pb-32 to give padding at bottom so absolute dropdown can flow freely without getting cut off */}
-      <div className="flex flex-col gap-4 mt-4 mb-4 pb-32">
-        <span className="text-sm text-gray-500">
-          {t('searchHousehold.instruction', 'Enter your household address to find your building and manage laundry reservations.')}
-        </span>
+      <div className="flex flex-col gap-4 mt-4 mb-4 min-h-[280px] transition-all">
         
-        <AddressSearch onLocationResolved={handleLocationResolved} />
-        
-        {isLoadingSearch && <LoadingSpinner />}
+        {/* VIEW STEP 1: SEARCH ADRESSE AUTCOMPLETE PANELS */}
+        {currentStep === ModalStep.SEARCH_ADDRESS && (
+          <div className="flex flex-col gap-4 w-full animate-fadeIn">
+            <span className="text-sm text-gray-400">
+              {t('searchHousehold.instruction', 'Enter your household address to find your building and manage laundry reservations.')}
+            </span>
+            
+            <AddressSearch onLocationResolved={handleLocationResolved} />
+            
+            {isLoadingSearch && <LoadingSpinner />}
 
-        {!isLoadingSearch && resolvedHousehold && (
-          <div className="mt-4 animate-fadeIn">
-            <SlotCard
-              title={resolvedHousehold.address}
-              subtitle={resolvedHousehold.name}
-              onClick={() => {
-                onClose(); // Cleanly close modal before navigating away
-                // navigate to the page to scan QR or insert the code
-              }}
-            />
+            {!isLoadingSearch && resolvedHousehold && (
+              <div className="mt-2 animate-slideUp mb-32">
+                <SlotCard
+                  title={resolvedHousehold.address}
+                  subtitle={resolvedHousehold.name}
+                  // Action shifts view frame to step 2 configuration 
+                  onClick={() => setCurrentStep(ModalStep.VERIFY_CODE)}
+                />
+              </div>
+            )}
           </div>
         )}
+
+        {/* VIEW STEP 2: VERIFY SECURED BUILDING CODE PASSWORD LOCKS */}
+        {currentStep === ModalStep.VERIFY_CODE && resolvedHousehold && (
+          <div className="flex flex-col gap-4 w-full animate-fadeIn">
+            
+            {/* Display static reference of the building selection */}
+              <SlotCard title={resolvedHousehold.address} subtitle={resolvedHousehold.name} icon={<Building className="w-5 h-5" />} />
+
+            <span className="text-sm text-gray-400">
+              {t('searchHousehold.instruction_code', 'Please enter the access code generated by your property manager to unlock this workspace context.')}
+            </span>
+            {/* Structured custom input field frame */}
+            <div className="flex flex-col gap-1.5 mt-4">
+              <div className="flex flex-row gap-2 items-center">
+                <Lock className="w-4 h-4 text-gray-400" />
+                <label className="text-xs font-bold text-gray-400 uppercase tracking-wider px-1">
+                  {t('searchHousehold.label_code', 'Security Code')}
+                </label>
+              </div>
+              <div className="relative w-full">
+                <input
+                  type="password"
+                  inputMode="numeric"
+                  maxLength={4}
+                  value={accessCode}
+                  onChange={(e) => setAccessCode(e.target.value)}
+                  placeholder="••••"
+                  disabled={isVerifying}
+                  className="w-full pl-10 pr-4 py-3.5 bg-gray-50 dark:bg-slate-800/50 border border-gray-200 dark:border-slate-700/60 rounded-xl text-center text-lg font-mono tracking-widest focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-gray-800 dark:text-white transition-all disabled:opacity-50"
+                />
+              </div>
+            </div>
+
+            {/* Real-time inline validation error feedback banner */}
+            {errorMessage && (
+              <div className="p-3 rounded-xl bg-red-50 dark:bg-red-950/20 border border-red-100 dark:border-red-900 text-xs font-semibold text-red-600 dark:text-red-400 text-center animate-shake">
+                {errorMessage}
+              </div>
+            )}
+
+            {/* Direct operation action triggers */}
+            <div className="flex flex-col gap-2 mt-2">
+              <button
+                type="button"
+                onClick={handleVerifyAccessCode}
+                disabled={isVerifying}
+                className="w-full py-3.5 bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2 text-sm shadow-sm active:scale-[0.99] disabled:opacity-50"
+              >
+                {isVerifying ? (
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <>
+                    <CheckCircle2 className="w-4 h-4" />
+                    <span>{t('searchHousehold.btn_verify', 'Verify & Connect')}</span>
+                  </>
+                )}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setCurrentStep(ModalStep.SEARCH_ADDRESS);
+                  setAccessCode('');
+                  setErrorMessage(null);
+                }}
+                disabled={isVerifying}
+                className="w-full py-3 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 font-semibold transition-colors flex items-center justify-center gap-1.5 text-xs disabled:opacity-50"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" />
+                <span>{t('searchHousehold.btn_back', 'Go Back to Search')}</span>
+              </button>
+            </div>
+          </div>
+        )}
+
       </div>
     </BottomModal>
   );

@@ -127,3 +127,13 @@ export async function searchHouseholdByCoords(lat: number, lng: number) {
   if (error) throw error;
   return data && data.length > 0 ? data[0] : null; // Return the matched row or null
 }
+
+export async function verifyHouseholdAccessById(householdId: string, inputCode: string) {
+  const { data, error } = await supabase.rpc('verify_household_access_by_id', {
+    target_id: householdId,
+    user_input_code: inputCode
+  });
+
+  if (error) throw error;
+  return data && data.length > 0 ? data[0] : { success: false };
+}
