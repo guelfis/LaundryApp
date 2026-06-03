@@ -40,10 +40,11 @@ export function useGetUserHouselds(){
   });
 }
 
-export function useSearchHousehold() {
-  return useMutation({
-    mutationFn: async ({ lat, lng }: { lat: number; lng: number }) => {
-      return await searchHouseholdByCoords(lat, lng);
-    }
+export function useSearchHousehold(lat: number, lng: number, options: { enabled: boolean }) {
+  return useQuery({
+    queryKey: ["search-household", lat, lng],
+    queryFn: () => searchHouseholdByCoords(parseFloat(lat.toFixed(6)), parseFloat(lng.toFixed(6))),
+    enabled: options.enabled && lat !== 0 && lng !== 0,
+    staleTime: 0, // Ensures clean network re-fetch execution on coordinate updates
   });
 }

@@ -1,22 +1,25 @@
 import { useTranslation } from "react-i18next";
 import PageLayout from "../components/PageLayout";
 import { PageHeader } from "../components/PageHeader";
-import { Building, Plus } from "lucide-react";
+import { Building, Plus, Search } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useGetUserHouselds } from "../hooks/useHousehold";
 import { LoadingSpinner } from "../components/LoadingSpinner";
 import SlotCard from "../components/SlotCard";
 import SectionText from "../components/SectionText";
-import FooterSection from "../components/FooterSection";
+import Button from "../components/Button";
+import { useState } from "react";
+import SearchHouseholdModal from "../household/SearchHouseholdModal";
 
 export default function HouseholdLogin() {
     const { t } = useTranslation();
-    const navigate = useNavigate();
+    const navigate = useNavigate();    
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
-    // 1. DATABASE FETCH: Check if this user is already an admin of any buildings
     const { data: administeredBuildings = [], isLoading: isLoadingAdmins } = useGetUserHouselds();
-    
+
     if (isLoadingAdmins) return <LoadingSpinner />;
+
     return (
         <PageLayout
             header={
@@ -25,38 +28,36 @@ export default function HouseholdLogin() {
                     icon={<Building className="w-7 h-7 text-blue-500 dark:text-blue-400" />} 
                 />
             }
-            footer={
-                <FooterSection 
-                    buttonLabel={t("householdLogin.btn_create_new")} 
-                    buttonIcon={<Plus className="w-4 h-4" />} 
-                    text={t("householdLogin.footer_description")} 
-                    onButtonClick={() => navigate('/create-household')} 
-                />
-            }
         >
-            {/* SECTION 1: RESUME SESSION (IF ACTIVE ADMIN BUILDINGS EXIST) */}
-            {administeredBuildings.length > 0 && (
-                <div className="flex flex-col gap-2.5">
+            <div className="flex flex-col gap-2.5 mb-6">
                 <SectionText title={t("householdLogin.header_your_buildings")}/>
-                <div className="flex flex-col gap-3 w-full">
-                    {administeredBuildings.map((item) => (
-                        <SlotCard
-                            key={item.household_id}
-                            title={item.household.name}
-                            subtitle={item.household.address}
-                            onClick={() => navigate(`/dashboard/admin/${item.household_id}`)}
-                        />
-                    ))}
-                </div>
-                </div>
-            )}
+                {administeredBuildings.length > 0 ? (
+                    <div className="flex flex-col gap-3 px-2 mb-4">
+                        {administeredBuildings.map((item) => (
+                            <SlotCard
+                                key={item.household_id}
+                                title={item.household.name}
+                                subtitle={item.household.address}
+                                onClick={() => navigate(`/dashboard/admin/${item.household_id}`)}
+                            />
+                        ))}
+                    </div>
+               
+                ) : (
+                    <span className="text-xs text-gray-400 pl-1 mt-1 mx-6 mb-4">{t("householdLogin.no_admin_buildings")}</span>
+                )}
+                 {/* VISUAL DIVIDER */}
+                {/* <hr className="border-gray-100 dark:border-gray-800 mt-2 mb-4" /> */}
+                <SectionText title={t("householdLogin.manage_actions")}/>
+                <div className="flex flex-col gap-3 px-4 w-full">
+                    <Button label={t("householdLogin.btn_join_existing")} onClick={() => setIsModalOpen(true)} icon={<Search className="w-4 h-4" />} />
+                    <Button label={t("householdLogin.btn_create_new")} onClick={() => navigate('/household-setup')} icon={<Plus className="w-4 h-4" />} /> 
+                </div>         
+             </div>
 
-            {/* SECTION 2: JOIN AN EXISTING HOUSEHOLD (CODE / QR INTERFACE) */}
-            <div className="flex flex-col gap-2.5">
-                <SectionText title={t("householdLogin.header_join_existing")}/>
-                // TODO: add the way to insert the address
-            </div>
+             <SearchHouseholdModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
 
+            
         </PageLayout>
-        );
+    );
 }

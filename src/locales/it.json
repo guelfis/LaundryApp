@@ -147,17 +147,24 @@
     "success": "Household creata con successo. Codice assegnato:",
     "failure": "Errore nella creazione del setup dell'household:"
   },
+  "householdSetup": {
+    "label_address": "Indirizzo",
+    "placeholder_address": "Digita l'indirizzo del palazzo..."
+  },
   "createHousehold":{
     "title": "Crea un Palazzo"
   },
   "householdLogin":{
     "page_title": "Login nel palazzo",
     "header_your_buildings": "I tuoi Stabili in Gestione",
-    "header_join_existing": "Cerca il tuo condominio",
+    "btn_join_existing": "Cerca il tuo condominio",
     "placeholder_code": "Inserisci il codice a 6 cifre",
     "btn_scan_qr": "Scansiona QR Code del Palazzo",
     "btn_create_new": "Registra un Nuovo Condominio",
     "code_error": "Il codice inserito non corrisponde a nessun edificio registrato.",
+    "footer_description": "Il condominio non e' ancora registrato?",
+    "no_admin_buildings": "Non stai amministrando nessun edificio al momento. Unisciti o crea un condominio per iniziare a gestire le prenotazioni della lavanderia!",
+    "manage_actions": "Sei nuovo?"
   },
   "settings": {
     "page_title": "Impostazioni",
@@ -170,5 +177,9 @@
     "row_privacy": "Informativa sulla Privacy",
     "btn_logout": "Disconnetti",
     "logout_failed": "Disconnessione fallita. Riprova."
+  },
+  "searchHousehold": {
+    "title": "Cerca un Condominio",
+    "instruction": "Inserisci l'indirizzo di casa per trovare il tuo edificio e gestire le prenotazioni della lavanderia."
   }
 }

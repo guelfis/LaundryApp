@@ -149,18 +149,25 @@
   "useHousehold":{
     "success": "Household created successfully. Code assigned:",
     "failure": "Failed to commit landlord household setup:"
-},
+  },
+  "householdSetup": {
+    "label_address": "Address",
+    "placeholder_address": "Type the building address..."
+  },
   "createHousehold":{
     "title": "Create Household"
   },
   "householdLogin":{
     "page_title": "Household Login",
     "header_your_buildings": "Your Managed Buildings",
-    "header_join_existing": "Search your household",
+    "btn_join_existing": "Search your household",
     "placeholder_code": "Enter 6-digit access code",
     "btn_scan_qr": "Scan Building QR Code",
     "btn_create_new": "Register a New Building",
     "code_error": "The entry code provided matches no registered household structure.",
+    "footer_description": "Your Household is not registered yet?",
+    "no_admin_buildings": "You are not an admin of any buildings yet. Join or create a household to manage your building's laundry schedule!",
+    "manage_actions": "New here?"
   },
   "settings": {
     "page_title": "Settings",
@@ -173,5 +180,9 @@
     "row_privacy": "Privacy Policy",
     "btn_logout": "Log Out",
     "logout_failed": "Sign out failed. Please try again."
+  },
+  "searchHousehold": {
+    "title": "Search Household",
+    "instruction": "Enter your household address to find your building and manage laundry reservations."
   }
 }
