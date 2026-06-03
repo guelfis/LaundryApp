@@ -385,7 +385,6 @@ export type Database = {
       search_household_by_coords: {
         Args: { search_lat: number; search_lng: number }
         Returns: {
-          access_code: string
           address: string
           id: string
           name: string
@@ -399,6 +398,15 @@ export type Database = {
           target_user_id: string
         }
         Returns: undefined
+      }
+      verify_household_access_by_id: {
+        Args: { target_id: string; user_input_code: string }
+        Returns: {
+          household_address: string
+          household_id: string
+          household_name: string
+          success: boolean
+        }[]
       }
     }
     Enums: {
