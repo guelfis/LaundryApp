@@ -1,9 +1,7 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import { LogOut, User } from "lucide-react";
-import PageLayout from "../components/PageLayout";
-import { PageHeader } from "../components/PageHeader";
+import { LogOut } from "lucide-react";
 import { resolveCurrentUserEmail, signOutUser } from "../auth/authUtils";
 
 export default function UserSettings() {
@@ -35,14 +33,7 @@ export default function UserSettings() {
     };
 
     return (
-        <PageLayout
-            header={
-                <PageHeader 
-                    title={t('settings.page_title', 'Settings')} 
-                    icon={<User className="w-7 h-7 text-blue-500" />} 
-                />
-            }
-        >
+       
             <div className="flex flex-col gap-6 p-4 max-w-md mx-auto w-full">
                 
                 {/* Profile Information Block */}
@@ -70,8 +61,6 @@ export default function UserSettings() {
                         </>
                     )}
                 </button>
-
             </div>
-        </PageLayout>
     );
 }

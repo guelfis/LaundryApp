@@ -2,13 +2,14 @@ import CalendarGridTab from './CalendarGridTab';
 import { useEffect, useMemo, useState } from 'react';
 import PageLayout from '../components/PageLayout';
 import { PageHeader } from '../components/PageHeader';
-import { Calendar, Home, LayoutDashboard } from 'lucide-react';
+import { Calendar, Home, LayoutDashboard, Settings } from 'lucide-react';
 import MyApartmentTab from './MyApartmentTab';
 import { usePendingRequests,useApartmentMembers } from '../hooks/useApartments'; // Ensure correct path
 import { checkIsAdmin, getCleanStorageItem, resolveCurrentUserId } from '../auth/authUtils';
 import { Navigate, Routes, Link, Route, useNavigate } from 'react-router-dom';
 import MyDashboard from './UserDashboard';
 import { useTranslation } from 'react-i18next';
+import UserSettings from './UserSettings';
 
 
 
@@ -42,6 +43,9 @@ function Dashboard() {
     }
     if(location.pathname.includes('/dashboard/calendar')) {
       return <PageHeader title={t('dashboard.calendar')} icon={<Calendar className="w-7 h-7 text-blue-500" />} onBack={onBack} />;
+    }
+    if(location.pathname === '/dashboard/settings') {
+      return <PageHeader title={t('settings.page_title')} icon={<Settings className="w-7 h-7 text-blue-500" />} onBack={onBack} />;
     }
     return <PageHeader title="Dashboard" icon={<LayoutDashboard className="w-7 h-7 text-blue-500" />} onBack={onBack} />;
   };
@@ -94,6 +98,17 @@ function Dashboard() {
               </div>
               <span>{t('dashboard.apartment')}</span>
             </Link>
+            <Link 
+              to="/dashboard/settings" // Base dashboard URL maps to the calendar index
+              className={`flex flex-col items-center justify-center gap-1 flex-1 text-sm border-none border-r border-[#b8cbe0] dark:border-slate-700 transition-colors
+                ${location.pathname === '/dashboard/settings'
+                  ? 'bg-[#cbdcf0] dark:bg-slate-800 text-gray-900 dark:text-white font-bold' 
+                  : 'bg-transparent text-gray-700 dark:text-gray-300 font-normal'
+                }`}
+            >
+              <Settings className="w-5 h-5" />
+              <span>{t('settings.page_title')}</span>
+            </Link>
           </nav>
         </footer>
       }
@@ -113,6 +128,12 @@ function Dashboard() {
           element={
             <MyApartmentTab />
           } 
+        />
+        <Route
+          path="settings"
+          element={
+            <UserSettings />
+          }
         />
         {/* Fallback back to base dashboard calendar route */}
         <Route path="*" element={<Navigate to="" replace />} />
