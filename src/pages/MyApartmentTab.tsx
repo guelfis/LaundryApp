@@ -10,7 +10,7 @@ import { BookingContext } from "../contexts/BookingContext";
 import { LogOut, Trash2 } from "lucide-react";
 import MemberModal from "../myApartment/MemberModal";
 import { ApartmentMember } from "../lib/databaseTypes";
-import { useNavigate } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
 const destructiveButtonStyle = "flex items-center justify-center gap-2 py-3 px-6 text-red-600 dark:text-red-400 text-base bg-transparent border-none rounded-xl active:bg-red-50 dark:active:bg-red-950/20 active:scale-[0.98] transition-all disabled:opacity-40";
@@ -19,7 +19,7 @@ export default function MyApartmentTab() {
 
     const {t} = useTranslation();
 
-    const navigate = useNavigate();
+    const history = useHistory();
 
     const { householdId } = useContext(BookingContext)!;
     const [currentUserId, setCurrentUserId] = useState<string | null>(null);
@@ -55,7 +55,7 @@ export default function MyApartmentTab() {
             try {
                 await deleteApartment(apartmentId);
                 alert(t('myApartmentTab.delete_success'));
-                navigate('/apartment-login', { replace: true }); 
+                history.push('/apartment-login', { replace: true }); 
             } catch (err) {
                 const errorInstance = err as Error;
                 console.error(t('myApartmentTab.delete_fail'), err);
@@ -68,7 +68,7 @@ export default function MyApartmentTab() {
         if (window.confirm(t('myApartmentTab.release_warning'))) {
             try {
                 await leaveApartment(apartmentId);
-                navigate('/apartment-login', { replace: true });
+                history.push('/apartment-login', { replace: true });
             } catch (err) {
                 const errorInstance = err as Error;
                 console.error(t('myApartmentTab.release_fail'), err);

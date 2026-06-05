@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import { LogOut } from "lucide-react";
 import { resolveCurrentUserEmail, signOutUser } from "../auth/authUtils";
 
 export default function UserSettings() {
     const { t } = useTranslation();
-    const navigate = useNavigate();
+    const history = useHistory();
     const [loading, setLoading] = useState(false);
     const [userEmail, setUserEmail] = useState<string | null>(null);
 
@@ -26,7 +26,7 @@ export default function UserSettings() {
       setLoading(false);
 
       if (success) {
-        navigate("/login");
+        history.push("/login");
         localStorage.removeItem('apartmentId');
         localStorage.removeItem('apartmentName');
       }

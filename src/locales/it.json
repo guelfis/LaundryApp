@@ -6,6 +6,9 @@
     "system_error": "Si è verificato un errore inaspettato",
     "btn_settings": "Impostazioni"
   },
+  "app": {
+    "title": "Pianificatore Lavanderia"
+  },
   "slotModal": {
     "title_yours": "La tua Prenotazione",
     "title_occupied": "Slot Occupato",
@@ -111,7 +114,8 @@
     "placeholder_password": "Password",
     "link_have_account": "Hai già un account? Accedi",
     "link_new_user": "Sei nuovo? Registrati",
-    "alert_signup_confirm": "Controlla la tua email per il link di conferma!"
+    "alert_signup_confirm": "Controlla la tua email per il link di conferma!",
+    "logging_in": "Accesso in corso..."
   },
   "membersList": {
     "btn_add_member": "Aggiungi membro",

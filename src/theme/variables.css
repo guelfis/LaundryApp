@@ -1,0 +1,14 @@
+/* theme/variables.css */
+:root {
+  --ion-background-color: #ffffff;
+  --ion-text-color: #000000;
+  --ion-tab-bar-background: #ffffff;
+}
+
+@media (prefers-color-scheme: dark) {
+  body {
+    --ion-background-color: #121212;
+    --ion-text-color: #ffffff;
+    --ion-tab-bar-background: #1c1c1e;
+  }
+}

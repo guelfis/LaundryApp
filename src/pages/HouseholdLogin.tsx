@@ -2,7 +2,7 @@ import { useTranslation } from "react-i18next";
 import PageLayout from "../components/PageLayout";
 import { PageHeader } from "../components/PageHeader";
 import { Building, Plus, Search } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import { useGetUserHouselds } from "../hooks/useHousehold";
 import { LoadingSpinner } from "../components/LoadingSpinner";
 import SlotCard from "../components/SlotCard";
@@ -13,7 +13,7 @@ import SearchHouseholdModal from "../household/SearchHouseholdModal";
 
 export default function HouseholdLogin() {
     const { t } = useTranslation();
-    const navigate = useNavigate();    
+    const history = useHistory();
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     const { data: administeredBuildings = [], isLoading: isLoadingAdmins } = useGetUserHouselds();
@@ -38,7 +38,7 @@ export default function HouseholdLogin() {
                                 key={item.household_id}
                                 title={item.household.name}
                                 subtitle={item.household.address}
-                                onClick={() => navigate(`/dashboard/admin/${item.household_id}`)}
+                                onClick={() => history.push(`/dashboard/admin/${item.household_id}`)}
                             />
                         ))}
                     </div>
@@ -51,7 +51,7 @@ export default function HouseholdLogin() {
                 <SectionText title={t("householdLogin.manage_actions")}/>
                 <div className="flex flex-col gap-3 px-4 w-full">
                     <Button label={t("householdLogin.btn_join_existing")} onClick={() => setIsModalOpen(true)} icon={<Search className="w-4 h-4" />} />
-                    <Button label={t("householdLogin.btn_create_new")} onClick={() => navigate('/household-setup')} icon={<Plus className="w-4 h-4" />} /> 
+                    <Button label={t("householdLogin.btn_create_new")} onClick={() => history.push('/household-setup')} icon={<Plus className="w-4 h-4" />} /> 
                 </div>         
              </div>
 

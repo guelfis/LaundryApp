@@ -1,5 +1,5 @@
-import { useContext, useState, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useContext, useState, useEffect, useMemo } from 'react';
+import { useHistory, useLocation } from 'react-router-dom';
 import PageLayout from '../components/PageLayout';
 import { useApartments, useMyApartments, useJoinViaLink } from '../hooks/useApartments'; 
 import { BookingContext } from '../contexts/BookingContext';
@@ -21,7 +21,11 @@ export default function ApartmentLogin() {
   const { data: myApartments = [], isLoading: isLoadingMy } = useMyApartments(householdId);
   const { data: allApartments = [], isLoading: isLoadingAll } = useApartments(householdId);
   
-  const [searchParams] = useSearchParams();
+  const location = useLocation();
+   const searchParams = useMemo(() => {
+    return new URLSearchParams(location.search);
+  }, [location.search]);
+
   const { mutateAsync: joinViaLink, isPending: isJoining } = useJoinViaLink();
 
   const [selectedApt, setSelectedApt] = useState<Apartment | null>(null);
@@ -32,7 +36,7 @@ export default function ApartmentLogin() {
     (apt) => !myApartments.some((myapt) => apt.id === myapt.id)
   );
 
-  const navigate = useNavigate();
+  const history = useHistory();
 
   useEffect(() => {
     const handleAutoJoin = async (token: string) => {
@@ -40,11 +44,11 @@ export default function ApartmentLogin() {
         await joinViaLink(token);
         /* 1. Localized Alert Notifications */
         alert(t('apartmentLogin.alert_join_success', 'Successfully joined the apartment!'));
-        navigate('/dashboard/', { replace: true });
+        history.push('/dashboard/', { replace: true });
       } catch (err) {
         console.error("Link processing error:", err);
         alert(t('apartmentLogin.alert_join_error', 'This invitation link is invalid, expired, or fully claimed.'));
-        navigate('/apartment-login', { replace: true });
+        history.push('/apartment-login', { replace: true });
       }
     };
 
@@ -52,12 +56,12 @@ export default function ApartmentLogin() {
     if (inviteToken) {
       handleAutoJoin(inviteToken);
     }
-  }, [searchParams, joinViaLink, navigate, t]); 
+  }, [searchParams, joinViaLink, history, t]); 
 
   const enterApartment = (apt: Apartment) => {
     localStorage.setItem('apartmentName', apt.display_name);
     localStorage.setItem('apartmentId', apt.id);
-    navigate('/dashboard/');
+    history.push('/dashboard/');
   };
 
   const handleJoinRequest = (apt: Apartment) => {

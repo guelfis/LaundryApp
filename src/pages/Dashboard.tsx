@@ -1,145 +1,118 @@
-import CalendarGridTab from './CalendarGridTab';
 import { useEffect, useMemo, useState } from 'react';
+import { useLocation, useHistory, Switch, Route, Redirect } from 'react-router-dom';
+import { IonTabs, IonTabBar, IonTabButton, IonLabel, IonRouterOutlet } from '@ionic/react';
+import { Calendar, Home, LayoutDashboard, Settings } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+
+// Components & Hooks
 import PageLayout from '../components/PageLayout';
 import { PageHeader } from '../components/PageHeader';
-import { Calendar, Home, LayoutDashboard, Settings } from 'lucide-react';
+import CalendarGridTab from './CalendarGridTab';
 import MyApartmentTab from './MyApartmentTab';
-import { usePendingRequests,useApartmentMembers } from '../hooks/useApartments'; // Ensure correct path
-import { checkIsAdmin, getCleanStorageItem, resolveCurrentUserId } from '../auth/authUtils';
-import { Navigate, Routes, Link, Route, useNavigate } from 'react-router-dom';
 import MyDashboard from './UserDashboard';
-import { useTranslation } from 'react-i18next';
 import UserSettings from './UserSettings';
-
-
+import { usePendingRequests, useApartmentMembers } from '../hooks/useApartments';
+import { checkIsAdmin, getCleanStorageItem, resolveCurrentUserId } from '../auth/authUtils';
 
 function Dashboard() {
-
-  const navigate = useNavigate();
+  const history = useHistory();
+  const location = useLocation();
   const { t } = useTranslation();
   
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-
-  // Safely extract the active session context
   const apartmentId = useMemo(() => getCleanStorageItem('apartmentId') || '', []);
-  // Resolve user ID natively on mount
-      useEffect(() => {
-          resolveCurrentUserId().then(id => setCurrentUserId(id));
-      }, []);
+  
+  useEffect(() => {
+    resolveCurrentUserId().then(id => setCurrentUserId(id));
+  }, []);
 
-  // These hooks will now SHARE the exact same cache data with MyApartmentTab
   const { data: members = [] } = useApartmentMembers(apartmentId);
   const { data: requests = [] } = usePendingRequests(apartmentId);
   
-  // Logical checks
-  const isUserAdmin = useMemo(() => checkIsAdmin(members, currentUserId), [members, currentUserId]);  const hasNotifications = isUserAdmin && Array.isArray(requests) && requests.length > 0;
+  const isUserAdmin = useMemo(() => checkIsAdmin(members, currentUserId), [members, currentUserId]);
+  const hasNotifications = isUserAdmin && Array.isArray(requests) && requests.length > 0;
+
   const onBack = () => {
-    navigate('/apartment-login');
-  }
+    history.push('/apartment-login');
+  };
 
   const renderHeader = () => {
     if (location.pathname.includes('/dashboard/apartment')) {
       return <PageHeader title={t('dashboard.your_apartment')} icon={<Home className="w-7 h-7 text-blue-500" />} onBack={onBack} />;
     }
-    if(location.pathname.includes('/dashboard/calendar')) {
+    if (location.pathname.includes('/dashboard/calendar')) {
       return <PageHeader title={t('dashboard.calendar')} icon={<Calendar className="w-7 h-7 text-blue-500" />} onBack={onBack} />;
     }
-    if(location.pathname === '/dashboard/settings') {
+    if (location.pathname.includes('/dashboard/settings')) {
       return <PageHeader title={t('settings.page_title')} icon={<Settings className="w-7 h-7 text-blue-500" />} onBack={onBack} />;
     }
     return <PageHeader title="Dashboard" icon={<LayoutDashboard className="w-7 h-7 text-blue-500" />} onBack={onBack} />;
   };
 
   return (
-    <PageLayout 
-      header={renderHeader()} 
-      footer={
-        <footer className="flex h-18 border-t border-[#b8cbe0] dark:border-slate-700 bg-[#dce8f5] dark:bg-slate-900 shrink-0 pb-[env(safe-area-inset-bottom)]">
-          <nav className="flex w-full" aria-label="Footer Navigation">
-            <Link 
-              to="/dashboard" // Base dashboard URL maps to the calendar index
-              className={`flex flex-col items-center justify-center gap-1 flex-1 text-sm border-none border-r border-[#b8cbe0] dark:border-slate-700 transition-colors
-                ${location.pathname === '/dashboard'
-                  ? 'bg-[#cbdcf0] dark:bg-slate-800 text-gray-900 dark:text-white font-bold' 
-                  : 'bg-transparent text-gray-700 dark:text-gray-300 font-normal'
-                }`}
-            >
-              <LayoutDashboard className="w-5 h-5" />
-              <span>Dashboard</span>
-            </Link>
-            <Link 
-              to="/dashboard/calendar" // Base dashboard URL maps to the calendar index
-              className={`flex flex-col items-center justify-center gap-1 flex-1 text-sm border-none border-r border-[#b8cbe0] dark:border-slate-700 transition-colors
-                ${location.pathname === '/dashboard/calendar'
-                  ? 'bg-[#cbdcf0] dark:bg-slate-800 text-gray-900 dark:text-white font-bold' 
-                  : 'bg-transparent text-gray-700 dark:text-gray-300 font-normal'
-                }`}
-            >
-              <Calendar className="w-5 h-5" />
-              <span>{t('dashboard.calendar')}</span>
-            </Link>
-            
-            <Link 
-              to="/dashboard/apartment"
-              className={`flex flex-col items-center justify-center gap-1 flex-1 text-sm border-none transition-colors relative
-                ${location.pathname === '/dashboard/apartment' 
-                  ? 'bg-[#cbdcf0] dark:bg-slate-800 text-gray-900 dark:text-white font-bold' 
-                  : 'bg-transparent text-gray-700 dark:text-gray-300 font-normal'
-                }`}
-            >
-              <div className="relative p-1">
-                <Home className="w-5 h-5" />
-                {hasNotifications && (
-                  <span className="absolute -top-0.5 -right-0.5 flex h-2.5 w-2.5">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
-                  </span>
-                )}
-              </div>
-              <span>{t('dashboard.apartment')}</span>
-            </Link>
-            <Link 
-              to="/dashboard/settings" // Base dashboard URL maps to the calendar index
-              className={`flex flex-col items-center justify-center gap-1 flex-1 text-sm border-none border-r border-[#b8cbe0] dark:border-slate-700 transition-colors
-                ${location.pathname === '/dashboard/settings'
-                  ? 'bg-[#cbdcf0] dark:bg-slate-800 text-gray-900 dark:text-white font-bold' 
-                  : 'bg-transparent text-gray-700 dark:text-gray-300 font-normal'
-                }`}
-            >
-              <Settings className="w-5 h-5" />
-              <span>{t('settings.page_title')}</span>
-            </Link>
-          </nav>
-        </footer>
-      }
-    >
-      {/* LOCAL SUB-ROUTES WITH DIRECT PROP PASSING  */}
-      <Routes>
-        <Route 
-          path="" 
-          element={<MyDashboard />} 
-        />
-        <Route 
-          path="calendar" 
-          element={<CalendarGridTab />} 
-        />
-        <Route 
-          path="apartment" 
-          element={
-            <MyApartmentTab />
-          } 
-        />
-        <Route
-          path="settings"
-          element={
-            <UserSettings />
-          }
-        />
-        {/* Fallback back to base dashboard calendar route */}
-        <Route path="*" element={<Navigate to="" replace />} />
-      </Routes>
-      
-      
+    <PageLayout header={renderHeader()}>
+      <IonTabs>
+        {/* 
+          IonRouterOutlet combines with React Router v5 <Switch> to handle
+          sub-view stack memory management efficiently.
+        */}
+        <IonRouterOutlet>
+          <Switch>
+            <Route exact path="/dashboard">
+              <MyDashboard />
+            </Route>
+            <Route exact path="/dashboard/calendar">
+              <CalendarGridTab />
+            </Route>
+            <Route exact path="/dashboard/apartment">
+              <MyApartmentTab />
+            </Route>
+            <Route exact path="/dashboard/settings">
+              <UserSettings />
+            </Route>
+            <Route path="*">
+              <Redirect to="/dashboard" />
+            </Route>
+          </Switch>
+        </IonRouterOutlet>
+
+        <IonTabBar 
+          slot="bottom" 
+          style={{
+            height: '4.5rem',
+            borderTop: '1px solid var(--border-color, #b8cbe0)',
+            backgroundColor: 'var(--ion-tab-bar-background, #dce8f5)'
+          }}
+        >
+          <IonTabButton tab="main" href="/dashboard">
+            <LayoutDashboard className="w-5 h-5" />
+            <IonLabel style={{ fontSize: '0.875rem' }}>Dashboard</IonLabel>
+          </IonTabButton>
+
+          <IonTabButton tab="calendar" href="/dashboard/calendar">
+            <Calendar className="w-5 h-5" />
+            <IonLabel style={{ fontSize: '0.875rem' }}>{t('dashboard.calendar')}</IonLabel>
+          </IonTabButton>
+
+          <IonTabButton tab="apartment" href="/dashboard/apartment">
+            <div style={{ position: 'relative' }}>
+              <Home className="w-5 h-5" />
+              {hasNotifications && (
+                <span style={{ position: 'absolute', top: '-2px', right: '-2px', display: 'flex', height: '10px', width: '10px' }}>
+                  <span className="animate-ping" style={{ position: 'absolute', borderRadius: '9999px', backgroundColor: '#f87171', opacity: 0.75, height: '100%', width: '100%' }}></span>
+                  <span style={{ position: 'relative', borderRadius: '9999px', height: '10px', width: '10px', backgroundColor: '#ef4444' }}></span>
+                </span>
+              )}
+            </div>
+            <IonLabel style={{ fontSize: '0.875rem' }}>{t('dashboard.apartment')}</IonLabel>
+          </IonTabButton>
+
+          <IonTabButton tab="settings" href="/dashboard/settings">
+            <Settings className="w-5 h-5" />
+            <IonLabel style={{ fontSize: '0.875rem' }}>{t('settings.page_title')}</IonLabel>
+          </IonTabButton>
+        </IonTabBar>
+      </IonTabs>
     </PageLayout>
   );
 }
