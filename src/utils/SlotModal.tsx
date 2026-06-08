@@ -1,11 +1,9 @@
-import { useMemo } from 'react';
 import BottomModal from '../components/BottomModal';
 import ModalButton from '../components/ModalButton';
 import StatusDot from '../components/StatusDot';
 import { SlotStatus } from '../constants/SlotStatus';
-import { useBookingActions } from '../hooks/useBookings';
+import { useBookingActions, useBookingFilters } from '../hooks/useBookings';
 import { AggregatedSlotInfo, getSlotLabel, SlotTimeState } from './slotsUtils';
-import { getCleanStorageItem } from '../auth/authUtils';
 import { Lock } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
@@ -24,7 +22,7 @@ export default function BookingModal({
 }: BookingModalProps) {
 
   const { t } = useTranslation();
-  const apartmentId = useMemo(() => getCleanStorageItem('apartmentId') || '', []);
+  const { apartmentId } = useBookingFilters();
   const { bookSlot, isBooking, releaseSlot, isReleasing } = useBookingActions();
 
   if (!isOpen || !selectedSlot) return null;

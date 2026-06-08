@@ -9,7 +9,6 @@ import { useBookingFilters, useMonthBookings } from '../hooks/useBookings';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import SlotModal from '../utils/SlotModal';
 import { useApartments } from '../hooks/useApartments';
-import { getCleanStorageItem } from '../auth/authUtils';
 import { useTranslation } from 'react-i18next';
 
 const dayColStyles = "w-24 shrink-0 px-4 py-3";
@@ -67,10 +66,9 @@ export default function CalendarGridTab() {
   const days = getLocalizedDaysOfWeek();
 
   const [selectedSlot, setSelectedSlot] = useState<{ dateString: string, slotTimes: number[], slotTimeState: SlotTimeState } | null>(null);
-  const apartmentId = useMemo(() => getCleanStorageItem('apartmentId') || '', []);
   
   const [selectedBooking, setSelectedBooking] = useState<AggregatedSlotInfo>(emptySlotFallback);
-  const { viewDate, setViewDate, householdId } = useBookingFilters();
+  const { viewDate, setViewDate, householdId, apartmentId } = useBookingFilters();
   const { data: bookings = [], isLoading } = useMonthBookings(householdId, viewDate); 
   const { data: apartments = [] } = useApartments(householdId);
   

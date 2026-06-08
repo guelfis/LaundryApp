@@ -1,8 +1,8 @@
 import { SlotStatus } from '../constants/SlotStatus';
-import { BUILDING_TIMEZONE } from '../constants/temporary';
 import { Booking } from '../lib/databaseTypes';
 import i18n from '../locales/i18n';
 import { getBuildingHour } from './datesGetter';
+import { getHouseholdTimezone } from './getters';
 
 export const getSlotKey = (day: number, month: number, year: number, slotStartHour: number) => {
   // Format standard string dictionary mapping reference token: "2026-5-25-17"
@@ -15,10 +15,11 @@ export const getSlotKey = (day: number, month: number, year: number, slotStartHo
  */
 export const getCurrentSlotKey = (slots: number[][]): string | null => {
   const today = new Date();
+  const timezone = getHouseholdTimezone();
   
   // 1. Convert the universal current moment into the exact time matching the building's physical wall-clock [google:4]
   const formatter = new Intl.DateTimeFormat('en-US', {
-    timeZone: BUILDING_TIMEZONE,
+    timeZone: timezone,
     year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', hour12: false
   });
   
@@ -64,13 +65,14 @@ export const getAggregatedBookingsMap = (
 ): Record<string, AggregatedSlotInfo> => {
   
   const grouped: Record<string, Booking[]> = {};
+  const timezone = getHouseholdTimezone();
   
   bookings.forEach((b) => {
     const d = new Date(b.start_time);
     
     // 1. EXTRACT BUILDING DATETIME METRICS: Translates universal dates into local building variables [google:4]
     const formatter = new Intl.DateTimeFormat('en-US', { 
-      timeZone: BUILDING_TIMEZONE, 
+      timeZone: timezone, 
       year: 'numeric', 
       month: 'numeric', 
       day: 'numeric' 

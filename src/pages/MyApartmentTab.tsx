@@ -12,6 +12,7 @@ import MemberModal from "../myApartment/MemberModal";
 import { ApartmentMember } from "../lib/databaseTypes";
 import { useHistory } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { useBookingFilters } from "../hooks/useBookings";
 
 const destructiveButtonStyle = "flex items-center justify-center gap-2 py-3 px-6 text-red-600 dark:text-red-400 text-base bg-transparent border-none rounded-xl active:bg-red-50 dark:active:bg-red-950/20 active:scale-[0.98] transition-all disabled:opacity-40";
 
@@ -36,8 +37,7 @@ export default function MyApartmentTab() {
     // Invitation States
     const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
     
-    
-    const apartmentId = useMemo(() => getCleanStorageItem('apartmentId') || '', []);
+    const {  apartmentId } = useBookingFilters();
     const { data: members = [] } = useApartmentMembers(apartmentId);
     const { leaveApartment, isLeaving, deleteApartment, isDeletingApartment } = useDeleteOrLeaveApartment();
 

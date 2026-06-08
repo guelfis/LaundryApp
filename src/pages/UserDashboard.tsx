@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import SectionText from "../components/SectionText";
 import { useApartmentMembers, useApartments, usePendingRequests } from "../hooks/useApartments";
 import { useUpcomingBookings, useBookings, useBookingFilters } from "../hooks/useBookings";
-import { getCleanStorageItem, resolveCurrentUserId, checkIsAdmin } from "../auth/authUtils";
+import { resolveCurrentUserId, checkIsAdmin } from "../auth/authUtils";
 import { Calendar } from "lucide-react"; 
 import { LoadingSpinner } from "../components/LoadingSpinner";
 import { SLOTS } from "../constants/dates";
@@ -11,16 +11,14 @@ import { AggregatedSlotInfo, emptySlotFallback, getAggregatedBookingsMap, getCur
 import { SlotStatus } from "../constants/SlotStatus";
 import DashboardSlotCard from "../components/DashboardSlotCard";
 import { getDate, getDateString, getDateStringFromDate, getTimeSlotString } from "../utils/datesGetter"; 
-import { BUILDING_TIMEZONE } from "../constants/temporary"; 
 import { TravelingBanner } from "../components/TravelingBanner";
 import SlotCard from "../components/SlotCard";
 import SlotModal from "../utils/SlotModal";
 
 export default function UserDashboard() {
-  const { householdId } = useBookingFilters();
+  const { householdId, householdTimezone, apartmentId } = useBookingFilters();
   const { t } = useTranslation();
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-  const apartmentId = useMemo(() => getCleanStorageItem("apartmentId") || "", []);
 
   // Shared React calendar grid hooks variables
   const [selectedSlot, setSelectedSlot] = useState<{ dateString: string, slotTimes: number[], slotTimeState: SlotTimeState } | null>(null);
@@ -34,10 +32,10 @@ export default function UserDashboard() {
   const travelingStatus = useMemo(() => {
     const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone; 
     return {
-      isTraveling: userTimezone !== BUILDING_TIMEZONE,
+      isTraveling: userTimezone !== householdTimezone,
       userTimezone
     };
-  }, []);
+  }, [householdTimezone]);
 
   // Sync calendar date metrics range boundaries
   const queryRange = useMemo(() => {
@@ -98,7 +96,7 @@ export default function UserDashboard() {
     const endDate = new Date(slotInfo.endTime ?? "");
 
     const formatter = new Intl.DateTimeFormat('en-US', {
-        timeZone: BUILDING_TIMEZONE,
+        timeZone: householdTimezone,
         year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', hour12: false
     });
     
@@ -137,7 +135,7 @@ export default function UserDashboard() {
     
     {/* 1. TRAVELING ALERT BANNER SYSTEM */}
     {travelingStatus.isTraveling && (
-      <TravelingBanner userTz={travelingStatus.userTimezone} buildingTz={BUILDING_TIMEZONE} />
+      <TravelingBanner userTz={travelingStatus.userTimezone} buildingTz={householdTimezone} />
     )}
 
     {/* 2. NOTIFICATION BANNER (ADMIN ONLY) */}

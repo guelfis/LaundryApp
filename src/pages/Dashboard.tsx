@@ -12,7 +12,8 @@ import MyApartmentTab from './MyApartmentTab';
 import MyDashboard from './UserDashboard';
 import UserSettings from './UserSettings';
 import { usePendingRequests, useApartmentMembers } from '../hooks/useApartments';
-import { checkIsAdmin, getCleanStorageItem, resolveCurrentUserId } from '../auth/authUtils';
+import { checkIsAdmin, resolveCurrentUserId } from '../auth/authUtils';
+import { useBookingFilters } from '../hooks/useBookings';
 
 function Dashboard() {
   const history = useHistory();
@@ -20,12 +21,12 @@ function Dashboard() {
   const { t } = useTranslation();
   
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-  const apartmentId = useMemo(() => getCleanStorageItem('apartmentId') || '', []);
   
   useEffect(() => {
     resolveCurrentUserId().then(id => setCurrentUserId(id));
   }, []);
-
+  const { apartmentId } = useBookingFilters();
+  
   const { data: members = [] } = useApartmentMembers(apartmentId);
   const { data: requests = [] } = usePendingRequests(apartmentId);
   

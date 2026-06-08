@@ -1,8 +1,7 @@
-import { useContext, useState, useEffect, useMemo } from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useState, useEffect, useMemo } from 'react';
+import { Redirect, useHistory, useLocation } from 'react-router-dom';
 import PageLayout from '../components/PageLayout';
 import { useApartments, useMyApartments, useJoinViaLink } from '../hooks/useApartments'; 
-import { BookingContext } from '../contexts/BookingContext';
 import { Apartment } from '../lib/databaseTypes';
 import ApartmentsList from '../apartmentSetup/ApartmentsList';
 import JoinRequestModal from '../apartmentSetup/JoinRequestModal'; 
@@ -13,11 +12,12 @@ import SectionText from '../components/SectionText';
 import CreateApartmentModal from '../apartmentSetup/CreateApartmentModal';
 import { useTranslation } from 'react-i18next';
 import FooterSection from '../components/FooterSection';
+import { getCleanStorageItem } from '../auth/authUtils';
 
 export default function ApartmentLogin() {
   const { t } = useTranslation();
-  const { householdId } = useContext(BookingContext)!;
-
+  const householdId = getCleanStorageItem('householdId') || '';
+  
   const { data: myApartments = [], isLoading: isLoadingMy } = useMyApartments(householdId);
   const { data: allApartments = [], isLoading: isLoadingAll } = useApartments(householdId);
   
@@ -68,6 +68,10 @@ export default function ApartmentLogin() {
     setSelectedApt(apt);
     setIsJoinModalOpen(true);
   };
+
+  if (!householdId) {
+    return <Redirect to="/household-login" />;
+  }
 
   /* 2. Localized Invitation Link Processing View State */
   if (isJoining) {

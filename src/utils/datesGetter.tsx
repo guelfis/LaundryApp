@@ -1,12 +1,13 @@
-import { BUILDING_TIMEZONE } from '../constants/temporary';
 import i18n from '../locales/i18n'; // Import to read current app language
-
+import { getHouseholdTimezone } from './getters';
+ 
 /**
  * Extracts the exact numeric hour of a date object interpreted within the building's localized timezone.
  */
 export const getBuildingHour = (date: Date): number => {
+  const timezone = getHouseholdTimezone();
   return parseInt(
-    date.toLocaleTimeString('en-US', { timeZone: BUILDING_TIMEZONE, hour: 'numeric', hour12: false }), 
+    date.toLocaleTimeString('en-US', { timeZone: timezone, hour: 'numeric', hour12: false }), 
     10
   );
 };
@@ -25,12 +26,13 @@ export function getFirstDayOfMonth(monthIndex: number, year: number) {
  * Generates a JavaScript Date object synchronized with the building's clock .
  * This calculates the precise universal millisecond timestamp representing when hour "X" happens at the building .
  */
-export function getDate(dayNum: number, monthIndex: number, year: number, hour: number): Date {
+export function getDate(dayNum: number, monthIndex: number, year: number, hour: number ): Date {
   // 1. Create a baseline date using the smartphone's local execution clock
   const baseDate = new Date(year, monthIndex, dayNum, hour, 0, 0);
+  const timezone = getHouseholdTimezone();
   
   // 2. Compute the exact difference in milliseconds between the smartphone's location and the building's location
-  const tzBuilding = baseDate.toLocaleString('en-US', { timeZone: BUILDING_TIMEZONE }); 
+  const tzBuilding = baseDate.toLocaleString('en-US', { timeZone: timezone }); 
   const tzLocal = baseDate.toLocaleString('en-US');
   
   const diffInMilliseconds = Date.parse(tzLocal) - Date.parse(tzBuilding);
@@ -43,36 +45,36 @@ export function getDate(dayNum: number, monthIndex: number, year: number, hour: 
  * Formats the calendar row title string by looking at the date AT THE BUILDING.
  * This stops date roll-overs (e.g., a late 23:00 building slot showing up as the next day due to UTC compression) .
  */
-export function getDateString(dayNum: number, monthIndex: number, year: number): string {
+export function getDateString(dayNum: number, monthIndex: number, year: number, ): string {
   // Create a safe reference point at noon to prevent any daytime edge leaks
   const baseDate = new Date(year, monthIndex, dayNum, 12, 0, 0);
   const locale = i18n.language || 'en-GB';
-
-  // Explicitly passing BUILDING_TIMEZONE ensures Intl formats the text string exactly as seen at the building .
+  const timezone = getHouseholdTimezone();
   return baseDate.toLocaleDateString(locale, {
     day: 'numeric',
     month: 'long',
     year: 'numeric',
-    timeZone: BUILDING_TIMEZONE
+    timeZone: timezone
   });
 }
 
-export function getDateStringFromDate(date: Date): string {
+export function getDateStringFromDate(date: Date ): string {
   const locale = i18n.language || 'en-GB';
+  const timezone = getHouseholdTimezone();
 
-  // Explicitly passing BUILDING_TIMEZONE ensures Intl formats the text string exactly as seen at the building .
   return date.toLocaleDateString(locale, {
     day: 'numeric',
     month: 'long',
     year: 'numeric',
-    timeZone: BUILDING_TIMEZONE
+    timeZone: timezone
   });
 }
 
 export const getTimeSlotString = (startHour: Date, endHour: Date): string => {
-      const formatBuildingHour = (date: Date) => {
+    const timezone = getHouseholdTimezone();
+    const formatBuildingHour = (date: Date) => {
       return date.toLocaleTimeString('en-US', { 
-        timeZone: BUILDING_TIMEZONE, 
+        timeZone: timezone, 
         hour: 'numeric', 
         minute: '2-digit', 
         hour12: false 

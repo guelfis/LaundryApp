@@ -7,7 +7,8 @@
     "btn_settings": "Impostazioni"
   },
   "app": {
-    "title": "Pianificatore Lavanderia"
+    "title": "Pianificatore Lavanderia",
+    "checking_membership": "Verifica delle appartenenze al condominio in corso..."
   },
   "slotModal": {
     "title_yours": "La tua Prenotazione",
@@ -160,14 +161,14 @@
   },
   "householdLogin":{
     "page_title": "Login nel palazzo",
-    "header_your_buildings": "I tuoi Stabili in Gestione",
+    "header_your_buildings": "I tuoi Condomini",
     "btn_join_existing": "Cerca il tuo condominio",
     "placeholder_code": "Inserisci il codice a 6 cifre",
     "btn_scan_qr": "Scansiona QR Code del Palazzo",
     "btn_create_new": "Registra un Nuovo Condominio",
     "code_error": "Il codice inserito non corrisponde a nessun edificio registrato.",
     "footer_description": "Il condominio non e' ancora registrato?",
-    "no_admin_buildings": "Non stai amministrando nessun edificio al momento. Unisciti o crea un condominio per iniziare a gestire le prenotazioni della lavanderia!",
+    "no_admin_buildings": "Non sei membro di nessun edificio al momento. Unisciti o crea un condominio per iniziare a gestire le prenotazioni della lavanderia!",
     "manage_actions": "Sei nuovo?"
   },
   "settings": {

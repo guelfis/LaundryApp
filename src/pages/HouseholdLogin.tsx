@@ -16,9 +16,14 @@ export default function HouseholdLogin() {
     const history = useHistory();
     const [isModalOpen, setIsModalOpen] = useState(false);
 
-    const { data: administeredBuildings = [], isLoading: isLoadingAdmins } = useGetUserHouselds();
+    const { data: buildings = [], isLoading: isLoadingHouseholds } = useGetUserHouselds();
 
-    if (isLoadingAdmins) return <LoadingSpinner />;
+    if (isLoadingHouseholds) return <LoadingSpinner />;
+
+    const onClickBuilding = (householdId: string) => {
+        localStorage.setItem('householdId', householdId);
+        history.push('/apartment-login');
+    };
 
     return (
         <PageLayout
@@ -31,14 +36,14 @@ export default function HouseholdLogin() {
         >
             <div className="flex flex-col gap-2.5 mb-6">
                 <SectionText title={t("householdLogin.header_your_buildings")}/>
-                {administeredBuildings.length > 0 ? (
+                {buildings.length > 0 ? (
                     <div className="flex flex-col gap-3 px-2 mb-4">
-                        {administeredBuildings.map((item) => (
+                        {buildings.map((item) => (
                             <SlotCard
                                 key={item.household_id}
                                 title={item.household.name}
                                 subtitle={item.household.address}
-                                onClick={() => history.push(`/dashboard/admin/${item.household_id}`)}
+                                onClick={() => onClickBuilding(item.household_id)}
                             />
                         ))}
                     </div>

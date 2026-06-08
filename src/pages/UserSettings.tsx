@@ -29,6 +29,8 @@ export default function UserSettings() {
         history.push("/login");
         localStorage.removeItem('apartmentId');
         localStorage.removeItem('apartmentName');
+        localStorage.removeItem('householdId');
+        localStorage.removeItem('householdTimezone');
       }
     };
 

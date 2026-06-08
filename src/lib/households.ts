@@ -110,7 +110,7 @@ export async function getUserHouseholds(){
 
   const { data, error } = await supabase
     .from("household_members")
-    .select("household_id, household(name, address, timezone)")
+    .select("household_id, role, household(name, address, timezone)")
     .eq("user_id", user.id);
         
   if (error) throw error;
