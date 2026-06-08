@@ -49,15 +49,17 @@ export function useJoinViaLink() {
   return useMutation({
     mutationFn: (tokenId: string) => joinApartmentViaLink(tokenId),
     onSuccess: (data) => {
-      // 1. USE THE DATA: Save the new apartment selection immediately
+      // 1. Save BOTH selections immediately to allow AppRoutes to pass the guard check!
+      localStorage.setItem('householdId', data.household_id);
       localStorage.setItem('apartmentId', data.apartment_id);
       
-      // 2. Refresh the cache lists
+      // 2. Refresh lists across both layout namespaces
       queryClient.invalidateQueries({ queryKey: ['my-apartments'] });
       queryClient.invalidateQueries({ queryKey: ['household-apartments'] });
     }
   });
 }
+
 // Hook: Fetch pending join requests for an admin dashboard
 export function usePendingRequests(apartmentId: string) {
   return useQuery({
@@ -71,10 +73,19 @@ export function usePendingRequests(apartmentId: string) {
 // Mutation: Generate a token link
 export function useGenerateInviteLink() {
   return useMutation({
-    mutationFn: ({ apartmentId, daysValid, maxSlots }: { apartmentId: string; daysValid?: number; maxSlots?: number }) => 
-      generateInviteLink(apartmentId, daysValid, maxSlots),
+    mutationFn: ({ 
+      apartmentId, 
+      householdId,
+      daysValid, 
+      maxSlots 
+    }: { 
+      apartmentId: string; 
+      householdId: string; 
+      daysValid?: number; 
+      maxSlots?: number; 
+    }) => generateInviteLink(apartmentId, householdId, daysValid, maxSlots),
     onSuccess: (token) => {
-      console.log('Token generated successfully:', token);
+      console.log('Dual-layered token generated successfully:', token);
     }
   });
 }

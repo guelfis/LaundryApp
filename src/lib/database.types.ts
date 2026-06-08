@@ -50,6 +50,7 @@ export type Database = {
           created_by: string
           current_uses: number | null
           expires_at: string
+          household_id: string | null
           id: string
           max_uses: number | null
         }
@@ -59,6 +60,7 @@ export type Database = {
           created_by: string
           current_uses?: number | null
           expires_at?: string
+          household_id?: string | null
           id?: string
           max_uses?: number | null
         }
@@ -68,6 +70,7 @@ export type Database = {
           created_by?: string
           current_uses?: number | null
           expires_at?: string
+          household_id?: string | null
           id?: string
           max_uses?: number | null
         }
@@ -84,6 +87,13 @@ export type Database = {
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "apartment_invitations_household_id_fkey"
+            columns: ["household_id"]
+            isOneToOne: false
+            referencedRelation: "household"
             referencedColumns: ["id"]
           },
         ]
@@ -353,6 +363,7 @@ export type Database = {
           days_valid?: number
           max_slots?: number
           target_apartment_id: string
+          target_household_id: string
         }
         Returns: string
       }

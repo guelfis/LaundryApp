@@ -115,13 +115,14 @@ export async function joinApartmentViaLink(tokenId: string) {
   });
 
   if (error) throw error;
-  return data as { apartment_id: string; status: string };
+  return data as { apartment_id: string; household_id: string; status: string };
 }
 
 // Generate an invitation link token (Admin only)
-export async function generateInviteLink(apartmentId: string, daysValid: number = 7, maxSlots: number = 5) {
+export async function generateInviteLink(apartmentId: string, householdId: string, daysValid: number = 7, maxSlots: number = 5) {
   const { data, error } = await supabase.rpc('generate_apartment_invite_link', {
     target_apartment_id: apartmentId,
+    target_household_id: householdId,
     days_valid: daysValid,
     max_slots: maxSlots
   });

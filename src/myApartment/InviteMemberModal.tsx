@@ -3,6 +3,7 @@ import BottomModal from "../components/BottomModal";
 import { useGenerateInviteLink } from "../hooks/useApartments";
 import { Check, Copy, Link2, Share2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { getCleanStorageItem } from "../auth/authUtils"; // Imported helper
 
 interface InviteMemberModalProps {
     apartmentId: string;
@@ -19,8 +20,19 @@ export default function InviteMemberModal({ apartmentId, apartmentName, isModalO
     const generateLinkMutation = useGenerateInviteLink();
     
     const handleCreateLink = async () => {
+        const currentHouseholdId = getCleanStorageItem('householdId') || '';
+
+        if (!currentHouseholdId) {
+            alert("Error: Active household reference not resolved.");
+            return;
+        }
+
         try {
-            const token = await generateLinkMutation.mutateAsync({ apartmentId });
+            const token = await generateLinkMutation.mutateAsync({ 
+                apartmentId, 
+                householdId: currentHouseholdId 
+            });
+            
             const finalUrl = `${window.location.origin}/apartment-login?invite=${token}`;
             setGeneratedLink(finalUrl);
         } catch (err) {
@@ -40,9 +52,8 @@ export default function InviteMemberModal({ apartmentId, apartmentName, isModalO
         if (navigator.share) {
             try {
                 await navigator.share({
-                    /* 1. Localized Native Share Sheet parameters */
-                    title: t('inviteMember.share_title', 'Join {{name}}', { name: apartmentName }),
-                    text: t('inviteMember.share_text', 'Use this invitation link to join our apartment schedule!'),
+                    title: t('inviteMember.share_title', { name: apartmentName }),
+                    text: t('inviteMember.share_text'),
                     url: generatedLink,
                 });
             } catch (err) {
@@ -56,21 +67,18 @@ export default function InviteMemberModal({ apartmentId, apartmentName, isModalO
     const handleCloseModal = () => {
         setGeneratedLink(null);
         setCopied(false);
-        if (onClose) {
-            onClose();
-        }
+        if (onClose) onClose();
     };
 
     return (
         <BottomModal
             isOpen={isModalOpen} 
             onClose={handleCloseModal}
-            title={t('inviteMember.title', 'Invite Roommate')}
+            title={t('inviteMember.title')}
         >
         <div className="space-y-6">
-            {/* 2. Safe string injection utilizing component framework layout blocks */}
-            <p className="text-sm text-gray-500 dark:text-slate-400">
-                {t('inviteMember.description', 'Generate a secure link to add an active member straight to ')}
+            <p className="text-sm text-gray-500 dark:text-slate-400" style={{ color: 'var(--ion-text-color)' }}>
+                {t('inviteMember.description')}
                 <span className="font-bold text-gray-800 dark:text-white">{apartmentName}</span>.
             </p>
 
@@ -82,8 +90,8 @@ export default function InviteMemberModal({ apartmentId, apartmentName, isModalO
                 >
                     <Link2 size={18} />
                     {generateLinkMutation.isPending 
-                        ? t('inviteMember.status_generating', 'Generating...') 
-                        : t('inviteMember.btn_generate', 'Generate Invitation Link')}
+                        ? t('inviteMember.status_generating') 
+                        : t('inviteMember.btn_generate')}
                 </button>
             ) : (
                 <div className="space-y-4">
@@ -93,6 +101,7 @@ export default function InviteMemberModal({ apartmentId, apartmentName, isModalO
                             readOnly
                             value={generatedLink}
                             className="flex-1 bg-transparent text-xs text-gray-600 dark:text-slate-300 outline-none select-all truncate"
+                            style={{ color: 'var(--ion-text-color)' }}
                         />
                         <button 
                             onClick={handleCopyLink}
@@ -107,15 +116,14 @@ export default function InviteMemberModal({ apartmentId, apartmentName, isModalO
                             onClick={handleCloseModal}
                             className="flex-1 py-4 bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-300 font-bold rounded-2xl"
                         >
-                            {/* 3. Uses global fallback common key instead of localized component string duplicate */}
-                            {t('common.close', 'Close')}
+                            {t('common.button_close')}
                         </button>
                         <button
                             onClick={handleShareLink}
                             className="flex-1 py-4 bg-blue-600 text-white font-bold rounded-2xl shadow-md flex items-center justify-center gap-2 active:scale-[0.98] transition-all"
                         >
                             <Share2 size={18} />
-                            {t('inviteMember.btn_share', 'Share Link')}
+                            {t('inviteMember.btn_share')}
                         </button>
                     </div>
                 </div>
