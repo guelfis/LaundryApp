@@ -208,35 +208,38 @@ export type Database = {
         }
         Relationships: []
       }
-      household_admins: {
+      household_members: {
         Row: {
-          created_at: string | null
           household_id: string
           id: string
+          joined_at: string | null
+          role: Database["public"]["Enums"]["household_role"]
           user_id: string
         }
         Insert: {
-          created_at?: string | null
           household_id: string
           id?: string
+          joined_at?: string | null
+          role?: Database["public"]["Enums"]["household_role"]
           user_id: string
         }
         Update: {
-          created_at?: string | null
           household_id?: string
           id?: string
+          joined_at?: string | null
+          role?: Database["public"]["Enums"]["household_role"]
           user_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "household_admins_household_id_fkey"
+            foreignKeyName: "household_members_household_id_fkey"
             columns: ["household_id"]
             isOneToOne: false
             referencedRelation: "household"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "household_admins_user_id_fkey"
+            foreignKeyName: "household_members_user_id_profiles_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
@@ -412,6 +415,7 @@ export type Database = {
     Enums: {
       apartment_role: "admin" | "member"
       booking_status: "active" | "released"
+      household_role: "admin" | "member"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -541,6 +545,7 @@ export const Constants = {
     Enums: {
       apartment_role: ["admin", "member"],
       booking_status: ["active", "released"],
+      household_role: ["admin", "member"],
     },
   },
 } as const

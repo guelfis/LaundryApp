@@ -109,7 +109,7 @@ export async function getUserHouseholds(){
   if (!user) throw new Error("No authenticated user found");
 
   const { data, error } = await supabase
-    .from("household_admins")
+    .from("household_members")
     .select("household_id, household(name, address, timezone)")
     .eq("user_id", user.id);
         
