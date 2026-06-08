@@ -4,6 +4,7 @@ import { useGenerateInviteLink } from "../hooks/useApartments";
 import { Check, Copy, Link2, Share2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { getCleanStorageItem } from "../auth/authUtils"; // Imported helper
+import { ROUTES } from "../routes/routes.constants";
 
 interface InviteMemberModalProps {
     apartmentId: string;
@@ -33,7 +34,7 @@ export default function InviteMemberModal({ apartmentId, apartmentName, isModalO
                 householdId: currentHouseholdId 
             });
             
-            const finalUrl = `${window.location.origin}/apartment-login?invite=${token}`;
+            const finalUrl = `${window.location.origin}${ROUTES.APARTMENT_LOGIN}?invite=${token}`;
             setGeneratedLink(finalUrl);
         } catch (err) {
             console.error("Failed to generate invite:", err);

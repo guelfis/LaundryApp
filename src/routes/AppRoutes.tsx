@@ -13,6 +13,7 @@ import HouseholdLogin from '../pages/HouseholdLogin';
 import CreateHousehold from '../pages/CreateHousehold';
 import { useGetUserHouselds } from '../hooks/useHousehold';
 import { BookingProvider } from '../contexts/BookingContext';
+import { ROUTES } from './routes.constants';
 
 export default function AppRoutes() {
   const { session, loading: authLoading } = useAuth();
@@ -38,8 +39,8 @@ export default function AppRoutes() {
       // 2. If the user is unauthenticated, skip calculations and lock them to login
       if (!session?.user?.id) {
         setCheckingPermissions(false);
-        if (location.pathname !== '/login') {
-          history.push('/login');
+        if (location.pathname !== ROUTES.LOGIN) {
+          history.push(ROUTES.LOGIN);
         }
         return;
       }
@@ -54,19 +55,19 @@ export default function AppRoutes() {
         
         console.log(hasHouseholdAccess, belongsToAnyHousehold, userHouseholds);
         // 4. ROUTING DECISION MATRIX TREE
-        if (location.pathname === '/login' || location.pathname === '/') {
+        if (location.pathname === ROUTES.LOGIN || location.pathname === '/') {
           if (!belongsToAnyHousehold) {
             // User is fresh: must link up or configure a brand new house structure
-            history.push('/household-login');
+            history.push(ROUTES.HOUSEHOLD_LOGIN);
           } else if (!cachedHouseholdId) {
             // Belongs to homes but hasn't picked an active scope item this session
-            history.push('/household-login');
+            history.push(ROUTES.HOUSEHOLD_LOGIN);
           } else if (!cachedApartmentId) {
             // Inside household, but needs to link to a physical room/apartment
-            history.push('/apartment-login');
+            history.push(ROUTES.APARTMENT_LOGIN);
           } else {
             // Everything validated: jump directly into the interface workspace
-            history.push('/dashboard');
+            history.push(ROUTES.DASHBOARD_MAIN);
           }
         }
       } catch (err) {
@@ -106,36 +107,36 @@ export default function AppRoutes() {
     <IonRouterOutlet id="main-app-content">
       <Switch>
         {/* Public Landing Area */}
-        <Route exact path="/login">
-          {!session ? <AuthPage /> : <Redirect to="/household-login" />}
+        <Route exact path={ROUTES.LOGIN}>
+          {!session ? <AuthPage /> : <Redirect to={ROUTES.HOUSEHOLD_LOGIN} />}
         </Route>
 
         {/* Private Workspace Area with Real-Time Conditional Guards */}
-        <Route exact path="/household-login">
-          {session ? <HouseholdLogin /> : <Redirect to="/login" />}
+        <Route exact path={ROUTES.HOUSEHOLD_LOGIN}>
+          {session ? <HouseholdLogin /> : <Redirect to={ROUTES.LOGIN} />}
         </Route>
         
-        <Route exact path="/household-setup">
-          {session ? <CreateHousehold /> : <Redirect to="/login" />}
+        <Route exact path={ROUTES.HOUSEHOLD_SETUP}>
+          {session ? <CreateHousehold /> : <Redirect to={ROUTES.LOGIN} />}
         </Route>
         
-        <Route exact path="/apartment-login">
-          {session ? (hasHouseholdAccess ? <ApartmentLogin /> : <Redirect to="/household-login" />) : <Redirect to="/login" />}
+        <Route exact path={ROUTES.APARTMENT_LOGIN}>
+          {session ? (hasHouseholdAccess ? <ApartmentLogin /> : <Redirect to={ROUTES.HOUSEHOLD_LOGIN} />) : <Redirect to={ROUTES.LOGIN} />}
         </Route>
 
-        <Route path="/dashboard">
+        <Route path={ROUTES.DASHBOARD_MAIN}>
           {session && cachedApartmentId && cachedHouseholdId ? (
             <BookingProvider householdId={cachedHouseholdId} apartmentId={cachedApartmentId} householdTimezone={householdTimezone}>
               <Dashboard />
             </BookingProvider>
           ) : (
-            <Redirect to={cachedHouseholdId ? "/apartment-login" : "/household-login"} />
+            <Redirect to={cachedHouseholdId ? ROUTES.APARTMENT_LOGIN : ROUTES.HOUSEHOLD_LOGIN} />
           )}
         </Route>
 
         {/* Catch-All Standard Routing Resolution Point */}
         <Route path="*">
-          <Redirect to={session ? (cachedApartmentId ? "/dashboard" : "/apartment-login") : "/login"} />
+          <Redirect to={session ? (cachedApartmentId ? ROUTES.DASHBOARD_MAIN : ROUTES.APARTMENT_LOGIN) : ROUTES.LOGIN} />
         </Route>
       </Switch>
     </IonRouterOutlet>

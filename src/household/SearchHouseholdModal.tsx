@@ -7,6 +7,8 @@ import SlotCard from "../components/SlotCard";
 import { useState, useEffect } from "react";
 import { useSearchHousehold, useVerifyHouseholdAccess } from "../hooks/useHousehold";
 import { Lock, ArrowLeft, CheckCircle2, Building } from "lucide-react";
+import { ROUTES } from "../routes/routes.constants";
+import { useHistory } from "react-router-dom";
 
 interface SearchHouseholdModalProps {
   isOpen: boolean;
@@ -21,7 +23,7 @@ enum ModalStep {
 
 export default function SearchHouseholdModal({ isOpen, onClose }: SearchHouseholdModalProps) {
   const { t } = useTranslation();
-  // const navigate = useNavigate();
+  const history = useHistory();
   
   // State Machine parameters
   const [currentStep, setCurrentStep] = useState<ModalStep>(ModalStep.SEARCH_ADDRESS);
@@ -76,8 +78,9 @@ export default function SearchHouseholdModal({ isOpen, onClose }: SearchHousehol
       });
 
       if (result.success) {
+        history.push(ROUTES.APARTMENT_LOGIN);
         onClose();
-        // navigate(`/dashboard/household/${result.household_id}`);
+        
       } else {
         setErrorMessage(t('searchHousehold.error_invalid_code', 'Incorrect access code. Please try again.'));
       }

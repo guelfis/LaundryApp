@@ -13,6 +13,7 @@ import CreateApartmentModal from '../apartmentSetup/CreateApartmentModal';
 import { useTranslation } from 'react-i18next';
 import FooterSection from '../components/FooterSection';
 import { getCleanStorageItem } from '../auth/authUtils';
+import { ROUTES } from '../routes/routes.constants';
 
 export default function ApartmentLogin() {
   const { t } = useTranslation();
@@ -44,11 +45,11 @@ export default function ApartmentLogin() {
         await joinViaLink(token);
         /* 1. Localized Alert Notifications */
         alert(t('apartmentLogin.alert_join_success', 'Successfully joined the apartment!'));
-        history.push('/dashboard/', { replace: true });
+        history.push(ROUTES.DASHBOARD_MAIN, { replace: true });
       } catch (err) {
         console.error("Link processing error:", err);
         alert(t('apartmentLogin.alert_join_error', 'This invitation link is invalid, expired, or fully claimed.'));
-        history.push('/apartment-login', { replace: true });
+        history.push(ROUTES.APARTMENT_LOGIN, { replace: true });
       }
     };
 
@@ -61,7 +62,7 @@ export default function ApartmentLogin() {
   const enterApartment = (apt: Apartment) => {
     localStorage.setItem('apartmentName', apt.display_name);
     localStorage.setItem('apartmentId', apt.id);
-    history.push('/dashboard/');
+    history.push(ROUTES.DASHBOARD_MAIN);
   };
 
   const handleJoinRequest = (apt: Apartment) => {
@@ -70,7 +71,7 @@ export default function ApartmentLogin() {
   };
 
   if (!householdId) {
-    return <Redirect to="/household-login" />;
+    return <Redirect to={ROUTES.HOUSEHOLD_LOGIN} />;
   }
 
   /* 2. Localized Invitation Link Processing View State */

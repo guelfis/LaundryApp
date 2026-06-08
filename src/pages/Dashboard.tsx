@@ -14,6 +14,7 @@ import UserSettings from './UserSettings';
 import { usePendingRequests, useApartmentMembers } from '../hooks/useApartments';
 import { checkIsAdmin, resolveCurrentUserId } from '../auth/authUtils';
 import { useBookingFilters } from '../hooks/useBookings';
+import { ROUTES } from '../routes/routes.constants';
 
 function Dashboard() {
   const history = useHistory();
@@ -34,17 +35,17 @@ function Dashboard() {
   const hasNotifications = isUserAdmin && Array.isArray(requests) && requests.length > 0;
 
   const onBack = () => {
-    history.push('/apartment-login');
+    history.push(ROUTES.APARTMENT_LOGIN);
   };
 
   const renderHeader = () => {
-    if (location.pathname.includes('/dashboard/apartment')) {
+    if (location.pathname.includes(ROUTES.DASHBOARD_APARTMENT)) {
       return <PageHeader title={t('dashboard.your_apartment')} icon={<Home className="w-7 h-7 text-blue-500" />} onBack={onBack} />;
     }
-    if (location.pathname.includes('/dashboard/calendar')) {
+    if (location.pathname.includes(ROUTES.DASHBOARD_CALENDAR)) {
       return <PageHeader title={t('dashboard.calendar')} icon={<Calendar className="w-7 h-7 text-blue-500" />} onBack={onBack} />;
     }
-    if (location.pathname.includes('/dashboard/settings')) {
+    if (location.pathname.includes(ROUTES.DASHBOARD_SETTINGS)) {
       return <PageHeader title={t('settings.page_title')} icon={<Settings className="w-7 h-7 text-blue-500" />} onBack={onBack} />;
     }
     return <PageHeader title="Dashboard" icon={<LayoutDashboard className="w-7 h-7 text-blue-500" />} onBack={onBack} />;
@@ -59,20 +60,20 @@ function Dashboard() {
         */}
         <IonRouterOutlet>
           <Switch>
-            <Route exact path="/dashboard">
+            <Route exact path={ROUTES.DASHBOARD_MAIN}>
               <MyDashboard />
             </Route>
-            <Route exact path="/dashboard/calendar">
+            <Route exact path={ROUTES.DASHBOARD_CALENDAR}>
               <CalendarGridTab />
             </Route>
-            <Route exact path="/dashboard/apartment">
+            <Route exact path={ROUTES.DASHBOARD_APARTMENT}>
               <MyApartmentTab />
             </Route>
-            <Route exact path="/dashboard/settings">
+            <Route exact path={ROUTES.DASHBOARD_SETTINGS}>
               <UserSettings />
             </Route>
             <Route path="*">
-              <Redirect to="/dashboard" />
+              <Redirect to={ROUTES.DASHBOARD_MAIN} />
             </Route>
           </Switch>
         </IonRouterOutlet>
@@ -85,17 +86,17 @@ function Dashboard() {
             backgroundColor: 'var(--ion-tab-bar-background, #dce8f5)'
           }}
         >
-          <IonTabButton tab="main" href="/dashboard">
+          <IonTabButton tab="main" href={ROUTES.DASHBOARD_MAIN}>
             <LayoutDashboard className="w-5 h-5" />
             <IonLabel style={{ fontSize: '0.875rem' }}>Dashboard</IonLabel>
           </IonTabButton>
 
-          <IonTabButton tab="calendar" href="/dashboard/calendar">
+          <IonTabButton tab="calendar" href={ROUTES.DASHBOARD_CALENDAR}>
             <Calendar className="w-5 h-5" />
             <IonLabel style={{ fontSize: '0.875rem' }}>{t('dashboard.calendar')}</IonLabel>
           </IonTabButton>
 
-          <IonTabButton tab="apartment" href="/dashboard/apartment">
+          <IonTabButton tab="apartment" href={ROUTES.DASHBOARD_APARTMENT}>
             <div style={{ position: 'relative' }}>
               <Home className="w-5 h-5" />
               {hasNotifications && (
@@ -108,7 +109,7 @@ function Dashboard() {
             <IonLabel style={{ fontSize: '0.875rem' }}>{t('dashboard.apartment')}</IonLabel>
           </IonTabButton>
 
-          <IonTabButton tab="settings" href="/dashboard/settings">
+          <IonTabButton tab="settings" href={ROUTES.DASHBOARD_SETTINGS}>
             <Settings className="w-5 h-5" />
             <IonLabel style={{ fontSize: '0.875rem' }}>{t('settings.page_title')}</IonLabel>
           </IonTabButton>

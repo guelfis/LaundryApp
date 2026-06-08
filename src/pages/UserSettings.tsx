@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useHistory } from "react-router-dom";
 import { LogOut } from "lucide-react";
 import { resolveCurrentUserEmail, signOutUser } from "../auth/authUtils";
+import { ROUTES } from "../routes/routes.constants";
 
 export default function UserSettings() {
     const { t } = useTranslation();
@@ -26,7 +27,7 @@ export default function UserSettings() {
       setLoading(false);
 
       if (success) {
-        history.push("/login");
+        history.push(ROUTES.LOGIN);
         localStorage.removeItem('apartmentId');
         localStorage.removeItem('apartmentName');
         localStorage.removeItem('householdId');

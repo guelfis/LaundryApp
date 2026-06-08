@@ -10,6 +10,7 @@ import SectionText from "../components/SectionText";
 import Button from "../components/Button";
 import { useState } from "react";
 import SearchHouseholdModal from "../household/SearchHouseholdModal";
+import { ROUTES } from "../routes/routes.constants";
 
 export default function HouseholdLogin() {
     const { t } = useTranslation();
@@ -22,7 +23,7 @@ export default function HouseholdLogin() {
 
     const onClickBuilding = (householdId: string) => {
         localStorage.setItem('householdId', householdId);
-        history.push('/apartment-login');
+        history.push(ROUTES.APARTMENT_LOGIN);
     };
 
     return (
@@ -56,7 +57,7 @@ export default function HouseholdLogin() {
                 <SectionText title={t("householdLogin.manage_actions")}/>
                 <div className="flex flex-col gap-3 px-4 w-full">
                     <Button label={t("householdLogin.btn_join_existing")} onClick={() => setIsModalOpen(true)} icon={<Search className="w-4 h-4" />} />
-                    <Button label={t("householdLogin.btn_create_new")} onClick={() => history.push('/household-setup')} icon={<Plus className="w-4 h-4" />} /> 
+                    <Button label={t("householdLogin.btn_create_new")} onClick={() => history.push(ROUTES.HOUSEHOLD_SETUP)} icon={<Plus className="w-4 h-4" />} /> 
                 </div>         
              </div>
 
