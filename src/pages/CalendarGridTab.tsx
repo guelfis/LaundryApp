@@ -10,6 +10,11 @@ import { LoadingSpinner } from '../components/LoadingSpinner';
 import SlotModal from '../utils/SlotModal';
 import { useApartments } from '../hooks/useApartments';
 import { useTranslation } from 'react-i18next';
+import PageLayout from '../components/PageLayout';
+import { PageHeader } from '../components/PageHeader';
+import { Calendar } from 'lucide-react';
+import { ROUTES } from '../routes/routes.constants';
+import { useHistory } from 'react-router-dom';
 
 const dayColStyles = "w-24 shrink-0 px-4 py-3";
 
@@ -61,6 +66,7 @@ function SlotCell({ onClick, slotStatus, isCurrentTimeSlot }: SlotCellProps) {
 }
 
 export default function CalendarGridTab() {
+  const history = useHistory();
   const todayRowRef = useRef<HTMLDivElement | null>(null);
   const { t } = useTranslation();
   const days = getLocalizedDaysOfWeek();
@@ -115,9 +121,23 @@ export default function CalendarGridTab() {
     setViewDate(newDate);
   };
 
+  const onBack = () => {
+    history.push(ROUTES.APARTMENT_LOGIN);
+  };
+
   if (isLoading) return <LoadingSpinner />;
 
   return (
+    <PageLayout 
+      scrollable={false}
+      header={
+        <PageHeader 
+          title={t('dashboard.calendar')} 
+          icon={<Calendar className="w-7 h-7 text-blue-500" />} 
+          onBack={onBack} 
+        />
+      }
+    >
     <div style={{ display: 'flex', flexDirection: 'column', width: '100%', flex: 1, minHeight: 0 }}>
       {/* Month Switcher Header */}
       <div style={{ flexShrink: 0 }}>
@@ -125,11 +145,10 @@ export default function CalendarGridTab() {
       </div>
 
       {/* Grid Canvas Wrapper */}
-      <div className="flex-1 min-h-0 flex flex-col bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200">
-        
+      <div className="flex-1 min-h-0 flex flex-col bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200 dark:border-slate-800">        
         {/* Columns Description Title row */}
-        <div className="flex border-b border-gray-200 bg-gray-50 shrink-0">
-          <div className={cn(dayColStyles, "text-xs font-semibold text-gray-500 uppercase tracking-wider border-r border-gray-200")}>
+        <div className="flex border-b border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 shrink-0">
+          <div className={cn(dayColStyles, "text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider border-r border-gray-200 dark:border-slate-800")}>
             {t('calendarGrid.day')}
           </div>
           {SLOTS.map((slot) => {
@@ -143,8 +162,15 @@ export default function CalendarGridTab() {
         </div>
 
         {/* Scrollable Rows Matrix Box */}
-        <div className="flex-1 overflow-y-auto overflow-x-hidden WebkitOverflowScrolling-touch">
-          {rows.map(({ dayNum, dayName, isToday, dayOfWeekIndex }, idx) => (
+        <div 
+          style={{ 
+            flex: 1, 
+            overflowY: 'auto', 
+            overflowX: 'hidden',
+            WebkitOverflowScrolling: 'touch',
+          }}
+        >          
+        {rows.map(({ dayNum, dayName, isToday, dayOfWeekIndex }, idx) => (
             <div
               key={dayNum}
               ref={isToday ? todayRowRef : null}
@@ -190,5 +216,6 @@ export default function CalendarGridTab() {
         />
       )}
     </div>
+    </PageLayout>
   );
 }

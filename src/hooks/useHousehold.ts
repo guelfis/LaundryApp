@@ -24,7 +24,6 @@ export function useCreateHousehold() {
       queryClient.invalidateQueries({ queryKey: ['household-details', data.household_id] });
       queryClient.invalidateQueries({ queryKey: ['user-administered-buildings'] });
       
-      console.log(t('useHousehold.success'), data.access_code);
     },
     onError: (error: Error) => {
       // Graceful error capturing fallback for standard logging monitors

@@ -52,7 +52,13 @@
     "deleting": "Deleting ...",
     "delete": "Rimuovi L'Appartmento",
     "leaving": "Leaving ...",
-    "leave": "Lascia L'Appartmento"
+    "leave": "Lascia L'Appartmento",
+    "members": "Membri ({{count}})",
+    "more_actions": "Altre azioni",
+    "info": "Info",
+    "info_title": "Impossibile Lasciare l'Appartamento",
+    "info_message": "Puoi lasciare l'appartamento solo se non sei un amministratore o se c'è almeno un altro amministratore nell'appartamento. Se sei l'unico membro, puoi invece eliminare l'appartamento per rimuoverlo definitivamente.",
+    "btn_ok": "Ho Capito"
   },
   "createApartment": {
     "title": "Crea un nuovo Appartamento",

@@ -53,7 +53,6 @@ export default function AppRoutes() {
         const belongsToAnyHousehold = Array.isArray(userHouseholds) && userHouseholds.length > 0;
         setHasHouseholdAccess(belongsToAnyHousehold);
         
-        console.log(hasHouseholdAccess, belongsToAnyHousehold, userHouseholds);
         // 4. ROUTING DECISION MATRIX TREE
         if (location.pathname === ROUTES.LOGIN || location.pathname === '/') {
           if (!belongsToAnyHousehold) {

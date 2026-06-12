@@ -7,18 +7,17 @@ interface PageLayoutProps {
   children: React.ReactNode;
   header?: React.ReactNode;
   footer?: React.ReactNode;
+  scrollable?: boolean; // NEW: Controls scrolling per-page dynamically
 }
 
-const PageLayout: React.FC<PageLayoutProps> = ({ children, header, footer }) => {
+const PageLayout: React.FC<PageLayoutProps> = ({ children, header, footer, scrollable = true }) => {
   const { t } = useTranslation();
 
   return (
-    /* 1. IonPage provides full viewport bounding and native lifecycle support */
-    <IonPage style={{ backgroundColor: 'var(--ion-background-color)' }}>
+    <IonPage style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
       
-      {/* 2. IonHeader contains top layout blocks, isolated from scroll containers */}
-      <IonHeader collapse="fade" style={{ boxShadow: 'none', background: 'transparent' }}>
-        <div style={{ flexShrink: 0 }}>
+      <IonHeader style={{ boxShadow: 'none', background: 'transparent', flexShrink: 0 }}>
+        <div>
           <header style={{ 
             display: 'flex', 
             justifyContent: 'space-between', 
@@ -35,7 +34,7 @@ const PageLayout: React.FC<PageLayoutProps> = ({ children, header, footer }) => 
               letterSpacing: '0.5px',
               color: 'var(--ion-text-color)'
             }}>
-              {t('app.title')}
+              {t('app.title', 'Laundry Planner')}
             </h1>
             <LaundryIcon />
           </header>
@@ -48,9 +47,12 @@ const PageLayout: React.FC<PageLayoutProps> = ({ children, header, footer }) => 
         </div>
       </IonHeader>
 
-      {/* 3. IonContent implements native momentum scrolling and dark mode color inheritance */}
+      {/* 
+        FIXED: Uses the scrollable parameter flag.
+        True for all standard pages, False exclusively for the specialized Grid layout view.
+      */}
       <IonContent 
-        scrollEvents={true}
+        scrollY={scrollable} 
         style={{
           '--background': 'var(--ion-background-color)',
           '--color': 'var(--ion-text-color)'
@@ -60,19 +62,16 @@ const PageLayout: React.FC<PageLayoutProps> = ({ children, header, footer }) => 
           height: '100%',
           padding: '10px',
           display: 'flex',
-          flexDirection: 'column'
+          flexDirection: 'column',
+          minHeight: 0 // Crucial for nested flex child scrolling calculations
         }}>
           {children}
         </main>
       </IonContent>
 
-      {/* 4. IonFooter properly adjusts content above mobile system navigation pills */}
       {footer && (
-        <IonFooter style={{ boxShadow: 'none', background: 'transparent' }}>
-          <div style={{ 
-            flexShrink: 0, 
-            paddingBottom: 'env(safe-area-inset-bottom)'
-          }}>
+        <IonFooter style={{ boxShadow: 'none', background: 'transparent', flexShrink: 0 }}>
+          <div style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
             {footer}
           </div>
         </IonFooter>

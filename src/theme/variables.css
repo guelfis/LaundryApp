@@ -12,3 +12,16 @@
     --ion-tab-bar-background: #1c1c1e;
   }
 }
+
+/* 
+  Ensure that when any IonPage is rendered inside an active IonTabs shell context, 
+  its inner content automatically shifts up to completely clear the navigation bar.
+*/
+ion-tabs ion-content {
+  --padding-bottom: 3.5rem !important;
+}
+
+/* Ensure the main block element expands safely without stretching past screen lines */
+main {
+  box-sizing: border-box;
+}

@@ -4,7 +4,7 @@ import SectionText from "../components/SectionText";
 import { useApartmentMembers, useApartments, usePendingRequests } from "../hooks/useApartments";
 import { useUpcomingBookings, useBookings, useBookingFilters } from "../hooks/useBookings";
 import { resolveCurrentUserId, checkIsAdmin } from "../auth/authUtils";
-import { Calendar } from "lucide-react"; 
+import { Calendar, LayoutDashboard } from "lucide-react"; 
 import { LoadingSpinner } from "../components/LoadingSpinner";
 import { SLOTS } from "../constants/dates";
 import { AggregatedSlotInfo, emptySlotFallback, getAggregatedBookingsMap, getCurrentSlotKey, getSlotTimeState, SlotTimeState } from "../utils/slotsUtils";
@@ -14,10 +14,15 @@ import { getDate, getDateString, getDateStringFromDate, getTimeSlotString } from
 import { TravelingBanner } from "../components/TravelingBanner";
 import SlotCard from "../components/SlotCard";
 import SlotModal from "../utils/SlotModal";
+import PageLayout from "../components/PageLayout";
+import { PageHeader } from "../components/PageHeader";
+import { ROUTES } from "../routes/routes.constants";
+import { useHistory } from "react-router-dom";
 
 export default function UserDashboard() {
   const { householdId, householdTimezone, apartmentId } = useBookingFilters();
   const { t } = useTranslation();
+  const history = useHistory();
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   // Shared React calendar grid hooks variables
@@ -88,7 +93,7 @@ export default function UserDashboard() {
       slotStatus: activeBooking.status,
       slotKey: currentSlotKey,
     };
-  }, [aggregatedBookingsMap, currentUserId]);
+  }, [aggregatedBookingsMap]);
 
   const handleOpenModal = (slotInfo: AggregatedSlotInfo) => {
 
@@ -131,80 +136,90 @@ export default function UserDashboard() {
   }
 
   return (
-  <div className="w-full px-4 py-2 flex flex-col gap-6 flex-1 overflow-y-auto">
-    
-    {/* 1. TRAVELING ALERT BANNER SYSTEM */}
-    {travelingStatus.isTraveling && (
-      <TravelingBanner userTz={travelingStatus.userTimezone} buildingTz={householdTimezone} />
-    )}
+    <PageLayout 
+      header={
+        <PageHeader 
+            title="Dashboard"
+            icon={<LayoutDashboard className="w-7 h-7 text-blue-500" />} 
+            onBack={() => history.push(ROUTES.APARTMENT_LOGIN)} 
+        />
+      }
+    >
+      <div className="w-full px-4 py-2 flex flex-col gap-6 flex-1 overflow-y-auto">
+        
+        {/* 1. TRAVELING ALERT BANNER SYSTEM */}
+        {travelingStatus.isTraveling && (
+          <TravelingBanner userTz={travelingStatus.userTimezone} buildingTz={householdTimezone} />
+        )}
 
-    {/* 2. NOTIFICATION BANNER (ADMIN ONLY) */}
-    {isUserAdmin && requests.length > 0 && (
-      <div className="w-full p-4 bg-amber-50 dark:bg-amber-950/20 border border-amber-100 dark:border-amber-900/40 rounded-2xl flex items-center gap-3 shadow-sm">
-        <span className="flex h-2 w-2 relative">
-          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-          <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
-        </span>
-        <div className="text-sm font-medium text-amber-800 dark:text-amber-400">
-          {t("userDashboard.pending_requests_count", { count: requests.length })}
+        {/* 2. NOTIFICATION BANNER (ADMIN ONLY) */}
+        {isUserAdmin && requests.length > 0 && (
+          <div className="w-full p-4 bg-amber-50 dark:bg-amber-950/20 border border-amber-100 dark:border-amber-900/40 rounded-2xl flex items-center gap-3 shadow-sm">
+            <span className="flex h-2 w-2 relative">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+            </span>
+            <div className="text-sm font-medium text-amber-800 dark:text-amber-400">
+              {t("userDashboard.pending_requests_count", { count: requests.length })}
+            </div>
+          </div>
+        )}
+
+        {/* 3. ONGOING STATUS PANEL */}
+        <div className="flex flex-col gap-2">
+          <SectionText title={t("userDashboard.live_status")} />
+          <DashboardSlotCard 
+            state={ongoingState.slotStatus}
+            onClick={() => {
+              if (ongoingState.bookingId) {
+                const bookingInfo = aggregatedBookingsMap[ongoingState.slotKey ?? ""] ?? emptySlotFallback();
+                handleOpenModal(bookingInfo);
+              }
+            }}
+          />
         </div>
+
+        {/* 4. UPCOMING RESERVATIONS LIST */}
+        <div className="flex flex-col gap-2">
+          <SectionText title={t("userDashboard.next_reservations")} />
+          {upcomingBookings.length > 0 ? (
+            <div className="bg-white dark:bg-slate-800/40 border border-gray-100 dark:border-slate-800 rounded-2xl divide-y divide-gray-100 dark:divide-slate-800/50 overflow-hidden shadow-sm">
+              {Object.values(upcomingAggregated).map((slotInfo) => {
+                const dateObj = new Date(slotInfo.startTime ?? "");
+                const localizedDate = getDateStringFromDate(dateObj);
+                const timeRangeString = getTimeSlotString(
+                  dateObj,
+                  new Date(slotInfo.endTime ?? "")
+                );
+
+                return (
+                  <SlotCard 
+                    key={slotInfo.id}
+                    icon={<Calendar className="w-5 h-5 text-blue-500" />}
+                    iconBgClass="bg-blue-50 dark:bg-blue-950/20"
+                    title={localizedDate}
+                    subtitle={timeRangeString}
+                    onClick={() => handleOpenModal(slotInfo)}
+                  />
+                );
+              })}
+            </div>
+          ) : (
+            <p className="text-xs text-gray-400 pl-1 mt-1">{t("userDashboard.no_bookings")}</p>
+          )}
+        </div>
+
+        {selectedSlot && (
+          <SlotModal
+            isOpen={!!selectedSlot}
+            onClose={() => setSelectedSlot(null)}
+            selectedSlot={selectedSlot}
+            currentSlot={selectedBooking}
+          />
+        )}
+
       </div>
-    )}
-
-    {/* 3. ONGOING STATUS PANEL */}
-    <div className="flex flex-col gap-2">
-      <SectionText title={t("userDashboard.live_status")} />
-      <DashboardSlotCard 
-        state={ongoingState.slotStatus}
-        onClick={() => {
-          if (ongoingState.bookingId) {
-            const bookingInfo = aggregatedBookingsMap[ongoingState.slotKey ?? ""] ?? emptySlotFallback();
-            handleOpenModal(bookingInfo);
-          }
-        }}
-      />
-    </div>
-
-    {/* 4. UPCOMING RESERVATIONS LIST */}
-    <div className="flex flex-col gap-2">
-      <SectionText title={t("userDashboard.next_reservations")} />
-      {upcomingBookings.length > 0 ? (
-        <div className="bg-white dark:bg-slate-800/40 border border-gray-100 dark:border-slate-800 rounded-2xl divide-y divide-gray-100 dark:divide-slate-800/50 overflow-hidden shadow-sm">
-          {Object.values(upcomingAggregated).map((slotInfo) => {
-            const dateObj = new Date(slotInfo.startTime ?? "");
-            const localizedDate = getDateStringFromDate(dateObj);
-            const timeRangeString = getTimeSlotString(
-              dateObj,
-              new Date(slotInfo.endTime ?? "")
-            );
-
-            return (
-              <SlotCard 
-                key={slotInfo.id}
-                icon={<Calendar className="w-5 h-5 text-blue-500" />}
-                iconBgClass="bg-blue-50 dark:bg-blue-950/20"
-                title={localizedDate}
-                subtitle={timeRangeString}
-                onClick={() => handleOpenModal(slotInfo)}
-              />
-            );
-          })}
-        </div>
-      ) : (
-        <p className="text-xs text-gray-400 pl-1 mt-1">{t("userDashboard.no_bookings")}</p>
-      )}
-    </div>
-
-    {selectedSlot && (
-      <SlotModal
-        isOpen={!!selectedSlot}
-        onClose={() => setSelectedSlot(null)}
-        selectedSlot={selectedSlot}
-        currentSlot={selectedBooking}
-      />
-    )}
-
-  </div>
+  </PageLayout>
 );
 
 }

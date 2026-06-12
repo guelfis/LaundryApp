@@ -193,7 +193,7 @@ export default function SearchHouseholdModal({ isOpen, onClose }: SearchHousehol
                 className="w-full py-3 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 font-semibold transition-colors flex items-center justify-center gap-1.5 text-xs disabled:opacity-50"
               >
                 <ArrowLeft className="w-3.5 h-3.5" />
-                <span>{t('searchHousehold.btn_back', 'Go Back to Search')}</span>
+                <span>{t('searchHousehold.btn_back', 'Back to Search')}</span>
               </button>
             </div>
           </div>

@@ -53,7 +53,13 @@
     "deleting": "Deleting ...",
     "delete": "Delete Apartment",
     "leaving": "Leaving ...",
-    "leave": "Leave Apartment"
+    "leave": "Leave Apartment",
+    "members": "Members ({{count}})",
+    "more_actions": "More actions",
+    "info": "Info",
+    "info_title": "Cannot Leave Apartment",
+    "info_message": "You can leave the apartment only if you are not an admin of the apartment or if there is at least another admin in the apartment. If you are the only member, you can delete the apartment instead to remove it permanently.",
+    "btn_ok": "Got It"
   },
   "createApartment": {
     "title": "Create New Apartment",
