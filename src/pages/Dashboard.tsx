@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Switch, Route, Redirect } from 'react-router-dom';
+import { Switch, Route, Redirect, useLocation } from 'react-router-dom';
 import { IonTabs, IonTabBar, IonTabButton, IonLabel, IonRouterOutlet } from '@ionic/react';
 import { Calendar, Home, LayoutDashboard, Settings } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -14,26 +14,36 @@ import { checkIsAdmin, resolveCurrentUserId } from '../auth/authUtils';
 import { useBookingFilters } from '../hooks/useBookings';
 import { ROUTES } from '../routes/routes.constants';
 
+const enum DashboardTabs {
+  DASHBOARD = "dashboard",
+  CALENDAR = "calendar",
+  SETTINGS = "settings",
+  APARTMENT = "apartment"
+}
+
 function Dashboard() {
   const { t } = useTranslation();
+  const location = useLocation();
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   
   useEffect(() => {
     resolveCurrentUserId().then(id => setCurrentUserId(id));
   }, []);
 
+  const activeTab = useMemo(() => {
+    if (location.pathname === ROUTES.DASHBOARD_CALENDAR) return DashboardTabs.CALENDAR;
+    if (location.pathname === ROUTES.DASHBOARD_APARTMENT) return DashboardTabs.APARTMENT;
+    if (location.pathname === ROUTES.DASHBOARD_SETTINGS) return DashboardTabs.SETTINGS;
+    return DashboardTabs.DASHBOARD; // Fallback default
+  }, [location.pathname]);
+  
   const { apartmentId } = useBookingFilters();
   const { data: members = [] } = useApartmentMembers(apartmentId);
   const { data: requests = [] } = usePendingRequests(apartmentId);
   
   const isUserAdmin = useMemo(() => checkIsAdmin(members, currentUserId), [members, currentUserId]);
   const hasNotifications = isUserAdmin && Array.isArray(requests) && requests.length > 0;
-
   return (
-    /* 
-      FIXED: IonTabs wraps the outlet directly. No middle-man elements. 
-      This lets Ionic apply the native tab-safe area adjustments automatically.
-    */
     <IonTabs>
       <IonRouterOutlet>
         <Switch>
@@ -58,23 +68,23 @@ function Dashboard() {
       {/* The bottom layout bar remains fixed outside the router wrapper */}
       <IonTabBar 
         slot="bottom" 
+        selectedTab={activeTab}
         style={{
-          height: '4.5rem',
           borderTop: '1px solid var(--border-color, #b8cbe0)',
           backgroundColor: 'var(--ion-tab-bar-background, #dce8f5)'
         }}
       >
-        <IonTabButton tab="main" href={ROUTES.DASHBOARD_MAIN}>
+        <IonTabButton tab={DashboardTabs.DASHBOARD} href={ROUTES.DASHBOARD_MAIN} selected={activeTab===DashboardTabs.DASHBOARD}>
           <LayoutDashboard className="w-5 h-5" />
           <IonLabel style={{ fontSize: '0.875rem' }}>Dashboard</IonLabel>
         </IonTabButton>
 
-        <IonTabButton tab="calendar" href={ROUTES.DASHBOARD_CALENDAR}>
+        <IonTabButton tab={DashboardTabs.CALENDAR} href={ROUTES.DASHBOARD_CALENDAR} selected={activeTab===DashboardTabs.CALENDAR}>
           <Calendar className="w-5 h-5" />
           <IonLabel style={{ fontSize: '0.875rem' }}>{t('dashboard.calendar')}</IonLabel>
         </IonTabButton>
 
-        <IonTabButton tab="apartment" href={ROUTES.DASHBOARD_APARTMENT}>
+        <IonTabButton tab={DashboardTabs.APARTMENT} href={ROUTES.DASHBOARD_APARTMENT} selected={activeTab===DashboardTabs.APARTMENT}>
           <div style={{ position: 'relative' }}>
             <Home className="w-5 h-5" />
             {hasNotifications && (
@@ -87,7 +97,7 @@ function Dashboard() {
           <IonLabel style={{ fontSize: '0.875rem' }}>{t('dashboard.apartment')}</IonLabel>
         </IonTabButton>
 
-        <IonTabButton tab="settings" href={ROUTES.DASHBOARD_SETTINGS}>
+        <IonTabButton tab={DashboardTabs.SETTINGS} href={ROUTES.DASHBOARD_SETTINGS} selected={activeTab===DashboardTabs.SETTINGS}>
           <Settings className="w-5 h-5" />
           <IonLabel style={{ fontSize: '0.875rem' }}>{t('settings.page_title')}</IonLabel>
         </IonTabButton>
