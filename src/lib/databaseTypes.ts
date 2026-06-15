@@ -1,3 +1,4 @@
+import { useSearchHousehold } from "../hooks/useHousehold";
 import { Database } from "./database.types";
 
 export type Household = Database['public']['Tables']['household']['Row'];
@@ -28,3 +29,9 @@ export interface ApartmentMember {
   role: string;
   profiles: Profile;
 }
+
+// 1. Get the return type of the hook function
+type UseSearchHouseholdResult = ReturnType<typeof useSearchHousehold>;
+
+// 2. Extract the exact data type wrapped inside TanStack Query's result object
+export type HouseholdData = NonNullable<UseSearchHouseholdResult['data']>;

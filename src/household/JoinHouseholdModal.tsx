@@ -1,44 +1,148 @@
-export default function JoinHouseholdModal(){
-    // <div className="bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800/80 p-5 rounded-3xl shadow-xs flex flex-col gap-4">
-    //       {/* Form wrapper for text code submission */}
-    //       <form onSubmit={()=>{}} className="flex gap-2 w-full">
-    //         <div className="relative flex-1">
-    //           <input
-    //             type="text"
-    //             maxLength={6}
-    //             value={accessCode}
-    //             onChange={(e) => setAccessCode(e.target.value.toUpperCase())}
-    //             placeholder={t("householdLogin.placeholder_code")}
-    //             className="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-slate-800/50 border border-gray-200 dark:border-slate-700/60 rounded-xl text-sm font-mono tracking-widest text-center focus:outline-hidden focus:ring-2 focus:ring-blue-500/20 text-gray-800 dark:text-white uppercase placeholder:font-sans placeholder:tracking-normal placeholder:text-left"
-    //           />
-    //           <Key className="w-4 h-4 text-gray-400 absolute left-3.5 top-3.5" />
-    //         </div>
-    //         <button
-    //           type="submit"
-    //           disabled={accessCode.length < 6 || isSubmittingCode}
-    //           className="px-4 bg-blue-600 hover:bg-blue-700 disabled:opacity-40 text-white rounded-xl flex items-center justify-center transition-all active:scale-95 shadow-sm"
-    //         >
-    //           {isSubmittingCode ? <LoadingSpinner /> : <ArrowRight className="w-4 h-4" />}
-    //         </button>
-    //       </form>
+import { useTranslation } from "react-i18next";
+import BottomModal from "../components/BottomModal";
 
-    //       {/* QR Code Action Divider separator bar */}
-    //       <div className="flex items-center my-1 text-gray-300 dark:text-slate-800">
-    //         <div className="flex-1 h-[1px] bg-gray-100 dark:bg-slate-800" />
-    //         <span className="px-3 text-[10px] font-bold uppercase tracking-widest text-gray-400">or</span>
-    //         <div className="flex-1 h-[1px] bg-gray-100 dark:bg-slate-800" />
-    //       </div>
+import SlotCard from "../components/SlotCard";
+// import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useVerifyHouseholdAccess } from "../hooks/useHousehold";
+import { Lock, ArrowLeft, CheckCircle2, Building } from "lucide-react";
+import { ROUTES } from "../routes/routes.constants";
+import { useHistory } from "react-router-dom";
+import { HouseholdData } from "../lib/databaseTypes";
 
-    //       {/* Trigger button for Capacitor Camera QR code operations */}
-    //       <button
-    //         type="button"
-    //         onClick={() => {}}
-    //         className="w-full py-3 bg-gray-50 dark:bg-slate-800/40 border border-gray-200 dark:border-slate-700/60 hover:bg-gray-100 text-gray-700 dark:text-gray-300 font-bold rounded-xl transition-all flex items-center justify-center gap-2.5 text-sm active:scale-[0.98]"
-    //       >
-    //         <QrCode className="w-4 h-4 text-blue-500" />
-    //         {t("householdLogin.btn_scan_qr")}
-    //       </button>
-    //     </div>
-    //   </div>
-    return <></>
+interface JoinHouseholdModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  householdData: HouseholdData | null;
+}
+
+export default function JoinHouseholdModal({ isOpen, onClose, householdData }: JoinHouseholdModalProps) {
+  const { t } = useTranslation();
+  const history = useHistory();
+  
+  // State Machine parameters
+  const [accessCode, setAccessCode] = useState('');
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const { mutateAsync: verifyAccess, isPending: isVerifying } = useVerifyHouseholdAccess();
+
+  // Flush states completely on modal exit transitions
+  useEffect(() => {
+    if (!isOpen) {
+      setAccessCode('');
+      setErrorMessage(null);
+    }
+  }, [isOpen]);
+
+  // Step 2 Action handler logic: Validates password code parameter straight to Supabase
+  const handleVerifyAccessCode = async () => {
+    if (!accessCode.trim()) {
+      setErrorMessage("Please enter a code.");
+      return;
+    }
+    if (!householdData?.id) return;
+
+    setErrorMessage(null);
+
+    try {
+      // Execute the hook mutation triggers
+      const result = await verifyAccess({ 
+        householdId: householdData.id, 
+        inputCode: accessCode.trim() 
+      });
+
+      if (result.success) {
+        localStorage.setItem('householdId', householdData.id);
+        history.push(ROUTES.APARTMENT_LOGIN);
+        onClose();
+        
+      } else {
+        setErrorMessage(t('joinHousehold.error_invalid_code', 'Incorrect access code. Please try again.'));
+      }
+    } catch (err: unknown) {
+      setErrorMessage(`${t('common.system_error', 'Incorrect access code. Please try again.')} (${err instanceof Error ? err.message : String(err)})`);
+    }
+  };
+  if (!isOpen || !householdData) return null;
+
+  return (
+    <BottomModal 
+      isOpen={isOpen} 
+      onClose={onClose} 
+      title={ t('joinHousehold.title_verify', 'Enter Access Code')
+      }
+    >
+      <div className="flex flex-col gap-4 mt-4 mb-4 min-h-[280px] transition-all">
+                  
+          {/* Display static reference of the building selection */}
+            <SlotCard title={householdData.address} subtitle={householdData.name} icon={<Building className="w-5 h-5" />} />
+
+          <span className="text-sm text-gray-400">
+            {t('joinHousehold.instruction_code', 'Please enter the access code generated by your property manager to unlock this workspace context.')}
+          </span>
+          {/* Structured custom input field frame */}
+          <div className="flex flex-col gap-4 mt-4">
+            <div className="flex flex-row gap-2 items-center">
+              <Lock className="w-4 h-4 text-gray-400" />
+              <label className="text-xs font-bold text-gray-400 uppercase tracking-wider px-1">
+                {t('joinHousehold.label_code', 'Security Code')}
+              </label>
+            </div>
+            <div className="relative w-full">
+              <input
+                type="password"
+                inputMode="numeric"
+                maxLength={4}
+                value={accessCode}
+                onChange={(e) => setAccessCode(e.target.value)}
+                placeholder="••••"
+                disabled={isVerifying}
+                className="w-full pl-10 pr-4 py-3.5 bg-gray-50 dark:bg-slate-800/50 border border-gray-200 dark:border-slate-700/60 rounded-xl text-center text-lg font-mono tracking-widest focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-gray-800 dark:text-white transition-all disabled:opacity-50"
+              />
+            </div>
+          </div>
+
+          {/* Real-time inline validation error feedback banner */}
+          {errorMessage && (
+            <div className="p-3 rounded-xl bg-red-50 dark:bg-red-950/20 border border-red-100 dark:border-red-900 text-xs font-semibold text-red-600 dark:text-red-400 text-center animate-shake">
+              {errorMessage}
+            </div>
+          )}
+
+          {/* Direct operation action triggers */}
+          <div className="flex flex-col gap-2 mt-2">
+            <button
+              type="button"
+              onClick={handleVerifyAccessCode}
+              disabled={isVerifying}
+              className="w-full py-3.5 bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2 text-sm shadow-sm active:scale-[0.99] disabled:opacity-50"
+            >
+              {isVerifying ? (
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <>
+                  <CheckCircle2 className="w-4 h-4" />
+                  <span>{t('joinHousehold.btn_verify', 'Verify & Connect')}</span>
+                </>
+              )}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setAccessCode('');
+                setErrorMessage(null);
+                onClose();
+              }}
+              disabled={isVerifying}
+              className="w-full py-3 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 font-semibold transition-colors flex items-center justify-center gap-1.5 text-xs disabled:opacity-50"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+              <span>{t('joinHousehold.btn_back', 'Back to Search')}</span>
+            </button>
+          </div>
+        </div>
+        
+
+    </BottomModal>
+  );
 }
