@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import BottomModal from "../components/BottomModal";
 import ModalButton from "../components/ModalButton";
 import ApartmentNameEditableSection from "../utils/ApartmentNameEditableSection";
-import { useCreateApartment } from "../hooks/useApartments";
+import { useApartments, useCreateApartment } from "../hooks/useApartments";
 import { Send } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -18,6 +18,9 @@ export default function CreateApartmentModal({ householdId, isModalOpen, onClose
     const [isEditingName, setIsEditingName] = useState<boolean>(true); // Fixed tiny typo in setter name
 
     const createApartmentMutation = useCreateApartment();
+    const { data: allApartments = [] } = useApartments(householdId);
+        
+    const existingNames = useMemo(() => allApartments.map(apt => apt.display_name), [allApartments]);
 
     const handleClose = () => {
         setApartmentName("");
@@ -43,7 +46,7 @@ export default function CreateApartmentModal({ householdId, isModalOpen, onClose
             <div className="space-y-6">
                 <ApartmentNameEditableSection 
                     apartmentName={apartmentName}
-                    householdId={householdId}
+                    invalidNames={existingNames}
                     onNameChange={setApartmentName}
                     setIsEditing={setIsEditingName}
                     isEditing={isEditingName}

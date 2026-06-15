@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useMemo, useState } from "react";
 import SectionText from "../components/SectionText";
 import MembersList from "../components/MembersList";
-import { useApartmentMembers, useDeleteOrLeaveApartment } from "../hooks/useApartments";
+import { useApartmentMembers, useApartments, useDeleteOrLeaveApartment } from "../hooks/useApartments";
 import InviteMemberModal from "../myApartment/InviteMemberModal";
 import { checkIsAdmin, getCleanStorageItem, resolveCurrentUserId } from "../auth/authUtils";
 import PendingRequestsSection from "../myApartment/PendingRequestsSection";
@@ -31,6 +31,7 @@ export default function MyApartmentTab() {
     const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
     const [isMemberModalOpen, setIsMemberModalOpen] = useState<boolean>(false);
     const [isInfoAlertOpen, setIsInfoAlertOpen] = useState(false);
+    
 
     useEffect(() => {
         resolveCurrentUserId().then(id => setCurrentUserId(id));
@@ -41,7 +42,9 @@ export default function MyApartmentTab() {
     const { apartmentId } = useBookingFilters();
     const { data: members = [] } = useApartmentMembers(apartmentId);
     const { leaveApartment, isLeaving, deleteApartment, isDeletingApartment } = useDeleteOrLeaveApartment();
-
+    const { data: allApartments = [] } = useApartments(householdId);
+    
+    const existingNames = useMemo(() => allApartments.map(apt => apt.display_name), [allApartments]);
     const isUserAdmin = useMemo(() => checkIsAdmin(members, currentUserId), [members, currentUserId]);
     const admins = useMemo(() => members.filter(m => m.role === 'admin'), [members]);
     const canDeleteApartment = isUserAdmin && members.length === 1;
@@ -115,7 +118,7 @@ export default function MyApartmentTab() {
                         }}
                         isEditing={isEditingName}
                         setIsEditing={setIsEditingName}
-                        householdId={householdId}
+                        invalidNames={existingNames}
                     />
                 </div>
                 

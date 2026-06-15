@@ -1,12 +1,11 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import TextInput from "../components/TextInput";
 import EditSaveButton from "../components/EditSaveButton";
-import { useApartments } from "../hooks/useApartments";
 import { useTranslation } from "react-i18next";
 
 interface ApartmentNameEditableSectionProps {
     apartmentName: string;
-    householdId: string;
+    invalidNames: string[];
     onNameChange: (newName: string) => void;
     isEditing: boolean;
     setIsEditing: (arg0: boolean) => void;
@@ -17,14 +16,11 @@ export default function ApartmentNameEditableSection({
     onNameChange, 
     isEditing, 
     setIsEditing, 
-    householdId 
+    invalidNames 
 }: ApartmentNameEditableSectionProps) {
     const { t } = useTranslation();
     const [tempName, setTempName] = useState(apartmentName);
-    const { data: allApartments = [] } = useApartments(householdId);
     
-    const existingNames = useMemo(() => allApartments.map(apt => apt.display_name), [allApartments]);
-
     useEffect(() => {
         setTempName(apartmentName);
     }, [apartmentName]);
@@ -35,7 +31,7 @@ export default function ApartmentNameEditableSection({
         if (!trimmedName) {
             return t('apartmentNameSection.error_empty', "Can't be empty");
         }
-        const exists = existingNames.some(
+        const exists = invalidNames.some(
             (aptName) => aptName.toLowerCase() === trimmedName.toLowerCase()
         );
         if (exists) {
@@ -52,9 +48,17 @@ export default function ApartmentNameEditableSection({
     const hasValidationError = !!validateApartmentName(tempName);
 
     return (
-        <div className="flex items-center gap-3">
+        <div style={{
+            display:"flex",
+            flexDirection:"row",
+            gap: 8,
+            alignItems:"center",
+            justifyContent: 'space-between',
+            marginLeft:'16px'
+        }}
+        >
             {/* 2. Localized Form Input Field Label Text */}
-            <label className="text-lg font-bold text-gray-800 dark:text-gray-300 shrink-0 min-w-[70px] ml-8">
+            <label className="text-lg font-bold text-gray-800 dark:text-gray-300 shrink-0 min-w-[70px]">
                 {t('apartmentNameSection.label_name', 'Name:')}
             </label>
             
