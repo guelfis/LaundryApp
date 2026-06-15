@@ -3,6 +3,16 @@
   --ion-background-color: #ffffff;
   --ion-text-color: #000000;
   --ion-tab-bar-background: #ffffff;
+
+  /* Crucial structural steps for Light Mode borders and inputs */
+  --ion-color-step-150: #d9d9d9;
+  --ion-color-step-300: #b3b3b3;
+  --ion-color-step-500: #808080;
+
+  /* Search bar auto-theming defaults for Light Mode */
+  --ion-searchbar-color: var(--ion-text-color);
+  --ion-searchbar-placeholder-color: var(--ion-color-step-500);
+  --ion-searchbar-icon-color: var(--ion-color-step-500);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -10,13 +20,22 @@
     --ion-background-color: #121212;
     --ion-text-color: #ffffff;
     --ion-tab-bar-background: #1c1c1e;
+
+    /* Crucial structural steps for Dark Mode borders and inputs */
+    --ion-color-step-150: #262626;
+    --ion-color-step-300: #404040;
+    --ion-color-step-500: #737373;
+    --ion-item-background: #1e1e1e;
+
+    /* Search bar auto-theming overrides for Dark Mode */
+    --ion-searchbar-color: var(--ion-text-color);
+    --ion-searchbar-placeholder-color: var(--ion-color-step-500);
+    --ion-searchbar-icon-color: var(--ion-color-step-500);
   }
 }
 
-/* 
-  Ensure that when any IonPage is rendered inside an active IonTabs shell context, 
-  its inner content automatically shifts up to completely clear the navigation bar.
-*/
+/* Ensure that when any IonPage is rendered inside an active IonTabs shell context, 
+   its inner content automatically shifts up to completely clear the navigation bar. */
 ion-tabs ion-content {
   --padding-bottom: 3.5rem !important;
 }

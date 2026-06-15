@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { MapPin, Search } from 'lucide-react';
+import { IonSearchbar, IonList, IonItem, IonIcon, IonLabel, IonSpinner } from '@ionic/react';
+import { pinOutline } from 'ionicons/icons';
 import tzlookup from 'tz-lookup';
 
 export interface LocationResolution {
@@ -41,24 +42,13 @@ export default function AddressSearch({ onLocationResolved, isPending = false }:
   const { t, i18n } = useTranslation();
   const [query, setQuery] = useState('');
   const [predictions, setPredictions] = useState<PhotonFeature[]>([]);
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
-        setIsDropdownOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  const handleInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
+  const handleInputChange = async (value: string) => {
     setQuery(value);
 
     if (value.trim().length > 3) {
+      setLoading(true);
       try {
         const currentLang = i18n.language || 'en';
         const response = await fetch(
@@ -69,13 +59,13 @@ export default function AddressSearch({ onLocationResolved, isPending = false }:
         
         const data = await response.json() as { features: PhotonFeature[] };
         setPredictions(data.features || []);
-        setIsDropdownOpen(true);
       } catch (error) {
         console.error("Photon OSM Autocomplete communication flight failed:", error);
+      } finally {
+        setLoading(false);
       }
     } else {
       setPredictions([]);
-      setIsDropdownOpen(false);
     }
   };
 
@@ -103,47 +93,58 @@ export default function AddressSearch({ onLocationResolved, isPending = false }:
 
     setQuery(fullAddress);
     setPredictions([]);
-    setIsDropdownOpen(false);
   };
 
   return (
-    // FIX: Removed horizontal padding classes from the outer container reference to keep absolute width 100% matched
-    <div ref={containerRef} className="w-full relative">
-      
-      <div className="relative w-full">
-        <input
-          type="text"
+    <div>
+      <div >
+        <IonSearchbar
           value={query}
           disabled={isPending}
-          onChange={handleInputChange}
+          onIonInput={(e) => handleInputChange(e.detail.value!)}
+          // Clear predictions when the single native Ionic 'X' button clears out the text
+          onIonClear={() => setPredictions([])}
           placeholder={t("householdSetup.placeholder_address", "Search for an address...")}
-          className="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-slate-800/50 border border-gray-200 dark:border-slate-700/60 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-gray-800 dark:text-white transition-all shadow-sm disabled:opacity-50"
+          animated={true}
+          debounce={300}
+          showCancelButton="never" 
+          style={{
+            '--color': 'var(--ion-text-color)',
+            '--icon-color': 'var(--ion-color-step-500)',
+            '--placeholder-color': 'var(--ion-color-step-500)',
+          }}
         />
-        <Search className="w-4 h-4 text-gray-400 absolute left-3.5 top-3.5" />
+        {loading && (
+          <div>
+            <IonSpinner name="crescent" />
+          </div>
+        )}
       </div>
 
-      {/* FIXED POSITIONING: Dropdown alignment exactly covers the layout boundaries */}
-      {isDropdownOpen && predictions.length > 0 && (
-        <div className="absolute top-[105%] left-0 w-full bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-xl shadow-lg z-50 divide-y divide-gray-100 dark:divide-slate-700/50 max-h-60 overflow-y-auto">
+      {predictions.length > 0 && (
+        <IonList>
           {predictions.map((item, idx) => {
             const p = item.properties;
             const displayStreet = p.street ? `${p.street} ${p.housenumber || ''}`.trim() : p.name || '';
             const displayCity = p.city || p.town || p.state || '';
-            const itemLabel = [displayStreet, displayCity, p.country].filter(Boolean).join(', ');
+            const subTitle = [displayCity, p.country].filter(Boolean).join(', ');
 
             return (
-              <button
+              <IonItem
                 key={idx}
-                type="button"
+                button={true}
+                detail={false}
                 onClick={() => handleSelectAddress(item)}
-                className="w-full px-4 py-3 text-left text-sm hover:bg-gray-50 dark:hover:bg-slate-700/60 text-gray-700 dark:text-gray-200 transition-colors flex items-start gap-2.5 outline-none"
               >
-                <MapPin className="w-4 h-4 text-gray-400 mt-0.5 shrink-0" />
-                <span className="truncate block flex-1 font-medium">{itemLabel}</span>
-              </button>
+                <IonIcon slot="start" icon={pinOutline} />
+                <IonLabel>
+                  <h3>{displayStreet}</h3>
+                  <p>{subTitle}</p>
+                </IonLabel>
+              </IonItem>
             );
           })}
-        </div>
+        </IonList>
       )}
     </div>
   );
