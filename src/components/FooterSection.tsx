@@ -1,12 +1,57 @@
+import { IonNote } from "@ionic/react";
 import Button from "./Button";
 
-export default function FooterSection({buttonLabel, onButtonClick, buttonIcon, text}: { buttonLabel: string; onButtonClick: () => void; buttonIcon?: React.ReactNode; text: React.ReactNode }) {
-    return (
-        <div className="w-full px-4 py-4">
-            <p className="text-center text-gray-600 dark:text-gray-400 text-sm mt-4 mb-2">
-                {text}
-            </p>
-            <Button label={buttonLabel} onClick={onButtonClick} icon={buttonIcon} />
-        </div>
-    );
+interface FooterSectionProps {
+  buttonLabel: string;
+  onButtonClick: () => void;
+  buttonIcon?: string;
+  text?: string;
+  disableButton?:boolean
 }
+
+export default function FooterSection({
+  buttonLabel,
+  onButtonClick,
+  buttonIcon,
+  text,
+  disableButton
+}: FooterSectionProps) {
+  return (
+    <div style={styles.footerContainer}>
+      {text && (
+        /* 
+          Using IonNote handles the text color automatically.
+          It uses your global step variables to render a muted gray in light mode 
+          and an appropriately adjusted readable gray/white in dark mode.
+        */
+        <IonNote style={styles.helperText}>
+          {text}
+        </IonNote>
+      )}
+      
+      <Button 
+        label={buttonLabel} 
+        onClick={onButtonClick} 
+        icon={buttonIcon} 
+        disabled={disableButton}
+      />
+    </div>
+  );
+}
+
+const styles = {
+  footerContainer: {
+    width: '100%',
+    padding: '16px',
+    display: 'flex',
+    flexDirection: 'column' as const,
+    gap: '8px', // Creates space between the descriptive note text and your button component
+  },
+  helperText: {
+    display: 'block',
+    textAlign: 'center' as const,
+    fontSize: '14px', 
+    marginTop: '16px',
+    marginBottom: '8px',
+  }
+};

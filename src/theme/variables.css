@@ -9,6 +9,11 @@
   --ion-color-step-300: #b3b3b3;
   --ion-color-step-500: #808080;
 
+  /* --- button colors --- */
+  --custom-btn-bg: #ffffff;
+  --custom-btn-text: #2563eb;       /* text-blue-600 */
+  --custom-btn-border: #e5e7eb;     /* border-gray-200 */
+
   /* Search bar auto-theming defaults for Light Mode */
   --ion-searchbar-color: var(--ion-text-color);
   --ion-searchbar-placeholder-color: var(--ion-color-step-500);
@@ -26,6 +31,11 @@
     --ion-color-step-300: #404040;
     --ion-color-step-500: #737373;
     --ion-item-background: #1e1e1e;
+
+    /* --- button colors--- */
+    --custom-btn-bg: #0f172a;       /* dark:bg-slate-900 */
+    --custom-btn-text: #60a5fa;     /* dark:text-blue-400 */
+    --custom-btn-border: #1e293b;   /* dark:border-slate-800 */
 
     /* Search bar auto-theming overrides for Dark Mode */
     --ion-searchbar-color: var(--ion-text-color);

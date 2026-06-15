@@ -48,7 +48,7 @@ const PageLayout: React.FC<PageLayoutProps> = ({ children, header, footer, scrol
       </IonHeader>
 
       {/* 
-        FIXED: Uses the scrollable parameter flag.
+        Uses the scrollable parameter flag.
         True for all standard pages, False exclusively for the specialized Grid layout view.
       */}
       <IonContent 

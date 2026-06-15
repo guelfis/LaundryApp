@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next";
 import PageLayout from "../components/PageLayout";
 import { PageHeader } from "../components/PageHeader";
-import { Building, Plus, Search } from "lucide-react";
+import { Building } from "lucide-react";
 import { useHistory } from "react-router-dom";
 import { useGetUserHouselds } from "../hooks/useHousehold";
 import { LoadingSpinner } from "../components/LoadingSpinner";
@@ -11,6 +11,7 @@ import Button from "../components/Button";
 import { useState } from "react";
 import SearchHouseholdModal from "../household/SearchHouseholdModal";
 import { ROUTES } from "../routes/routes.constants";
+import {addOutline, searchOutline} from 'ionicons/icons'
 
 export default function HouseholdLogin() {
     const { t } = useTranslation();
@@ -56,8 +57,8 @@ export default function HouseholdLogin() {
                 {/* <hr className="border-gray-100 dark:border-gray-800 mt-2 mb-4" /> */}
                 <SectionText title={t("householdLogin.manage_actions")}/>
                 <div className="flex flex-col gap-3 px-4 w-full">
-                    <Button label={t("householdLogin.btn_join_existing")} onClick={() => setIsModalOpen(true)} icon={<Search className="w-4 h-4" />} />
-                    <Button label={t("householdLogin.btn_create_new")} onClick={() => history.push(ROUTES.HOUSEHOLD_SETUP)} icon={<Plus className="w-4 h-4" />} /> 
+                    <Button label={t("householdLogin.btn_join_existing")} onClick={() => setIsModalOpen(true)} icon={searchOutline} />
+                    <Button label={t("householdLogin.btn_create_new")} onClick={() => history.push(ROUTES.HOUSEHOLD_SETUP)} icon={addOutline} /> 
                 </div>         
              </div>
 

@@ -6,7 +6,7 @@ import { Apartment } from '../lib/databaseTypes';
 import ApartmentsList from '../apartmentSetup/ApartmentsList';
 import JoinRequestModal from '../apartmentSetup/JoinRequestModal'; 
 import { PageHeader } from '../components/PageHeader';
-import { Home, Plus } from 'lucide-react';
+import { Home } from 'lucide-react';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import SectionText from '../components/SectionText';
 import CreateApartmentModal from '../apartmentSetup/CreateApartmentModal';
@@ -14,6 +14,7 @@ import { useTranslation } from 'react-i18next';
 import FooterSection from '../components/FooterSection';
 import { getCleanStorageItem } from '../auth/authUtils';
 import { ROUTES } from '../routes/routes.constants';
+import {addOutline} from 'ionicons/icons'
 
 export default function ApartmentLogin() {
   const { t } = useTranslation();
@@ -102,7 +103,7 @@ export default function ApartmentLogin() {
         <PageHeader title={t('apartmentLogin.page_title', 'Apartment Setup')} icon={<Home className="w-7 h-7 text-blue-500 dark:text-blue-400" />} />
       }
       footer={
-        <FooterSection buttonLabel={t('apartmentLogin.btn_create_apt', 'create a new apartment')} onButtonClick={() => setIsCreateAptModalOpen(true)} text={t('apartmentLogin.footer_question', 'Your apartment is not on the list?')} buttonIcon={<Plus className="w-4 h-4" />}  />
+        <FooterSection buttonLabel={t('apartmentLogin.btn_create_apt', 'create a new apartment')} onButtonClick={() => setIsCreateAptModalOpen(true)} text={t('apartmentLogin.footer_question', 'Your apartment is not on the list?')} buttonIcon={addOutline}  />
       }
     >
       <div className="flex flex-col flex-1 w-full space-y-6">
