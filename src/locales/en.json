@@ -41,7 +41,8 @@
   "dashboard":{
     "calendar": "Calendar",
     "apartment": "Apartment",
-    "your_apartment": "Your Apartment"
+    "your_apartment": "Your Apartment",
+    "household": "Building"
   },
   "calendarGrid":{
     "day":"Day"

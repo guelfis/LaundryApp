@@ -19,11 +19,11 @@ export function useMyApartments(householdId: string) {
   });
 }
 
-export function useApartmentMembers(apartmentId: string) {
+export function useApartmentMembers(apartmentId: string | null, options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: ['apartment-members', apartmentId],
-    queryFn: () => getApartmentMembers(apartmentId),
-    enabled: !!apartmentId, // only run if apartmentId is truthy
+    queryFn: () => getApartmentMembers(apartmentId!),
+    enabled: options?.enabled ?? !!apartmentId, 
   });
 }
 
@@ -61,11 +61,11 @@ export function useJoinViaLink() {
 }
 
 // Hook: Fetch pending join requests for an admin dashboard
-export function usePendingRequests(apartmentId: string) {
+export function usePendingRequests(apartmentId: string | null, options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: ['pending-requests', apartmentId],
-    queryFn: () => getPendingRequests(apartmentId),
-    enabled: !!apartmentId, 
+    queryFn: () => getPendingRequests(apartmentId!),
+    enabled: options?.enabled ?? !!apartmentId,
     staleTime: 1000 * 60,   // 1 minute of staleness to reduce refetch frequency
   });
 }

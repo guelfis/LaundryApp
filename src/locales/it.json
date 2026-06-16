@@ -40,7 +40,8 @@
   "dashboard":{
     "calendar": "Calendario",
     "apartment": "Appartmento",
-    "your_apartment": "Il Tuo Appartamento"
+    "your_apartment": "Il Tuo Appartamento",
+    "household": "Condominio"
   },
   "calendarGrid":{
     "day":"Giorno"

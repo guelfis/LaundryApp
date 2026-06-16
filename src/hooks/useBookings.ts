@@ -86,10 +86,10 @@ export function useBookingActions() {
   };
 }
 
-export function useUpcomingBookings(apartmentId: string) {
+export function useUpcomingBookings(apartmentId: string | null, options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: ['upcoming-bookings', apartmentId],
-    queryFn: () => getUpcomingBookings(apartmentId),
-    enabled: !!apartmentId,
+    queryFn: () => getUpcomingBookings(apartmentId!),
+    enabled: options?.enabled ?? !!apartmentId,
   });
 }

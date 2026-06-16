@@ -12,7 +12,6 @@ import MemberModal from "../myApartment/MemberModal";
 import { ApartmentMember } from "../lib/databaseTypes";
 import { useHistory } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { useBookingFilters } from "../hooks/useBookings";
 import { ROUTES } from "../routes/routes.constants";
 import PageLayout from "../components/PageLayout";
 import { PageHeader } from "../components/PageHeader";
@@ -24,7 +23,7 @@ export default function MyApartmentTab() {
     const { t } = useTranslation();
     const history = useHistory();
 
-    const { householdId } = useContext(BookingContext)!;
+    const { householdId, apartmentId } = useContext(BookingContext)!;
     const [currentUserId, setCurrentUserId] = useState<string | null>(null);
     const [apartmentName, setApartmentName] = React.useState(getCleanStorageItem('apartmentName') || 'my apartment');
     const [isEditingName, setIsEditingName] = useState<boolean>(false);
@@ -39,7 +38,6 @@ export default function MyApartmentTab() {
 
     const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
     
-    const { apartmentId } = useBookingFilters();
     const { data: members = [] } = useApartmentMembers(apartmentId);
     const { leaveApartment, isLeaving, deleteApartment, isDeletingApartment } = useDeleteOrLeaveApartment();
     const { data: allApartments = [] } = useApartments(householdId);
@@ -53,6 +51,12 @@ export default function MyApartmentTab() {
     const membersMap = useMemo((): Record<string, ApartmentMember> => {
         return Object.fromEntries(members.map(m => [m.user_id, m]));
     }, [members]);
+
+    if (!apartmentId){
+        // we should never get here anyway
+        console.error("Entering apartment tab without an apartment id set.")
+        return;
+    }
 
     const handleDeleteApartment = async () => {
         const confirmFirst = window.confirm(t('myApartmentTab.delete_warning'));

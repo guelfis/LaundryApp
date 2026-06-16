@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Switch, Route, Redirect, useLocation } from 'react-router-dom';
 import { IonTabs, IonTabBar, IonTabButton, IonLabel, IonRouterOutlet } from '@ionic/react';
-import { Calendar, Home, LayoutDashboard, Settings } from 'lucide-react';
+import { Building, Calendar, Home, LayoutDashboard, Settings } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 // Components & Hooks
@@ -13,12 +13,14 @@ import { usePendingRequests, useApartmentMembers } from '../hooks/useApartments'
 import { checkIsAdmin, resolveCurrentUserId } from '../auth/authUtils';
 import { useBookingFilters } from '../hooks/useBookings';
 import { ROUTES } from '../routes/routes.constants';
+import BuildingTab from './BuildingTab';
 
 const enum DashboardTabs {
   DASHBOARD = "dashboard",
   CALENDAR = "calendar",
   SETTINGS = "settings",
-  APARTMENT = "apartment"
+  APARTMENT = "apartment",
+  HOUSEHOLD = "household"
 }
 
 function Dashboard() {
@@ -34,15 +36,21 @@ function Dashboard() {
     if (location.pathname === ROUTES.DASHBOARD_CALENDAR) return DashboardTabs.CALENDAR;
     if (location.pathname === ROUTES.DASHBOARD_APARTMENT) return DashboardTabs.APARTMENT;
     if (location.pathname === ROUTES.DASHBOARD_SETTINGS) return DashboardTabs.SETTINGS;
+    if (location.pathname === ROUTES.DASHBOARD_HOUSEHOLD) return DashboardTabs.HOUSEHOLD;
     return DashboardTabs.DASHBOARD; // Fallback default
   }, [location.pathname]);
   
-  const { apartmentId } = useBookingFilters();
-  const { data: members = [] } = useApartmentMembers(apartmentId);
-  const { data: requests = [] } = usePendingRequests(apartmentId);
+  const { apartmentId, isAdminMode } = useBookingFilters();
+  const { data: members = [] } = useApartmentMembers(apartmentId, { enabled: !!apartmentId });
+  const { data: requests = [] } = usePendingRequests(apartmentId, { enabled: !!apartmentId });
   
-  const isUserAdmin = useMemo(() => checkIsAdmin(members, currentUserId), [members, currentUserId]);
-  const hasNotifications = isUserAdmin && Array.isArray(requests) && requests.length > 0;
+  // Se apartmentId è null, l'utente non può essere un admin dell'appartamento, quindi forziamo false
+  const isUserApartmentAdmin = useMemo(() => {
+    if (!apartmentId) return false;
+    return checkIsAdmin(members, currentUserId);
+  }, [members, currentUserId, apartmentId]);
+  
+  const hasNotifications = isUserApartmentAdmin && Array.isArray(requests) && requests.length > 0;
   return (
     <IonTabs>
       <IonRouterOutlet>
@@ -55,6 +63,9 @@ function Dashboard() {
           </Route>
           <Route exact path={ROUTES.DASHBOARD_APARTMENT}>
             <MyApartmentTab />
+          </Route>
+          <Route exact path={ROUTES.DASHBOARD_HOUSEHOLD}>
+            <BuildingTab/>
           </Route>
           <Route exact path={ROUTES.DASHBOARD_SETTINGS}>
             <UserSettings />
@@ -84,7 +95,8 @@ function Dashboard() {
           <IonLabel style={{ fontSize: '0.875rem' }}>{t('dashboard.calendar')}</IonLabel>
         </IonTabButton>
 
-        <IonTabButton tab={DashboardTabs.APARTMENT} href={ROUTES.DASHBOARD_APARTMENT} selected={activeTab===DashboardTabs.APARTMENT}>
+        {apartmentId && (
+          <IonTabButton tab={DashboardTabs.APARTMENT} href={ROUTES.DASHBOARD_APARTMENT} selected={activeTab===DashboardTabs.APARTMENT}>
           <div style={{ position: 'relative' }}>
             <Home className="w-5 h-5" />
             {hasNotifications && (
@@ -96,7 +108,17 @@ function Dashboard() {
           </div>
           <IonLabel style={{ fontSize: '0.875rem' }}>{t('dashboard.apartment')}</IonLabel>
         </IonTabButton>
+      )}
 
+      {isAdminMode && (
+        <IonTabButton tab={DashboardTabs.HOUSEHOLD} href={ROUTES.DASHBOARD_HOUSEHOLD} selected={activeTab===DashboardTabs.HOUSEHOLD}>
+          <div style={{ position: 'relative' }}>
+            <Building className="w-5 h-5" />
+          </div>
+          <IonLabel style={{ fontSize: '0.875rem' }}>{t('dashboard.household')}</IonLabel>
+        </IonTabButton>
+      )}
+        
         <IonTabButton tab={DashboardTabs.SETTINGS} href={ROUTES.DASHBOARD_SETTINGS} selected={activeTab===DashboardTabs.SETTINGS}>
           <Settings className="w-5 h-5" />
           <IonLabel style={{ fontSize: '0.875rem' }}>{t('settings.page_title')}</IonLabel>

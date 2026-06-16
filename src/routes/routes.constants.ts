@@ -13,6 +13,7 @@ export const ROUTES = {
   DASHBOARD_CALENDAR: '/dashboard/calendar',
   DASHBOARD_APARTMENT: '/dashboard/apartment',
   DASHBOARD_SETTINGS: '/dashboard/settings',
+  DASHBOARD_HOUSEHOLD: '/dashboard/building'
 } as const;
 
 // Create a TypeScript type helper from the object keys if needed

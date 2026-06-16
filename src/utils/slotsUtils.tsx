@@ -61,9 +61,10 @@ export interface AggregatedSlotInfo {
 export const getAggregatedBookingsMap = (
   bookings: Booking[], 
   apartments: Record<string, string>,
-  currentApartmentId: string,
+  currentApartmentId: string | null,
 ): Record<string, AggregatedSlotInfo> => {
   
+  const finalMap: Record<string, AggregatedSlotInfo> = {};
   const grouped: Record<string, Booking[]> = {};
   const timezone = getHouseholdTimezone();
   
@@ -90,13 +91,12 @@ export const getAggregatedBookingsMap = (
   });
 
   // 2. Reduce the groups into aggregated display nodes
-  const finalMap: Record<string, AggregatedSlotInfo> = {};
-
   Object.entries(grouped).forEach(([key, slotBookings]) => {
     const activeBooking = slotBookings.find((b) => b.status === 'active');
     
     if (activeBooking) {
       const booked_by_user = activeBooking.apartment_id === currentApartmentId;
+      // TODO: add a way to recognize booked by maintainance
       const name = apartments[activeBooking.apartment_id ?? ''] || i18n.t('slotSubstring.another_apartment');
       finalMap[key] = {
         id: activeBooking.id,
