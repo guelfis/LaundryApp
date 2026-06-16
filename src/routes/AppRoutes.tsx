@@ -30,6 +30,7 @@ export default function AppRoutes() {
   // Read current locally stored choices
   const cachedHouseholdId = getCleanStorageItem('householdId');
   const cachedApartmentId = getCleanStorageItem('apartmentId');
+  const isAdminModeActive = localStorage.getItem('isAdminModeActive') === 'true';
 
   useEffect(() => {
     async function determineNavigationTarget() {
@@ -82,6 +83,7 @@ export default function AppRoutes() {
 
   // get the timezone of the cached household for passing into the BookingProvider context
   const cachedHousehold = userHouseholds.find(hh => hh.household_id === cachedHouseholdId);
+  const isUserAdminOfThisBuilding = cachedHousehold?.role === 'admin';
   const householdTimezone = cachedHousehold ? cachedHousehold.household.timezone : 'Europe/Zurich';
   localStorage.setItem('householdTimezone', householdTimezone);
 
@@ -124,8 +126,8 @@ export default function AppRoutes() {
         </Route>
 
         <Route path={ROUTES.DASHBOARD_MAIN}>
-          {session && cachedApartmentId && cachedHouseholdId ? (
-            <BookingProvider householdId={cachedHouseholdId} apartmentId={cachedApartmentId} householdTimezone={householdTimezone}>
+            {session && cachedHouseholdId && (cachedApartmentId || (isUserAdminOfThisBuilding && isAdminModeActive)) ? (
+            <BookingProvider householdId={cachedHouseholdId} apartmentId={cachedApartmentId || null} householdTimezone={householdTimezone} isAdminMode={isAdminModeActive}>
               <Dashboard />
             </BookingProvider>
           ) : (

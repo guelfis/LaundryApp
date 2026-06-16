@@ -23,10 +23,14 @@ export default function BookingModal({
 
   const { t } = useTranslation();
   const { apartmentId } = useBookingFilters();
+  
   const { bookSlot, isBooking, releaseSlot, isReleasing } = useBookingActions();
 
   if (!isOpen || !selectedSlot) return null;
   const handleBook = async () => {
+    if (!apartmentId){
+      return;
+    }
     try {
       await bookSlot({
         apartmentId,

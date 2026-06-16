@@ -86,7 +86,10 @@
     "footer_question": "Your apartment is not on the list?",
     "btn_create_apt": "Create a New Apartment",
     "section_my_apts": "My Apartments",
-    "section_available_apts": "Available Apartments"
+    "section_available_apts": "Available Apartments",
+    "no_available_apartments": "There are no apartments created yet for this building",
+    "no_your_apartment": "You are not part of any apartment yet",
+    "enter_admin": "Enter as Administrator"
   },
   "inviteMember": {
     "title": "Invite Roommate",

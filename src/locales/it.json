@@ -85,7 +85,10 @@
     "footer_question": "Il tuo appartamento non è nella lista?",
     "btn_create_apt": "Crea un Nuovo Appartamento",
     "section_my_apts": "I Miei Appartamenti",
-    "section_available_apts": "Appartamenti Disponibili"
+    "section_available_apts": "Appartamenti Disponibili",
+    "no_available_apartments": "Non e' ancora stato creato nessun apparmento per questo edificio.",
+    "no_your_apartment": "Non fai parte di nessun appartamento",
+    "enter_admin": "Entra come Amministratore"
   },
   "inviteMember": {
     "title": "Invita Inquilino",

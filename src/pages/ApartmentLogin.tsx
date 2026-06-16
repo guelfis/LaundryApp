@@ -14,7 +14,10 @@ import { useTranslation } from 'react-i18next';
 import FooterSection from '../components/FooterSection';
 import { getCleanStorageItem } from '../auth/authUtils';
 import { ROUTES } from '../routes/routes.constants';
-import {addOutline} from 'ionicons/icons'
+import {addOutline, constructOutline} from 'ionicons/icons'
+import { IonIcon, IonLabel } from '@ionic/react';
+import { useGetUserHouselds } from '../hooks/useHousehold';
+import SlotCard from '../components/SlotCard';
 
 export default function ApartmentLogin() {
   const { t } = useTranslation();
@@ -22,7 +25,11 @@ export default function ApartmentLogin() {
   
   const { data: myApartments = [], isLoading: isLoadingMy } = useMyApartments(householdId);
   const { data: allApartments = [], isLoading: isLoadingAll } = useApartments(householdId);
+  const { data: buildings = [], isLoading: isLoadingHouseholds } = useGetUserHouselds();
   
+  const currentBuilding = buildings.filter(build => build.household_id === householdId)[0];
+  const isBuildingAdmin = currentBuilding.role === 'admin';
+
   const location = useLocation();
    const searchParams = useMemo(() => {
     return new URLSearchParams(location.search);
@@ -66,6 +73,11 @@ export default function ApartmentLogin() {
     history.push(ROUTES.DASHBOARD_MAIN);
   };
 
+  const enterAsAdmin = () => {
+    localStorage.setItem('isAdminModeActive', "true");
+    history.push(ROUTES.DASHBOARD_MAIN);
+  }
+
   const handleJoinRequest = (apt: Apartment) => {
     setSelectedApt(apt);
     setIsJoinModalOpen(true);
@@ -89,7 +101,7 @@ export default function ApartmentLogin() {
     );
   }
 
-  if (isLoadingAll || isLoadingMy) {
+  if (isLoadingAll || isLoadingMy || isLoadingHouseholds) {
     return (
       <PageLayout>
         <LoadingSpinner />
@@ -106,11 +118,19 @@ export default function ApartmentLogin() {
         <FooterSection buttonLabel={t('apartmentLogin.btn_create_apt', 'create a new apartment')} onButtonClick={() => setIsCreateAptModalOpen(true)} text={t('apartmentLogin.footer_question', 'Your apartment is not on the list?')} buttonIcon={addOutline}  />
       }
     >
-      <div className="flex flex-col flex-1 w-full space-y-6">
+      <div className="flex flex-col flex-1 w-full space-y-4">
+        <SectionText title={t('apartmentLogin.section_my_apts', 'My Apartments')} />
         {/* 3. Localized List Section Headers */}
-        {myApartments.length > 0 && (
+        {isBuildingAdmin && (
+          <SlotCard onClick={() => {
+            enterAsAdmin();
+          }}
+          title={t('apartmentLogin.enter_admin')}
+          icon={<IonIcon icon={constructOutline} />}
+          />
+        )}
+        {myApartments.length > 0 ? (
           <div className="flex flex-col">
-            <SectionText title={t('apartmentLogin.section_my_apts', 'My Apartments')} />
             <ApartmentsList 
               isLoading={isLoadingMy} 
               apartments={myApartments} 
@@ -118,12 +138,16 @@ export default function ApartmentLogin() {
               lock={false} 
             />
           </div>
+        ):(
+          <IonLabel>
+            {t('apartmentLogin.no_your_apartment')}
+          </IonLabel>
         )}
 
+        <SectionText title={t('apartmentLogin.section_available_apts', 'Available Apartments')} />
         {/* ALWAYS show Other Apartments if they exist */}
-        {otherApartments.length > 0 && (
+        {otherApartments.length > 0 ? (
           <div className="flex-grow flex flex-col">
-            <SectionText title={t('apartmentLogin.section_available_apts', 'Available Apartments')} />
             <ApartmentsList 
               isLoading={isLoadingAll} 
               apartments={otherApartments} 
@@ -131,6 +155,10 @@ export default function ApartmentLogin() {
               lock={true} 
             />
           </div>
+        ):(
+          <IonLabel>
+            {t('apartmentLogin.no_available_apartments')}
+          </IonLabel>
         )}
       </div>
 
