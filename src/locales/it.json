@@ -10,6 +10,8 @@
     "title": "Pianificatore Lavanderia",
     "checking_membership": "Verifica delle appartenenze al condominio in corso..."
   },
+  "accessCode":{
+      "error_lenght": "Il codice di accesso deve avere {{count}} numeri."    },
   "slotModal": {
     "title_yours": "La tua Prenotazione",
     "title_occupied": "Slot Occupato",
@@ -163,7 +165,13 @@
     "placeholder_address": "Digita l'indirizzo del palazzo..."
   },
   "createHousehold":{
-    "title": "Crea un Palazzo"
+    "title": "Nuovo Edificio",
+    "description": "Inserisci un nome identificativo per la configurazione di questo edificio.",
+    "name": "NOME EDIFICIO",
+    "btn_create": "Crea Edificio",
+    "access_code": "Aggiungi un codice di accesso",
+    "success_alert": "Edificio creato con successo!",
+    "error_alert": "Impossibile creare l'edificio. Riprova."
   },
   "householdLogin":{
     "page_title": "Login nel palazzo",

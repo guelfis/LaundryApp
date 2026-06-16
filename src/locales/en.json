@@ -10,7 +10,9 @@
       "title": "Laundry Planner",
       "checking_membership": "Checking building memberships..."
     },
-    
+    "accessCode":{
+      "error_lenght": "The access code needs to be {{count}} digits long."
+    },
     "slotModal": {
       "title_yours": "Your Booking",
       "title_occupied": "Slot Occupied",
@@ -167,7 +169,13 @@
     "placeholder_address": "Type the building address..."
   },
   "createHousehold":{
-    "title": "Create a Building"
+    "title": "Create a Building",
+    "description":"Here you can create a new building so you can start handling the laundry schedule. Once created you will become the administrator of the building.",
+    "name": "Add a name for the Building",
+    "btn_create": "Create Building",
+    "access_code": "Add an access code for users to join",
+    "success_alert": "Building created successfully!",
+    "error_alert": "Failed to create the building. Please try again."
   },
   "householdLogin":{
     "page_title": "Building Login",

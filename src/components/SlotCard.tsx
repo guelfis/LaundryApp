@@ -5,7 +5,7 @@ interface SlotCardProps {
   icon?: React.ReactNode;
   iconBgClass?: string;
   title: React.ReactNode;
-  subtitle: React.ReactNode;
+  subtitle?: React.ReactNode;
   containerClass?: string;
   endContent?: React.ReactNode;
   onClick?: () => void;
@@ -42,9 +42,11 @@ export default function SlotCard({
           <span className="font-bold text-gray-800 dark:text-gray-200 text-sm leading-snug truncate">
             {title}
           </span>
-          <span className="text-xs text-gray-500 font-medium tracking-wide mt-0.5 truncate">
-            {subtitle}
-          </span>
+          {subtitle && (
+            <span className="text-xs text-gray-500 font-medium tracking-wide mt-0.5 truncate">
+              {subtitle}
+            </span>
+          )}   
         </div>
       </div>
 

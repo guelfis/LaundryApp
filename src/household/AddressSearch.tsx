@@ -14,6 +14,7 @@ export interface LocationResolution {
 interface AddressSearchProps {
   onLocationResolved: (location: LocationResolution) => void;
   isPending?: boolean;
+  onClean?: () => void;
 }
 
 interface PhotonGeometry {
@@ -38,7 +39,7 @@ interface PhotonFeature {
   properties: PhotonProperties;
 }
 
-export default function AddressSearch({ onLocationResolved, isPending = false }: AddressSearchProps) {
+export default function AddressSearch({ onLocationResolved, isPending = false , onClean = () => {}}: AddressSearchProps) {
   const { t, i18n } = useTranslation();
   const [query, setQuery] = useState('');
   const [predictions, setPredictions] = useState<PhotonFeature[]>([]);
@@ -103,7 +104,7 @@ export default function AddressSearch({ onLocationResolved, isPending = false }:
           disabled={isPending}
           onIonInput={(e) => handleInputChange(e.detail.value!)}
           // Clear predictions when the single native Ionic 'X' button clears out the text
-          onIonClear={() => setPredictions([])}
+          onIonClear={() => {setPredictions([]); onClean();}}
           placeholder={t("householdSetup.placeholder_address", "Search for an address...")}
           animated={true}
           debounce={300}

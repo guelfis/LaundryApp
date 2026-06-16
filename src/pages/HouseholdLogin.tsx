@@ -77,7 +77,10 @@ export default function HouseholdLogin() {
                 )}
 
                 <SectionText title={t("householdLogin.manage_actions")}/>
-                <AddressSearch onLocationResolved={handleLocationResolved} />
+                <AddressSearch 
+                    onLocationResolved={handleLocationResolved} 
+                    onClean={() => setSelectedLocation(null)} 
+                />
                             
                 {isLoadingSearch && <LoadingSpinner />}
     

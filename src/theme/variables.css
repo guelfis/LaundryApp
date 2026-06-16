@@ -3,21 +3,20 @@
   --ion-background-color: #ffffff;
   --ion-text-color: #000000;
   --ion-tab-bar-background: #ffffff;
-
-  /* Crucial structural steps for Light Mode borders and inputs */
+  
   --ion-color-step-150: #d9d9d9;
   --ion-color-step-300: #b3b3b3;
   --ion-color-step-500: #808080;
-
-  /* --- button colors --- */
+  
+   /* --- button colors --- */
   --custom-btn-bg: #ffffff;
   --custom-btn-text: #2563eb;       /* text-blue-600 */
   --custom-btn-border: #e5e7eb;     /* border-gray-200 */
+  
 
-  /* Search bar auto-theming defaults for Light Mode */
-  --ion-searchbar-color: var(--ion-text-color);
-  --ion-searchbar-placeholder-color: var(--ion-color-step-500);
-  --ion-searchbar-icon-color: var(--ion-color-step-500);
+  /* --- UNIFIED ELEMENT VARIABLES (Light Mode) --- */
+  --app-input-bg: var(--ion-color-step-50, #f2f2f2);
+  --app-input-radius: 10px;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -26,7 +25,6 @@
     --ion-text-color: #ffffff;
     --ion-tab-bar-background: #1c1c1e;
 
-    /* Crucial structural steps for Dark Mode borders and inputs */
     --ion-color-step-150: #262626;
     --ion-color-step-300: #404040;
     --ion-color-step-500: #737373;
@@ -37,11 +35,44 @@
     --custom-btn-text: #60a5fa;     /* dark:text-blue-400 */
     --custom-btn-border: #1e293b;   /* dark:border-slate-800 */
 
-    /* Search bar auto-theming overrides for Dark Mode */
-    --ion-searchbar-color: var(--ion-text-color);
-    --ion-searchbar-placeholder-color: var(--ion-color-step-500);
-    --ion-searchbar-icon-color: var(--ion-color-step-500);
+    /* --- UNIFIED ELEMENT VARIABLES (Dark Mode from your image) --- */
+    --app-input-bg: #1a1a1a; /* Subtle off-black sheet background */
+    --app-input-radius: 10px;
+
   }
+}
+
+/* 
+  Global Automatic Component Unification Rules
+  This forces every Searchbar and input Item to match each other perfectly.
+*/
+ion-searchbar {
+  --background: var(--app-input-bg) !important;
+  --border-radius: var(--app-input-radius) !important;
+  --box-shadow: none !important;
+  padding: 0 !important;
+  height: 48px !important;
+}
+
+/* Removes default background lines under standard Ionic input list wrappers */
+ion-item.unified-input-item {
+  --background: var(--app-input-bg);
+  --border-radius: var(--app-input-radius);
+  --inner-padding-end: 12px;
+  --padding-start: 12px;
+  margin: 0;
+  height: 48px;
+  width: 100%;
+}
+
+.access-code-input {
+  --text-align: center !important;
+} 
+
+.access-code-input input:not(ion-input-password-toggle) {
+  font-family: monospace !important;
+  letter-spacing: 12px !important;
+  font-size: 20px !important;
 }
 
 /* Ensure that when any IonPage is rendered inside an active IonTabs shell context, 
@@ -54,3 +85,5 @@ ion-tabs ion-content {
 main {
   box-sizing: border-box;
 }
+
+

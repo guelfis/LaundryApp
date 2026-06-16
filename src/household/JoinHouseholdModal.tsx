@@ -9,6 +9,7 @@ import { Lock, ArrowLeft, CheckCircle2, Building } from "lucide-react";
 import { ROUTES } from "../routes/routes.constants";
 import { useHistory } from "react-router-dom";
 import { HouseholdData } from "../lib/databaseTypes";
+import AccessCodeInput from "./AccessCodeInput";
 
 interface JoinHouseholdModalProps {
   isOpen: boolean;
@@ -88,15 +89,10 @@ export default function JoinHouseholdModal({ isOpen, onClose, householdData }: J
               </label>
             </div>
             <div className="relative w-full">
-              <input
-                type="password"
-                inputMode="numeric"
-                maxLength={4}
-                value={accessCode}
-                onChange={(e) => setAccessCode(e.target.value)}
-                placeholder="••••"
+              <AccessCodeInput 
+                accessCode={accessCode}
                 disabled={isVerifying}
-                className="w-full pl-10 pr-4 py-3.5 bg-gray-50 dark:bg-slate-800/50 border border-gray-200 dark:border-slate-700/60 rounded-xl text-center text-lg font-mono tracking-widest focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-gray-800 dark:text-white transition-all disabled:opacity-50"
+                setAccessCode={setAccessCode}
               />
             </div>
           </div>

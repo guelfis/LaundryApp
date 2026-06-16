@@ -1,4 +1,4 @@
-import i18n from '../locales/i18n'; // Import to read current app language
+import i18n from '../locales/i18n'; 
 import { getHouseholdTimezone } from './getters';
  
 /**

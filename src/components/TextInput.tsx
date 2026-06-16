@@ -9,6 +9,7 @@ interface TextInputProps {
   autoFocus?: boolean;
   className?: string; 
   errorFn?: (value: string) => string | null; 
+  disabled?:boolean;
 }
 
 export default function TextInput({
@@ -19,6 +20,7 @@ export default function TextInput({
   autoFocus = false,
   className = '',
   errorFn = () => null,
+  disabled = false,
 }: TextInputProps) {
 
   const [isTouched, setIsTouched] = useState(false);
@@ -60,6 +62,7 @@ export default function TextInput({
           autofocus={autoFocus}
           errorText={errorText}
           onIonBlur={() => markTouched()}
+          disabled={disabled}
           onIonInput={(e) => {
             onChange(e.detail.value!);
             validate(e);
