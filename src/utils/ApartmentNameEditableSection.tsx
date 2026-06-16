@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import TextInput from "../components/TextInput";
 import EditSaveButton from "../components/EditSaveButton";
 import { useTranslation } from "react-i18next";
+import { validateApartmentName } from "./validateApartmentName";
 
 interface ApartmentNameEditableSectionProps {
     apartmentName: string;
@@ -26,18 +27,8 @@ export default function ApartmentNameEditableSection({
     }, [apartmentName]);
 
     // 1. Validation logic moved inside to leverage type-safe localized error keys
-    const validateApartmentName = (name: string): string | null => {
-        const trimmedName = name.trim();
-        if (!trimmedName) {
-            return t('apartmentNameSection.error_empty', "Can't be empty");
-        }
-        const exists = invalidNames.some(
-            (aptName) => aptName.toLowerCase() === trimmedName.toLowerCase()
-        );
-        if (exists) {
-            return t('apartmentNameSection.error_taken', "Name taken");
-        }
-        return null;
+    const validateName = (name: string): string | null => {
+        return validateApartmentName(name, invalidNames);
     };
 
     const handleSave = () => {
@@ -45,7 +36,7 @@ export default function ApartmentNameEditableSection({
         setIsEditing(false);
     };
 
-    const hasValidationError = !!validateApartmentName(tempName);
+    const hasValidationError = !!validateName(tempName);
 
     return (
         <div style={{
@@ -68,7 +59,7 @@ export default function ApartmentNameEditableSection({
                         value={tempName}
                         onChange={(val) => setTempName(val)}
                         autoFocus
-                        errorFn={validateApartmentName}
+                        errorFn={validateName}
                     />   
                 ) : (
                     <span className="text-gray-800 dark:text-gray-200 font-medium pl-3">{apartmentName}</span>

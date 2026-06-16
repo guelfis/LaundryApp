@@ -1,10 +1,11 @@
 import { useMemo, useState } from "react";
 import BottomModal from "../components/BottomModal";
 import ModalButton from "../components/ModalButton";
-import ApartmentNameEditableSection from "../utils/ApartmentNameEditableSection";
 import { useApartments, useCreateApartment } from "../hooks/useApartments";
 import { Send } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import TextInput from "../components/TextInput";
+import { validateApartmentName } from "../utils/validateApartmentName";
 
 interface CreateApartmentModalProps {
     householdId: string;
@@ -15,7 +16,6 @@ interface CreateApartmentModalProps {
 export default function CreateApartmentModal({ householdId, isModalOpen, onClose }: CreateApartmentModalProps) {
     const { t } = useTranslation();
     const [apartmentName, setApartmentName] = useState("");
-    const [isEditingName, setIsEditingName] = useState<boolean>(true); // Fixed tiny typo in setter name
 
     const createApartmentMutation = useCreateApartment();
     const { data: allApartments = [] } = useApartments(householdId);
@@ -40,25 +40,29 @@ export default function CreateApartmentModal({ householdId, isModalOpen, onClose
         }
     };
 
+    const validateName = (name: string): string | null => {
+        return validateApartmentName(name, existingNames);
+    };
+    const isNameValid = !!validateApartmentName(apartmentName, existingNames);
+
     return (
         /* 1. Localized Modal Title */
         <BottomModal isOpen={isModalOpen} onClose={handleClose} title={t('createApartment.title', 'Create New Apartment')}>
             <div className="space-y-6">
-                <ApartmentNameEditableSection 
-                    apartmentName={apartmentName}
-                    invalidNames={existingNames}
-                    onNameChange={setApartmentName}
-                    setIsEditing={setIsEditingName}
-                    isEditing={isEditingName}
+                <TextInput
+                    value={apartmentName}
+                    onChange={setApartmentName}
+                    type="text"
+                    errorFn={validateName}
                 />
                 <div className="flex flex-col gap-3 pt-2">
                     <ModalButton 
                         variant="primary"
                         onClick={handleCreateApartment}
                         disabled={
-                            isEditingName || 
                             !apartmentName.trim() || 
-                            createApartmentMutation.isPending
+                            createApartmentMutation.isPending || 
+                            isNameValid
                         }
                     >
                         {/* 2. Localized Dynamic Button States */}
@@ -72,7 +76,7 @@ export default function CreateApartmentModal({ householdId, isModalOpen, onClose
                     <ModalButton 
                         variant="secondary"
                         onClick={handleClose}
-                        disabled={createApartmentMutation.isPending}
+                        disabled={createApartmentMutation.isPending }
                     >
                         {/* 3. Localized Cancel Button */}
                         {t('common.button_cancel', 'Cancel')}
