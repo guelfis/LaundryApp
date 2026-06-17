@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { createHouseholdAsLandlord, getUserHouseholds, searchHouseholdByCoords, verifyHouseholdAccessById } from '../lib/households';
+import { createHouseholdAsLandlord, getHouseholdById, getUserHouseholds, searchHouseholdByCoords, verifyHouseholdAccessById } from '../lib/households';
 
 interface CreateHouseholdVariables {
   name: string;
@@ -61,5 +61,15 @@ export function useVerifyHouseholdAccess() {
         queryClient.invalidateQueries({ queryKey: ["user-households"] });
       }
     }
+  });
+}
+
+export function useHouseholdDetails(householdId: string) {
+  return useQuery({
+    queryKey: ['household-details', householdId],
+    queryFn: () => getHouseholdById(householdId!),
+    // disabled when id is null
+    enabled: !!householdId, 
+    staleTime: 1000 * 60 * 5, // keeps the clean data in the cache for 5 minutes
   });
 }

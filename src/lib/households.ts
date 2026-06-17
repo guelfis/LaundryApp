@@ -1,5 +1,4 @@
 import { supabase } from './supabase';
-import type { HouseholdInsert, HouseholdUpdate } from './databaseTypes';
 
 export async function getHouseholds() {
   const { data, error } = await supabase
@@ -39,29 +38,6 @@ export async function getHouseholdWithApartments(id: string) {
     .select('*, apartments:apartment(*)')
     .eq('id', id)
     .maybeSingle();
-
-  if (error) throw error;
-  return data;
-}
-
-export async function createHousehold(payload: HouseholdInsert) {
-  const { data, error } = await supabase
-    .from('household')
-    .insert(payload)
-    .select()
-    .single();
-
-  if (error) throw error;
-  return data;
-}
-
-export async function updateHousehold(id: string, payload: HouseholdUpdate) {
-  const { data, error } = await supabase
-    .from('household')
-    .update(payload)
-    .eq('id', id)
-    .select()
-    .single();
 
   if (error) throw error;
   return data;

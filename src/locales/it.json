@@ -209,5 +209,10 @@
     "btn_back": "Torna alla Ricerca",
     "error_empty_code": "Per favore inserisci il codice dell'edificio.",
     "error_invalid_code": "Il codice di accesso fornito non è corretto. Verificalo con il tuo amministratore."
+  },
+  "buildingTab":{
+    "accessCode": "CODICE DI ACCESSO EDIFICIO",
+    "shareInstructions": "Condividi questo codice numerico o il codice QR con i tuoi inquilini per permettergli di accedere all'edificio.",
+    "qr_label": "Scansiona per Entrare Istantaneamente"
   }
 }
