@@ -217,6 +217,16 @@
   "buildingTab":{
     "accessCode": "BUILDING ACCESS CODE",
     "shareInstructions": "Share this numeric code or QR code with your tenants so they can join the building.",
-    "qr_label": "Scan to Join Instantly"
+    "qr_label": "Scan to Join Instantly",
+    "btn_print": "Print Laundry Flier",
+    "unknown_address": "Unknown Address"
+  },
+  "flier":{
+   "flier_headline": "Building Laundry Scheduler App",
+    "universal_step_title": "Scan to Install & Join Instantly",
+    "universal_step_desc": "Scan this single QR code with your phone's camera. If you don't have the app yet, it will open the download link. If you already have it, it will open the building directly!",
+    "manual_title": "Alternative Manual Access",
+    "manual_desc_link": "If your camera is unavailable, open your phone's internet browser and go to this website to download the app:",
+    "manual_desc_code": "Once installed, create an account, search for our building address, and enter this exact access token code:"
   }
 }

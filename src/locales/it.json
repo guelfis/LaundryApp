@@ -213,6 +213,16 @@
   "buildingTab":{
     "accessCode": "CODICE DI ACCESSO EDIFICIO",
     "shareInstructions": "Condividi questo codice numerico o il codice QR con i tuoi inquilini per permettergli di accedere all'edificio.",
-    "qr_label": "Scansiona per Entrare Istantaneamente"
+    "qr_label": "Scansiona per Entrare Istantaneamente",
+    "btn_print": "Stampa Volantino Lavanderia",
+    "unknown_address": "Indirizzo sconosciuto"
+  },
+  "flier":{
+   "flier_headline": "Guida App Lavanderia Condominiale",
+    "universal_step_title": "Scansiona per Installare e Accedere",
+    "universal_step_desc": "Scansiona questo singolo codice QR con la fotocamera. Se non hai l'app, aprirà il link per scaricarla. Se l'hai già installata, aprirà direttamente il condominio!",
+    "manual_title": "Metodo Manuale Alternativo",
+    "manual_desc_link": "Se la fotocamera del telefono non è disponibile, apri il browser internet e visita questo sito per scaricare l'app:",
+    "manual_desc_code": "Una volta installata, crea un account, cerca l'indirizzo del condominio e inserisci questo codice di accesso:"
   }
 }

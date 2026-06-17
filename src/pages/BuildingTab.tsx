@@ -1,9 +1,10 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useHistory } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Building } from "lucide-react";
 import { IonText, IonNote } from "@ionic/react";
 import { QRCodeSVG } from 'qrcode.react'; 
+import { printOutline } from 'ionicons/icons';
 
 import PageLayout from "../components/PageLayout";
 import { PageHeader } from "../components/PageHeader";
@@ -14,10 +15,14 @@ import { LoadingSpinner } from "../components/LoadingSpinner";
 import { useHouseholdDetails } from "../hooks/useHousehold";
 import { useBookingFilters } from "../hooks/useBookings";
 import { ROUTES } from "../routes/routes.constants";
+import Button from "../components/Button";
+import { printLaundryFlier } from "../services/printService";
+import LaundryIcon from "../logo/LaundryIcon"; 
 
 export default function BuildingTab() {
   const { t } = useTranslation();
   const history = useHistory();
+  const logoRef = useRef<HTMLDivElement>(null);
 
   const { householdId } = useBookingFilters();
   const { data: householdData, isPending } = useHouseholdDetails(householdId);
@@ -28,16 +33,6 @@ export default function BuildingTab() {
       history.push(ROUTES.APARTMENT_LOGIN);
     }
   }, [householdData, isPending, history]);
-
-  if (isPending) {
-    return (
-      <PageLayout>
-        <div style={styles.centerSpinner}>
-          <LoadingSpinner />
-        </div>
-      </PageLayout>
-    );
-  }
 
   if (!householdData) {
     return null;
@@ -54,6 +49,32 @@ export default function BuildingTab() {
     code: householdData.access_code
   });
 
+  const handlePrintFlier = async () => {
+    const componentMarkup = logoRef.current?.innerHTML || '';
+
+    await printLaundryFlier({
+      headline: t('flier.flier_headline'),
+      universalTitle: t('flier.universal_step_title'),
+      universalDesc: t('flier.universal_step_desc'),
+      manualTitle: t('flier.manual_title'),
+      manualDescLink: t('flier.manual_desc_link'),
+      manualDescCode: t('flier.manual_desc_code'), 
+      accessCode: householdData.access_code,
+      buildingId: householdData.id,
+      logoHtml: componentMarkup
+    });
+  };
+
+  if (isPending) {
+    return (
+      <PageLayout>
+        <div style={styles.centerSpinner}>
+          <LoadingSpinner />
+        </div>
+      </PageLayout>
+    );
+  }
+
   return (
     <PageLayout 
       header={
@@ -64,6 +85,16 @@ export default function BuildingTab() {
         />
       }
     >
+      {/* 
+        5. HIDDEN COMPONENT REFERENCE SLOT:
+        This mounts your actual React component quietly in the background. 
+        It has display: none so it remains completely invisible to users on screen, 
+        but is fully available to the print service when clicking print.
+      */}
+      <div ref={logoRef} style={{ display: 'none' }}>
+        <LaundryIcon />
+      </div>
+      
       <div style={{
         display: 'flex', 
         flexDirection: 'column' as const, 
@@ -105,6 +136,13 @@ export default function BuildingTab() {
               level="H" 
             />
           </div>
+        </div>
+        <div style={styles.printActionRow}>
+            <Button 
+              label={t('buildingTab.btn_print')} 
+              onClick={handlePrintFlier} 
+              icon={printOutline} 
+            />
         </div>
           
       </div>
@@ -158,7 +196,6 @@ const styles = {
     justifyContent: 'center',
     gap: '12px',
     marginTop: '8px',
-    marginBottom: '24px'
   },
   qrLabel: {
     fontSize: '12px',
@@ -175,5 +212,9 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'center',
     border: '1px solid var(--ion-color-step-150, #d9d9d9)'
+  },
+  printActionRow: {
+    width: '100%',
+    marginBottom: '20px'
   }
 };

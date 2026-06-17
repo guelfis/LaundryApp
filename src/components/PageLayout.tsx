@@ -1,7 +1,7 @@
 import React from 'react';
 import { IonPage, IonHeader, IonContent, IonFooter } from '@ionic/react';
 import { useTranslation } from 'react-i18next';
-import LaundryIcon from './LaundryIcon';
+import LaundryIcon from '../logo/LaundryIcon';
 
 interface PageLayoutProps {
   children: React.ReactNode;
