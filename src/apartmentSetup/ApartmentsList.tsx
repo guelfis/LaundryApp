@@ -39,7 +39,7 @@ const ApartmentsList = ({
                 }}
                 title={apt.display_name}
                 // Forza un booleano pulito stringendo i controlli dell'operatore ternario
-                icon={!lock ? <IonIcon icon={lockClosedOutline} style={styles.lockIcon} /> : undefined}
+                icon={lock ? <IonIcon icon={lockClosedOutline} style={styles.lockIcon} /> : undefined}
               />
             );
           })}
