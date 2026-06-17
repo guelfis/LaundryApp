@@ -2,8 +2,6 @@ import { useSearchHousehold } from "../hooks/useHousehold";
 import { Database } from "./database.types";
 
 export type Household = Database['public']['Tables']['household']['Row'];
-export type HouseholdInsert = Database['public']['Tables']['household']['Insert'];
-export type HouseholdUpdate = Database['public']['Tables']['household']['Update'];
 
 export type Apartment = Database['public']['Tables']['apartment']['Row'];
 export type ApartmentInsert = Database['public']['Tables']['apartment']['Insert'];
