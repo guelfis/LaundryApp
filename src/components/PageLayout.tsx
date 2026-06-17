@@ -14,7 +14,7 @@ const PageLayout: React.FC<PageLayoutProps> = ({ children, header, footer, scrol
   const { t } = useTranslation();
 
   return (
-    <IonPage style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
+    <IonPage style={{ height: '100vh', display: 'flex', flexDirection: 'column'}}>
       
       <IonHeader style={{ boxShadow: 'none', background: 'transparent', flexShrink: 0 }}>
         <div>

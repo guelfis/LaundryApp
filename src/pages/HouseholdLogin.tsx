@@ -14,7 +14,7 @@ import { ROUTES } from "../routes/routes.constants";
 import { addOutline } from 'ionicons/icons';
 import AddressSearch, { LocationResolution } from "../household/AddressSearch";
 import { HouseholdData } from "../lib/databaseTypes";
-import { IonLabel } from "@ionic/react";
+import { IonNote } from "@ionic/react";
 
 export default function HouseholdLogin() {
     const { t } = useTranslation();
@@ -45,10 +45,16 @@ export default function HouseholdLogin() {
     }
 
     const onClickBuilding = (householdId: string) => {
+        localStorage.removeItem('apartmentId');
+        localStorage.removeItem('isAdminModeActive');
+        localStorage.removeItem('householdTimezone'); 
+        localStorage.removeItem('apartmentName');
+
         localStorage.setItem('householdId', householdId);
-        history.push(ROUTES.APARTMENT_LOGIN);
+        setTimeout(() => {
+            history.push(ROUTES.APARTMENT_LOGIN);
+        }, 0);
     };
-    console.log(selectedLocation);
 
     return (
         <PageLayout
@@ -97,10 +103,10 @@ export default function HouseholdLogin() {
                     </div>
                 )}
                 {!isLoadingSearch && !resolvedHousehold && selectedLocation && (
-                    <div className="flex flex-col gap-4">
-                        <IonLabel className=" mx-6"> 
+                    <div className="flex flex-col gap-4 mb-4">
+                        <IonNote className=" mx-6"> 
                             {t('householdLogin.no-results')}
-                        </IonLabel>
+                        </IonNote>
                         <Button 
                             label={t("householdLogin.btn_create_new")} 
                             onClick={() => {

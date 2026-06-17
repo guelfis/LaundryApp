@@ -17,6 +17,8 @@
   /* --- UNIFIED ELEMENT VARIABLES (Light Mode) --- */
   --app-input-bg: var(--ion-color-step-50, #f2f2f2);
   --app-input-radius: 10px;
+
+  --app-page-bottom-padding: 16px;
 }
 
 @media (prefers-color-scheme: dark) {

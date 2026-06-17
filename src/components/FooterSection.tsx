@@ -42,7 +42,7 @@ export default function FooterSection({
 const styles = {
   footerContainer: {
     width: '100%',
-    padding: '16px',
+    padding: '8px',
     display: 'flex',
     flexDirection: 'column' as const,
     gap: '8px', // Creates space between the descriptive note text and your button component
@@ -51,7 +51,7 @@ const styles = {
     display: 'block',
     textAlign: 'center' as const,
     fontSize: '14px', 
-    marginTop: '16px',
+    marginTop: '8px',
     marginBottom: '8px',
   }
 };

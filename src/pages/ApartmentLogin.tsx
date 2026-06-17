@@ -15,7 +15,7 @@ import FooterSection from '../components/FooterSection';
 import { getCleanStorageItem } from '../auth/authUtils';
 import { ROUTES } from '../routes/routes.constants';
 import {addOutline, constructOutline} from 'ionicons/icons'
-import { IonIcon, IonLabel } from '@ionic/react';
+import { IonIcon, IonText } from '@ionic/react';
 import { useGetUserHouselds } from '../hooks/useHousehold';
 import SlotCard from '../components/SlotCard';
 
@@ -23,12 +23,18 @@ export default function ApartmentLogin() {
   const { t } = useTranslation();
   const householdId = getCleanStorageItem('householdId') || '';
   
-  const { data: myApartments = [], isLoading: isLoadingMy } = useMyApartments(householdId);
-  const { data: allApartments = [], isLoading: isLoadingAll } = useApartments(householdId);
+  const { data: myApartmentsRaw = [], isLoading: isLoadingMy } = useMyApartments(householdId);
+  const { data: allApartmentsRaw = [], isLoading: isLoadingAll } = useApartments(householdId);
   const { data: buildings = [], isLoading: isLoadingHouseholds } = useGetUserHouselds();
+
   
-  const currentBuilding = buildings.filter(build => build.household_id === householdId)[0];
-  const isBuildingAdmin = currentBuilding.role === 'admin';
+  const myApartments = useMemo(() => (myApartmentsRaw || []).filter((apt): apt is Apartment => apt !== null && apt !== undefined), [myApartmentsRaw]);
+  const allApartments = useMemo(() => (allApartmentsRaw || []).filter((apt): apt is Apartment => apt !== null && apt !== undefined), [allApartmentsRaw]);
+  
+  const currentBuilding = useMemo(() => {
+      return (buildings || []).find(build => build && build.household_id === householdId);
+    }, [buildings, householdId]);
+  const isBuildingAdmin = currentBuilding?.role === 'admin';
 
   const location = useLocation();
    const searchParams = useMemo(() => {
@@ -41,10 +47,13 @@ export default function ApartmentLogin() {
   const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
   const [isCreateAptModalOpen, setIsCreateAptModalOpen] = useState(false); // Fixed spelling typo
 
-  const otherApartments = allApartments.filter(
-    (apt) => !myApartments.some((myapt) => apt.id === myapt.id)
-  );
+  const otherApartments = useMemo(() => {
+    return allApartments.filter(
+      (apt) => !myApartments.some((myapt) => myapt && apt.id === myapt.id)
+    );
+  }, [allApartments, myApartments]);
 
+  console.log(householdId, myApartments);
   const history = useHistory();
 
   useEffect(() => {
@@ -68,14 +77,23 @@ export default function ApartmentLogin() {
   }, [searchParams, joinViaLink, history, t]); 
 
   const enterApartment = (apt: Apartment) => {
-    localStorage.setItem('apartmentName', apt.display_name);
+    localStorage.removeItem('isAdminModeActive');
     localStorage.setItem('apartmentId', apt.id);
+    localStorage.setItem('apartmentName', apt.display_name);
+  
+  setTimeout(() => {
     history.push(ROUTES.DASHBOARD_MAIN);
+  }, 0);
   };
 
   const enterAsAdmin = () => {
-    localStorage.setItem('isAdminModeActive', "true");
-    history.push(ROUTES.DASHBOARD_MAIN);
+    localStorage.removeItem('apartmentId'); 
+    localStorage.removeItem('apartmentName');
+    localStorage.setItem('isAdminModeActive', 'true');
+    
+    setTimeout(() => {
+      history.push(ROUTES.DASHBOARD_MAIN);
+    }, 0);
   }
 
   const handleJoinRequest = (apt: Apartment) => {
@@ -118,16 +136,18 @@ export default function ApartmentLogin() {
         <FooterSection buttonLabel={t('apartmentLogin.btn_create_apt', 'create a new apartment')} onButtonClick={() => setIsCreateAptModalOpen(true)} text={t('apartmentLogin.footer_question', 'Your apartment is not on the list?')} buttonIcon={addOutline}  />
       }
     >
-      <div className="flex flex-col flex-1 w-full space-y-4">
+      <div className="flex flex-col flex-1 w-full space-y-4" style={{marginBottom:'8px'}}>
         <SectionText title={t('apartmentLogin.section_my_apts', 'My Apartments')} />
         {/* 3. Localized List Section Headers */}
         {isBuildingAdmin && (
-          <SlotCard onClick={() => {
-            enterAsAdmin();
-          }}
-          title={t('apartmentLogin.enter_admin')}
-          icon={<IonIcon icon={constructOutline} />}
-          />
+          <div style={{padding: '16px', marginBottom:'-32px'}}>
+            <SlotCard onClick={() => {
+              enterAsAdmin();
+            }}
+            title={t('apartmentLogin.enter_admin')}
+            icon={<IonIcon icon={constructOutline} />}
+            />
+          </div>
         )}
         {myApartments.length > 0 ? (
           <div className="flex flex-col">
@@ -139,9 +159,9 @@ export default function ApartmentLogin() {
             />
           </div>
         ):(
-          <IonLabel>
+          <IonText>
             {t('apartmentLogin.no_your_apartment')}
-          </IonLabel>
+          </IonText>
         )}
 
         <SectionText title={t('apartmentLogin.section_available_apts', 'Available Apartments')} />
@@ -156,9 +176,9 @@ export default function ApartmentLogin() {
             />
           </div>
         ):(
-          <IonLabel>
+          <IonText>
             {t('apartmentLogin.no_available_apartments')}
-          </IonLabel>
+          </IonText>
         )}
       </div>
 
