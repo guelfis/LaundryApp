@@ -18,23 +18,25 @@ export async function getMyApartments(householdId: string) {
   if (!user) throw new Error("No authenticated user found");
 
   const { data, error } = await supabase
-  .from('apartment_members')
-  .select(`
-    role,
-    apartment:apartment_id (
-      id,
-      display_name,
-      household_id
-    )
-  `)
-  .eq('user_id', user.id) // filter by current user
-  .eq('apartment.household_id', householdId);
-  
+    .from('memberships') 
+    .select(`
+      apartment_role, 
+      apartment:apartment_id (
+        id,
+        display_name,
+        household_id
+      )
+    `)
+    .eq('user_id', user.id)
+    .eq('household_id', householdId)
+    .not('apartment_id', 'is', null); // 4. Ignore rows where they are only a household member
+
   if (error) throw error;
-  
-  // Clean up the response to return a flatter structure if preferred
-  return (data?.map(m => m.apartment) || []) as Apartment[]
+
+  // 5. Clean up the response to return a flatter structure matching your exact style
+  return (data?.map(m => m.apartment) || []) as Apartment[];
 }
+
 
 export async function getApartmentById(id: string) {
   const { data, error } = await supabase
@@ -83,16 +85,17 @@ export async function updateApartment(id: string, payload: ApartmentUpdate) {
 //  Get Members of an Apartment with User Profiles
 export async function getApartmentMembers(apartmentId: string) {
   const { data, error } = await supabase
-    .from('apartment_members')
+    .from('memberships') 
     .select(`
-      role,
+      apartment_role,  
       user_id,
       profiles:user_id (
         id,
         full_name
       )
     `)
-    .eq('apartment_id', apartmentId);
+    .eq('apartment_id', apartmentId)
+    .not('apartment_id', 'is', null); 
 
   if (error) throw error;
   return data;

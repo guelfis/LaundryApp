@@ -74,11 +74,11 @@ const MembersList: React.FC<MembersListProps> = ({
               </>
             }
             subtitle={
-              member.role === 'admin' 
+              member.apartment_role === 'admin' 
                 ? t('membersList.role_admin', 'Apartment Admin') 
                 : t('membersList.role_resident', 'Regular Resident')
             }
-            subtitleClass={member.role === 'admin' ? 'text-amber-600 dark:text-amber-400 font-bold' : 'text-gray-500'}
+            subtitleClass={member.apartment_role === 'admin' ? 'text-amber-600 dark:text-amber-400 font-bold' : 'text-gray-500'}
           />
         );
       })}

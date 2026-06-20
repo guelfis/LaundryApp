@@ -24,7 +24,7 @@ export interface Profile {
 
 export interface ApartmentMember {
   user_id: string;
-  role: string;
+  apartment_role: string | null;
   profiles: Profile;
 }
 

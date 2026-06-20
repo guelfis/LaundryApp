@@ -34,7 +34,7 @@ export default function ApartmentLogin() {
   const currentBuilding = useMemo(() => {
       return (buildings || []).find(build => build && build.household_id === householdId);
     }, [buildings, householdId]);
-  const isBuildingAdmin = currentBuilding?.role === 'admin';
+  const isBuildingAdmin = currentBuilding?.household_role === 'admin';
 
   const location = useLocation();
    const searchParams = useMemo(() => {

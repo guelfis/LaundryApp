@@ -98,45 +98,6 @@ export type Database = {
           },
         ]
       }
-      apartment_members: {
-        Row: {
-          apartment_id: string
-          id: string
-          joined_at: string | null
-          role: Database["public"]["Enums"]["apartment_role"]
-          user_id: string
-        }
-        Insert: {
-          apartment_id: string
-          id?: string
-          joined_at?: string | null
-          role?: Database["public"]["Enums"]["apartment_role"]
-          user_id: string
-        }
-        Update: {
-          apartment_id?: string
-          id?: string
-          joined_at?: string | null
-          role?: Database["public"]["Enums"]["apartment_role"]
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "apartment_members_apartment_id_fkey"
-            columns: ["apartment_id"]
-            isOneToOne: false
-            referencedRelation: "apartment"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fk_apartment_members_profiles"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       booking: {
         Row: {
           apartment_id: string | null
@@ -218,45 +179,6 @@ export type Database = {
         }
         Relationships: []
       }
-      household_members: {
-        Row: {
-          household_id: string
-          id: string
-          joined_at: string | null
-          role: Database["public"]["Enums"]["household_role"]
-          user_id: string
-        }
-        Insert: {
-          household_id: string
-          id?: string
-          joined_at?: string | null
-          role?: Database["public"]["Enums"]["household_role"]
-          user_id: string
-        }
-        Update: {
-          household_id?: string
-          id?: string
-          joined_at?: string | null
-          role?: Database["public"]["Enums"]["household_role"]
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "household_members_household_id_fkey"
-            columns: ["household_id"]
-            isOneToOne: false
-            referencedRelation: "household"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "household_members_user_id_profiles_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       join_requests: {
         Row: {
           apartment_id: string
@@ -289,6 +211,58 @@ export type Database = {
           },
           {
             foreignKeyName: "join_requests_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      memberships: {
+        Row: {
+          apartment_id: string | null
+          apartment_role: Database["public"]["Enums"]["apartment_role"] | null
+          household_id: string
+          household_role: Database["public"]["Enums"]["household_role"]
+          id: string
+          joined_at: string | null
+          user_id: string
+        }
+        Insert: {
+          apartment_id?: string | null
+          apartment_role?: Database["public"]["Enums"]["apartment_role"] | null
+          household_id: string
+          household_role?: Database["public"]["Enums"]["household_role"]
+          id?: string
+          joined_at?: string | null
+          user_id: string
+        }
+        Update: {
+          apartment_id?: string | null
+          apartment_role?: Database["public"]["Enums"]["apartment_role"] | null
+          household_id?: string
+          household_role?: Database["public"]["Enums"]["household_role"]
+          id?: string
+          joined_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "memberships_apartment_id_fkey"
+            columns: ["apartment_id"]
+            isOneToOne: false
+            referencedRelation: "apartment"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "memberships_household_id_fkey"
+            columns: ["household_id"]
+            isOneToOne: false
+            referencedRelation: "household"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "memberships_user_id_profiles_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
@@ -358,6 +332,7 @@ export type Database = {
         Args: { target_apartment_id: string }
         Returns: undefined
       }
+      delete_household: { Args: { target_household_id: string }; Returns: Json }
       generate_apartment_invite_link: {
         Args: {
           days_valid?: number
@@ -388,6 +363,7 @@ export type Database = {
         Args: { target_apartment_id: string }
         Returns: undefined
       }
+      leave_household: { Args: { target_household_id: string }; Returns: Json }
       release_laundry_slot: {
         Args: { target_booking_id: string }
         Returns: Json
@@ -405,14 +381,23 @@ export type Database = {
           timezone: string
         }[]
       }
-      update_member_role: {
-        Args: {
-          new_role: string
-          target_apartment_id: string
-          target_user_id: string
-        }
-        Returns: undefined
-      }
+      update_member_role:
+        | {
+            Args: {
+              new_role: Database["public"]["Enums"]["apartment_role"]
+              target_apartment_id: string
+              target_user_id: string
+            }
+            Returns: undefined
+          }
+        | {
+            Args: {
+              new_role: string
+              target_apartment_id: string
+              target_user_id: string
+            }
+            Returns: undefined
+          }
       verify_household_access_by_id: {
         Args: { target_id: string; user_input_code: string }
         Returns: {

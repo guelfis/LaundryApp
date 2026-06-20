@@ -17,7 +17,7 @@ export function getCleanStorageItem(key: string): string | null {
  * within a structured database member roster payload array.
  */
 export function checkIsAdmin(
-  members: Array<{ user_id: string; role: string }>, 
+  members: Array<{ user_id: string; apartment_role: string | null }>, 
   userId: string | null
 ): boolean {
   if (!userId || !members || members.length === 0) return false;
@@ -25,7 +25,7 @@ export function checkIsAdmin(
   const cleanUserId = userId.replace(/['"]+/g, '').trim().toLowerCase();
   
   return members.some(
-    (member) => member.user_id.toLowerCase() === cleanUserId && member.role === 'admin'
+    (member) => member.user_id.toLowerCase() === cleanUserId && member.apartment_role === 'admin'
   );
 }
 

@@ -44,7 +44,7 @@ export default function MyApartmentTab() {
     
     const existingNames = useMemo(() => allApartments.map(apt => apt.display_name), [allApartments]);
     const isUserAdmin = useMemo(() => checkIsAdmin(members, currentUserId), [members, currentUserId]);
-    const admins = useMemo(() => members.filter(m => m.role === 'admin'), [members]);
+    const admins = useMemo(() => members.filter(m => m.apartment_role === 'admin'), [members]);
     const canDeleteApartment = isUserAdmin && members.length === 1;
     const canLeaveApartment = !isUserAdmin || admins.length > 1;
     
