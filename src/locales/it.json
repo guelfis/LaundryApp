@@ -62,7 +62,8 @@
     "leave": "Lascia L'Appartmento",
     "members": "Membri ({{count}})",
     "info_title": "Impossibile Lasciare l'Appartamento",
-    "info_message": "Puoi lasciare l'appartamento solo se non sei un amministratore o se c'è almeno un altro amministratore nell'appartamento. Se sei l'unico membro, puoi invece eliminare l'appartamento per rimuoverlo definitivamente."
+    "info_message": "Puoi lasciare l'appartamento solo se non sei un amministratore o se c'è almeno un altro amministratore nell'appartamento. Se sei l'unico membro, puoi invece eliminare l'appartamento per rimuoverlo definitivamente.",
+    "update_name_fail": "Salvataggio del nome fallito."
   },
   "createApartment": {
     "title": "Crea un nuovo Appartamento",

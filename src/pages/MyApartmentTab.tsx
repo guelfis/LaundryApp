@@ -16,6 +16,7 @@ import PageLayout from "../components/PageLayout";
 import { PageHeader } from "../components/PageHeader";
 import { Home } from "lucide-react";
 import LeaveDeleteActionsBlock from "../components/LeaveDeleteActionsBlock";
+import { updateApartmentName } from "../lib/apartments";
 
 
 export default function MyApartmentTab() {
@@ -39,7 +40,11 @@ export default function MyApartmentTab() {
     const { leaveApartment, isLeaving, deleteApartment, isDeletingApartment } = useDeleteOrLeaveApartment();
     const { data: allApartments = [] } = useApartments(householdId);
     
-    const existingNames = useMemo(() => allApartments.map(apt => apt.display_name), [allApartments]);
+    const existingNames = useMemo(() => {
+    return allApartments
+        .filter(apt => apt && apt.id !== apartmentId) 
+        .map(apt => apt.display_name);
+    }, [allApartments, apartmentId]);    
     const isUserAdmin = useMemo(() => checkIsAdminApartment(members, currentUserId), [members, currentUserId]);
     const admins = useMemo(() => members.filter(m => m.apartment_role === 'admin'), [members]);
     const canDeleteApartment = isUserAdmin && members.length === 1;
@@ -54,6 +59,20 @@ export default function MyApartmentTab() {
         console.error("Entering apartment tab without an apartment id set.")
         return;
     }
+
+    const handleNameChange = async (newName: string) => {
+        // 1. Optimistically update local UI states
+        setApartmentName(newName);
+        localStorage.setItem('apartmentName', newName);
+
+        // 2. Persist downstream directly to Supabase remote database
+        try {
+            await updateApartmentName(apartmentId, newName);
+        } catch (err) {
+            console.error("Database sync failure:", err);
+            alert(t('myApartmentTab.update_name_fail'));
+        }
+    };
 
     const handleDeleteApartment = async () => {
         const confirmFirst = window.confirm(t('myApartmentTab.delete_warning'));
@@ -113,10 +132,7 @@ export default function MyApartmentTab() {
                     <SectionText title={t('common.info')} />
                     <ApartmentNameEditableSection
                         apartmentName={apartmentName}
-                        onNameChange={(newName) => {
-                            setApartmentName(newName);
-                            localStorage.setItem('apartmentName', newName);
-                        }}
+                        onNameChange={handleNameChange}
                         isEditing={isEditingName}
                         setIsEditing={setIsEditingName}
                         invalidNames={existingNames}

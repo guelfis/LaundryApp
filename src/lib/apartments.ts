@@ -199,3 +199,14 @@ export async function deleteApartment(apartmentId:string){
   if (error) throw error;
   return {success:true};
 }
+
+export const updateApartmentName = async (apartmentId: string, newName: string): Promise<void> => {
+  const { error } = await supabase
+    .from('apartment') 
+    .update({ display_name: newName })
+    .eq('id', apartmentId);
+
+  if (error) {
+    throw new Error(error.message || 'Failed to update apartment name.');
+  }
+};

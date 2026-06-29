@@ -62,7 +62,8 @@
     "leave": "Leave Apartment",
     "members": "Members ({{count}})",
     "info_title": "Cannot Leave Apartment",
-    "info_message": "You can leave the apartment only if you are not an admin of the apartment or if there is at least another admin in the apartment. If you are the only member, you can delete the apartment instead to remove it permanently."
+    "info_message": "You can leave the apartment only if you are not an admin of the apartment or if there is at least another admin in the apartment. If you are the only member, you can delete the apartment instead to remove it permanently.",
+    "update_name_fail": "Failed to save the new name to the server."
   },
   "createApartment": {
     "title": "Create New Apartment",
