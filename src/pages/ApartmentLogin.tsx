@@ -137,6 +137,9 @@ export default function ApartmentLogin() {
               <IonIcon slot="icon-only" icon={logOutOutline} />
             </IonButton>
           }
+          onBack={
+            () => history.push(ROUTES.HOUSEHOLD_LOGIN)
+          }
         />
       }
     >
