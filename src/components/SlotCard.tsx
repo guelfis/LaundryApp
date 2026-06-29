@@ -9,6 +9,7 @@ interface SlotCardProps {
   containerClass?: string;
   endContent?: React.ReactNode;
   onClick?: () => void;
+  style?: React.CSSProperties; 
 }
 
 export default function SlotCard({
@@ -18,24 +19,29 @@ export default function SlotCard({
   subtitle,
   containerClass,
   endContent,
-  onClick
+  onClick,
+  style 
 }: SlotCardProps) {
   const Component = onClick ? 'button' : 'div';
 
   return (
     <Component
       {...(onClick ? { onClick, type: 'button' } : {})}
+      style={style} 
       className={cn(
         "w-full p-4 border rounded-2xl flex items-center justify-between shadow-sm text-left transition-all",
+        "bg-white dark:bg-slate-800/40 border-gray-100 dark:border-slate-800",
         onClick ? "active:scale-[0.99] active:bg-gray-100/40 dark:active:bg-slate-800/40" : "",
-        containerClass || "bg-white dark:bg-slate-800/40 border-gray-100 dark:border-slate-800"
+        containerClass
       )}
     >
       <div className="flex items-center gap-4 flex-1 min-w-0">
         {/* Left Icon Block Badge Container Wrapper */}
-        <div className={cn("p-2 rounded-xl shrink-0 flex items-center justify-center", iconBgClass)}>
-          {icon}
-        </div>
+        {icon && (
+          <div className={cn("p-2 rounded-xl shrink-0 flex items-center justify-center", iconBgClass)}>
+            {icon}
+          </div>
+        )}
         
         {/* Central Metadata Typography Stack */}
         <div className="flex flex-col min-w-0 truncate">

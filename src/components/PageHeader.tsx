@@ -5,9 +5,10 @@ interface PageHeaderProps {
     subtitle?: string;
     icon?: React.ReactNode;
     onBack?: () => void;
+    endContent?:React.ReactNode;
 }
 
-export function PageHeader({ title, subtitle, icon, onBack }: PageHeaderProps) {
+export function PageHeader({ title, subtitle, icon, onBack, endContent }: PageHeaderProps) {
     return (
         <header className="px-4 mt-4 mb-2 w-full">
             {/* Main Row Container with relative positioning */}
@@ -32,6 +33,12 @@ export function PageHeader({ title, subtitle, icon, onBack }: PageHeaderProps) {
                     <h1 className="text-xl font-black text-gray-900 dark:text-white truncate">
                         {title}
                     </h1>
+                </div>
+
+                <div className="absolute right-0 p-2 text-gray-600 dark:text-gray-300 active:scale-90 transition-transform">
+                {endContent && (
+                    endContent
+                )}
                 </div>
             </div>
 

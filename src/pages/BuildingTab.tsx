@@ -73,7 +73,7 @@ export default function BuildingTab() {
       };
     
   const handleLeaveBuilding = async () => {
-    if (window.confirm(t('myApartmentTab.release_warning'))) {
+    if (window.confirm(t('buildingTab.release_warning'))) {
       try {
           await leaveHousehold(householdId);
           history.push(ROUTES.HOUSEHOLD_LOGIN, { replace: true });
@@ -82,7 +82,7 @@ export default function BuildingTab() {
           console.error(t('buildingTab.release_fail'), err);
           alert(`${t('buildingTab.release_fail')}: ${errorInstance.message}`);
       }
-  }
+    }
   }
 
   const handlePrintFlier = async () => {

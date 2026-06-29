@@ -38,7 +38,6 @@ const ApartmentsList = ({
                   onSelect(apt);
                 }}
                 title={apt.display_name}
-                // Forza un booleano pulito stringendo i controlli dell'operatore ternario
                 icon={lock ? <IonIcon icon={lockClosedOutline} style={styles.lockIcon} /> : undefined}
               />
             );
@@ -52,13 +51,15 @@ const ApartmentsList = ({
 const styles = {
   listContainer: {
     flexGrow: 1,
-    padding: '16px',
-    overflowY: 'auto' as const
+    width: '100%',
+    boxSizing: 'border-box' as const,
+    overflowY: 'auto' as const,
+    padding: '0px'
   },
   gridGap: {
     display: 'flex',
     flexDirection: 'column' as const,
-    gap: '12px' // Sostituisce il vecchio space-y-3 per un calcolo del layout flessibile
+    gap: '12px' 
   },
   lockIcon: {
     color: 'var(--ion-color-step-400, #808080)',
