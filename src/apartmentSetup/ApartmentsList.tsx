@@ -52,14 +52,18 @@ const styles = {
   listContainer: {
     flexGrow: 1,
     width: '100%',
+    maxWidth: '100%',
     boxSizing: 'border-box' as const,
     overflowY: 'auto' as const,
+    overflowX: 'hidden' as const, 
     padding: '0px'
   },
   gridGap: {
     display: 'flex',
     flexDirection: 'column' as const,
-    gap: '12px' 
+    gap: '12px',
+    width: '100%',
+    maxWidth: '100%'
   },
   lockIcon: {
     color: 'var(--ion-color-step-400, #808080)',
