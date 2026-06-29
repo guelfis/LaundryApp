@@ -7,15 +7,14 @@ interface PageLayoutProps {
   children: React.ReactNode;
   header?: React.ReactNode;
   footer?: React.ReactNode;
-  scrollable?: boolean; // NEW: Controls scrolling per-page dynamically
+  scrollable?: boolean; 
 }
 
 const PageLayout: React.FC<PageLayoutProps> = ({ children, header, footer, scrollable = true }) => {
   const { t } = useTranslation();
 
   return (
-    <IonPage style={{ height: '100vh', display: 'flex', flexDirection: 'column'}}>
-      
+    <IonPage>
       <IonHeader style={{ boxShadow: 'none', background: 'transparent', flexShrink: 0 }}>
         <div>
           <header style={{ 
@@ -47,10 +46,6 @@ const PageLayout: React.FC<PageLayoutProps> = ({ children, header, footer, scrol
         </div>
       </IonHeader>
 
-      {/* 
-        Uses the scrollable parameter flag.
-        True for all standard pages, False exclusively for the specialized Grid layout view.
-      */}
       <IonContent 
         scrollY={scrollable} 
         style={{
@@ -59,11 +54,11 @@ const PageLayout: React.FC<PageLayoutProps> = ({ children, header, footer, scrol
         }}
       >
         <main style={{ 
-          height: '100%',
+          height: scrollable ? 'auto' : '100%',
           padding: '10px',
           display: 'flex',
           flexDirection: 'column',
-          minHeight: 0 // Crucial for nested flex child scrolling calculations
+          minHeight: 0 
         }}>
           {children}
         </main>
@@ -71,7 +66,7 @@ const PageLayout: React.FC<PageLayoutProps> = ({ children, header, footer, scrol
 
       {footer && (
         <IonFooter style={{ boxShadow: 'none', background: 'transparent', flexShrink: 0 }}>
-          <div style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
+          <div style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 10px)' }}>
             {footer}
           </div>
         </IonFooter>

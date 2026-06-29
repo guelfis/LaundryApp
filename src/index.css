@@ -6,6 +6,10 @@
 :root {
   --background-color: #ffffff;
   --text-color: #1a1a1a;
+  
+  /* Nativ ionic variables to set the light theme */
+  --ion-background-color: #ffffff;
+  --ion-text-color: #1a1a1a;
 }
 
 /* Automatic detection: Dark Mode */
@@ -13,13 +17,42 @@
   :root {
     --background-color: #121212;
     --text-color: #f5f5f5;
+    
+    /* Variabili native di Ionic per forzare il tema scuro */
+    --ion-background-color: #121212;
+    --ion-text-color: #f5f5f5;
+  }
+  
+  /* Forces the behaviour of talwind dark moile mode */
+  html {
+    color-scheme: dark;
   }
 }
 
-/* Apply the variables globally to the document body */
+/* 
+  FIX ANDROID VIEWPORT: 
+  Application adapts to the space available on the screen ( url bar for chrome)
+*/
+html, body, #root {
+  height: 100dvh !important;
+  min-height: 100dvh !important;
+  max-height: 100dvh !important;
+  margin: 0;
+  padding: 0;
+  overflow: hidden; 
+}
+
 body {
   background-color: var(--background-color);
   color: var(--text-color);
   transition: background-color 0.3s ease, color 0.3s ease;
-  margin: 0;
+}
+
+/* 
+  IONIC FIX: 
+*/
+ion-app, ion-page, ion-content {
+  height: 100dvh !important;
+  max-height: 100dvh !important;
+  --height: 100dvh !important;
 }

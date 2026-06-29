@@ -135,7 +135,7 @@ export default function BuildingTab() {
         display: 'flex', 
         flexDirection: 'column' as const, 
         width: '100%',
-        padding: '16px 20px 40px 20px',
+        padding: '16px 20px 20px 20px',
         boxSizing: 'border-box' as const,
         minHeight: 'min-content',
         gap: '24px' // Sets a consistent, clean vertical gap between all your Section blocks
@@ -263,6 +263,6 @@ const styles = {
   },
   printActionRow: {
     width: '100%',
-    marginBottom: '20px'
+    marginBottom: '10px'
   }
 };
