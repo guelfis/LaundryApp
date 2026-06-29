@@ -43,15 +43,6 @@ export async function getHouseholdWithApartments(id: string) {
   return data;
 }
 
-export async function deleteHousehold(id: string) {
-  const { error } = await supabase
-    .from('household')
-    .delete()
-    .eq('id', id);
-
-  if (error) throw error;
-}
-
 interface CreateHouseholdParams {
   name: string;
   formattedAddress: string;
@@ -124,4 +115,37 @@ export async function verifyHouseholdAccessById(householdId: string, inputCode: 
 
   if (error) throw error;
   return data && data.length > 0 ? data[0] : { success: false };
+}
+
+export async function deleteHousehold(householdId: string){
+  const {error} = await supabase.rpc('delete_household', {
+    target_household_id: householdId
+  });
+  if (error) throw error;
+  return {success:true};
+}
+
+export async function leaveHousehold(householdId: string){
+  const {error} = await supabase.rpc('leave_household', {
+    target_household_id: householdId
+  });
+  if (error) throw error;
+  return {success:true};
+}
+
+export async function getHouseholdMembers(householdId: string) {
+  const { data, error } = await supabase
+    .from('memberships') 
+    .select(`
+      household_role,  
+      user_id,
+      profiles:user_id (
+        id,
+        full_name
+      )
+    `)
+    .eq('household_id', householdId);
+
+  if (error) throw error;
+  return data;
 }

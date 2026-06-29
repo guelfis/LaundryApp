@@ -3,11 +3,10 @@ import SectionText from "../components/SectionText";
 import MembersList from "../components/MembersList";
 import { useApartmentMembers, useApartments, useDeleteOrLeaveApartment } from "../hooks/useApartments";
 import InviteMemberModal from "../myApartment/InviteMemberModal";
-import { checkIsAdmin, getCleanStorageItem, resolveCurrentUserId } from "../auth/authUtils";
+import { checkIsAdminApartment, getCleanStorageItem, resolveCurrentUserId } from "../auth/authUtils";
 import PendingRequestsSection from "../myApartment/PendingRequestsSection";
 import ApartmentNameEditableSection from "../utils/ApartmentNameEditableSection";
 import { BookingContext } from "../contexts/BookingContext";
-import { Home, Info, LogOut, Trash2 } from "lucide-react";
 import MemberModal from "../myApartment/MemberModal";
 import { ApartmentMember } from "../lib/databaseTypes";
 import { useHistory } from "react-router-dom";
@@ -15,9 +14,9 @@ import { useTranslation } from "react-i18next";
 import { ROUTES } from "../routes/routes.constants";
 import PageLayout from "../components/PageLayout";
 import { PageHeader } from "../components/PageHeader";
-import { IonAlert } from "@ionic/react";
+import { Home } from "lucide-react";
+import LeaveDeleteActionsBlock from "../components/LeaveDeleteActionsBlock";
 
-const destructiveButtonStyle = "flex items-center justify-center gap-2 py-3 px-6 text-red-600 dark:text-red-400 text-base bg-transparent border-none rounded-xl active:bg-red-50 dark:active:bg-red-950/20 active:scale-[0.98] transition-all disabled:opacity-40";
 
 export default function MyApartmentTab() {
     const { t } = useTranslation();
@@ -28,9 +27,7 @@ export default function MyApartmentTab() {
     const [apartmentName, setApartmentName] = React.useState(getCleanStorageItem('apartmentName') || 'my apartment');
     const [isEditingName, setIsEditingName] = useState<boolean>(false);
     const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
-    const [isMemberModalOpen, setIsMemberModalOpen] = useState<boolean>(false);
-    const [isInfoAlertOpen, setIsInfoAlertOpen] = useState(false);
-    
+    const [isMemberModalOpen, setIsMemberModalOpen] = useState<boolean>(false);    
 
     useEffect(() => {
         resolveCurrentUserId().then(id => setCurrentUserId(id));
@@ -43,7 +40,7 @@ export default function MyApartmentTab() {
     const { data: allApartments = [] } = useApartments(householdId);
     
     const existingNames = useMemo(() => allApartments.map(apt => apt.display_name), [allApartments]);
-    const isUserAdmin = useMemo(() => checkIsAdmin(members, currentUserId), [members, currentUserId]);
+    const isUserAdmin = useMemo(() => checkIsAdminApartment(members, currentUserId), [members, currentUserId]);
     const admins = useMemo(() => members.filter(m => m.apartment_role === 'admin'), [members]);
     const canDeleteApartment = isUserAdmin && members.length === 1;
     const canLeaveApartment = !isUserAdmin || admins.length > 1;
@@ -113,7 +110,7 @@ export default function MyApartmentTab() {
             >
                 {/* Info Section Block */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                    <SectionText title={t('myApartmentTab.info')} />
+                    <SectionText title={t('common.info')} />
                     <ApartmentNameEditableSection
                         apartmentName={apartmentName}
                         onNameChange={(newName) => {
@@ -149,84 +146,19 @@ export default function MyApartmentTab() {
                 </div>
 
                 {/* More Actions Section Block */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginTop: '8px', marginBottom: '32px' }}>
-                    <SectionText title={t('myApartmentTab.more_actions')} />
-                    
-                    <div 
-                    style={{ 
-                        display: 'flex', 
-                        flexDirection: 'column', 
-                        alignItems: 'flex-start', // Aligns icons and labels cleanly to the left edge
-                        gap: '12px', 
-                        width: '100%', 
-                        paddingBottom: '40px' // Safety spacing area above the footer tabs
-                    }}
-                    >
-                        <div style={{ 
-                            display: 'flex', 
-                            flexDirection: 'row', 
-                            alignItems: 'center', 
-                            gap: '12px', 
-                            width: '100%', 
-                        }}>
-                            <button
-                                aria-label="leave"
-                                onClick={handleLeaveApartment}
-                                disabled={isLeaving || !canLeaveApartment}
-                                className={destructiveButtonStyle}
-                                style={{ paddingLeft: '0px', paddingRight: '0px' }} // Strips offset paddings
-                            >
-                                <LogOut size={18} className="text-red-600 dark:text-red-400" />
-                                <span>{isLeaving ? t('myApartmentTab.leaving') : t('myApartmentTab.leave')}</span>
-                                
-                            </button>
-                                {!canLeaveApartment && 
-                                    <button 
-                                        type="button"
-                                        onClick={() => setIsInfoAlertOpen(true)}
-                                        style={{ 
-                                            background: "transparent", 
-                                            border: "none", 
-                                            padding: "4px", 
-                                            display: "flex", 
-                                            alignItems: "center", 
-                                            justifyContent: "center",
-                                            cursor: "pointer"
-                                        }}
-                                    >
-                                        <Info size={16} className="text-gray-500 dark:text-slate-400" />
-                                    </button>
-                                }
-                            </div>
-                        {canDeleteApartment && (
-                            <button
-                                aria-label="promote"
-                                onClick={handleDeleteApartment}
-                                disabled={isDeletingApartment}
-                                className={destructiveButtonStyle}
-                                style={{ paddingLeft: '0px', paddingRight: '0px' }}
-                            >
-                                <Trash2 size={18} className="text-red-600 dark:text-red-400" />
-                                <span>{isDeletingApartment ? t('myApartmentTab.deleting') : t('myApartmentTab.delete')}</span>
-                            </button>
-                        )}
-                    </div>
-                </div>
+                <LeaveDeleteActionsBlock 
+                    onLeave={handleLeaveApartment}
+                    onDelete={handleDeleteApartment}
+                    canLeave={canLeaveApartment}
+                    canDelete={canDeleteApartment}
+                    isLeaving={isLeaving}
+                    isDeleting={isDeletingApartment}
+                    leaveLabelKey={t('myApartmentTab.leave')}
+                    deleteLabelKey={t('myApartmentTab.delete')}
+                    infoTitleKey={t('myApartmentTab.info_title')}
+                    infoMessageKey={t('myApartmentTab.info_message')} 
+                />
             </div>
-
-            <IonAlert
-                isOpen={isInfoAlertOpen}
-                onDidDismiss={() => setIsInfoAlertOpen(false)}
-                header={t('myApartmentTab.info_title')}
-                message={t('myApartmentTab.info_message')}
-                buttons={[
-                    {
-                        text: t('myApartmentTab.btn_ok'),
-                        role: 'cancel',
-                        handler: () => setIsInfoAlertOpen(false)
-                    }
-                ]}
-            />
             {/* Modal overlays load below */}
             <InviteMemberModal 
                 apartmentId={apartmentId} 

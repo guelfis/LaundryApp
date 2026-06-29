@@ -10,7 +10,7 @@ import MyApartmentTab from './MyApartmentTab';
 import MyDashboard from './UserDashboard';
 import UserSettings from './UserSettings';
 import { usePendingRequests, useApartmentMembers } from '../hooks/useApartments';
-import { checkIsAdmin, resolveCurrentUserId } from '../auth/authUtils';
+import { checkIsAdminApartment, resolveCurrentUserId } from '../auth/authUtils';
 import { useBookingFilters } from '../hooks/useBookings';
 import { ROUTES } from '../routes/routes.constants';
 import BuildingTab from './BuildingTab';
@@ -47,7 +47,7 @@ function Dashboard() {
   // Se apartmentId è null, l'utente non può essere un admin dell'appartamento, quindi forziamo false
   const isUserApartmentAdmin = useMemo(() => {
     if (!apartmentId) return false;
-    return checkIsAdmin(members, currentUserId);
+    return checkIsAdminApartment(members, currentUserId);
   }, [members, currentUserId, apartmentId]);
   
   const hasNotifications = isUserApartmentAdmin && Array.isArray(requests) && requests.length > 0;

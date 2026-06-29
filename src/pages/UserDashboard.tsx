@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import SectionText from "../components/SectionText";
 import { useApartmentMembers, useApartments, usePendingRequests } from "../hooks/useApartments";
 import { useUpcomingBookings, useBookings, useBookingFilters } from "../hooks/useBookings";
-import { resolveCurrentUserId, checkIsAdmin } from "../auth/authUtils";
+import { resolveCurrentUserId, checkIsAdminApartment } from "../auth/authUtils";
 import { Calendar, LayoutDashboard } from "lucide-react"; 
 import { LoadingSpinner } from "../components/LoadingSpinner";
 import { SLOTS } from "../constants/dates";
@@ -61,7 +61,7 @@ export default function UserDashboard() {
   const { data: apartments = [] } = useApartments(householdId);
   const { data: upcomingBookings = [], isLoading } = useUpcomingBookings(apartmentId);
 
-  const isUserAdmin = useMemo(() => checkIsAdmin(members, currentUserId), [members, currentUserId]);
+  const isUserAdmin = useMemo(() => checkIsAdminApartment(members, currentUserId), [members, currentUserId]);
 
   const apartmentsMap = useMemo(() => {
     return Object.fromEntries(apartments.map((a) => [a.id, a.display_name]));

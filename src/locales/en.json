@@ -4,7 +4,12 @@
         "button_close": "Close",
         "error": "Failed to submit request. Please try again.",
         "system_error": "An unexpected error occurred",
-        "btn_settings": "Settings"
+        "btn_settings": "Settings",
+        "more_actions": "More actions",
+        "btn_ok": "Got It",
+        "deleting": "Deleting ...",
+        "leaving": "Leaving ...",
+        "info": "Info"
     },
     "app": {
       "title": "Laundry Planner",
@@ -53,16 +58,11 @@
     "delete_success": "Apartment successfully deleted.",
     "release_warning": "Are you sure you want to leave this apartment?",
     "release_fail": "Failed to Leave the apartment",
-    "deleting": "Deleting ...",
     "delete": "Delete Apartment",
-    "leaving": "Leaving ...",
     "leave": "Leave Apartment",
     "members": "Members ({{count}})",
-    "more_actions": "More actions",
-    "info": "Info",
     "info_title": "Cannot Leave Apartment",
-    "info_message": "You can leave the apartment only if you are not an admin of the apartment or if there is at least another admin in the apartment. If you are the only member, you can delete the apartment instead to remove it permanently.",
-    "btn_ok": "Got It"
+    "info_message": "You can leave the apartment only if you are not an admin of the apartment or if there is at least another admin in the apartment. If you are the only member, you can delete the apartment instead to remove it permanently."
   },
   "createApartment": {
     "title": "Create New Apartment",
@@ -219,7 +219,16 @@
     "shareInstructions": "Share this numeric code or QR code with your tenants so they can join the building.",
     "qr_label": "Scan to Join Instantly",
     "btn_print": "Print Laundry Flier",
-    "unknown_address": "Unknown Address"
+    "unknown_address": "Unknown Address",
+    "delete_warning":"WARNING: This action is permanent! Are you sure you want to completely delete this building and all its apartments and booking logs?",
+    "delete_fail": "Failed to Delete the building",
+    "delete_success": "Building successfully deleted.",
+    "release_warning": "Are you sure you want to leave this building?",
+    "release_fail": "Failed to Leave the building",
+    "delete": "Delete Building",
+    "leave": "Leave Building",
+    "info_title": "Cannot Leave Building",
+    "info_message": "You can leave the building only if you are not an admin of the building or if there is at least another admin in the building. You can delete the building instead to remove it permanently for everyone."
   },
   "flier":{
    "flier_headline": "Building Laundry Scheduler App",

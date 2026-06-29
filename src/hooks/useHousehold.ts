@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { createHouseholdAsLandlord, getHouseholdById, getUserHouseholds, searchHouseholdByCoords, verifyHouseholdAccessById } from '../lib/households';
+import { createHouseholdAsLandlord, deleteHousehold, getHouseholdById, getHouseholdMembers, getUserHouseholds, leaveHousehold, searchHouseholdByCoords, verifyHouseholdAccessById } from '../lib/households';
 
 interface CreateHouseholdVariables {
   name: string;
@@ -71,5 +71,50 @@ export function useHouseholdDetails(householdId: string) {
     // disabled when id is null
     enabled: !!householdId, 
     staleTime: 1000 * 60 * 5, // keeps the clean data in the cache for 5 minutes
+  });
+}
+
+export function useDeleteLeaveHousehold(){
+  const queryClient = useQueryClient();
+
+  const leaveHouseholdMutation = useMutation({
+    mutationFn: (householdId:string) => leaveHousehold(householdId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['user-households'] });
+      localStorage.removeItem('householdId');
+      localStorage.removeItem('isAdminModeActive');
+      localStorage.removeItem('householdTimezone');
+      localStorage.removeItem('apartmentId');
+      localStorage.removeItem('apartmentName');
+    }
+  })
+
+  const deleteHouseholdMutation = useMutation({
+    mutationFn: (householdId:string) => deleteHousehold(householdId),
+    onSuccess: () => {
+      localStorage.removeItem('householdId');
+      localStorage.removeItem('isAdminModeActive');
+      localStorage.removeItem('householdTimezone');
+      localStorage.removeItem('apartmentId');
+      localStorage.removeItem('apartmentName');
+
+      queryClient.invalidateQueries({queryKey: ["user-households"]});
+      queryClient.invalidateQueries({queryKey: ["user-administered-buildings"]});
+    }
+  });
+
+  return {
+    deleteHousehold: deleteHouseholdMutation.mutateAsync,
+    isDeletingHousehold: deleteHouseholdMutation.isPending,
+    leaveHousehold: leaveHouseholdMutation.mutateAsync,
+    isLeavingHousehold: leaveHouseholdMutation.isPending
+  }
+}
+
+export function useHouseholdMembers(householdId: string | null, options?: { enabled?: boolean }) {
+  return useQuery({
+    queryKey: ['household-members', householdId],
+    queryFn: () => getHouseholdMembers(householdId!),
+    enabled: options?.enabled ?? !!householdId, 
   });
 }

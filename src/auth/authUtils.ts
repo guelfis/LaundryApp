@@ -16,7 +16,7 @@ export function getCleanStorageItem(key: string): string | null {
  * Verifies if a specific user holds administrative permissions 
  * within a structured database member roster payload array.
  */
-export function checkIsAdmin(
+export function checkIsAdminApartment(
   members: Array<{ user_id: string; apartment_role: string | null }>, 
   userId: string | null
 ): boolean {
@@ -26,6 +26,19 @@ export function checkIsAdmin(
   
   return members.some(
     (member) => member.user_id.toLowerCase() === cleanUserId && member.apartment_role === 'admin'
+  );
+}
+
+export function checkIsAdminBuilding(
+  members: Array<{ user_id: string; household_role: string | null }>, 
+  userId: string | null
+): boolean {
+  if (!userId || !members || members.length === 0) return false;
+  
+  const cleanUserId = userId.replace(/['"]+/g, '').trim().toLowerCase();
+  
+  return members.some(
+    (member) => member.user_id.toLowerCase() === cleanUserId && member.household_role === 'admin'
   );
 }
 

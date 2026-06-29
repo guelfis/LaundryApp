@@ -4,14 +4,20 @@
     "button_close": "Chiudi",
     "error": "Richieta fallita. Prova di nuovo.",
     "system_error": "Si è verificato un errore inaspettato",
-    "btn_settings": "Impostazioni"
+    "btn_settings": "Impostazioni",
+    "more_actions": "Altre azioni",
+    "btn_ok": "Ho Capito",
+    "deleting": "Deleting ...",
+    "leaving": "Leaving ...",
+    "info": "Info"
   },
   "app": {
     "title": "Pianificatore Lavanderia",
     "checking_membership": "Verifica delle appartenenze al condominio in corso..."
   },
   "accessCode":{
-      "error_lenght": "Il codice di accesso deve avere {{count}} numeri."    },
+      "error_lenght": "Il codice di accesso deve avere {{count}} numeri."    
+  },
   "slotModal": {
     "title_yours": "La tua Prenotazione",
     "title_occupied": "Slot Occupato",
@@ -52,16 +58,11 @@
     "delete_success": "L'appartamento e' stato cancellato con successo.",
     "release_warning": "Sei sicuro di voler lasciare l'appartamento?",
     "release_fail": "Errore durante il rilascio dell'appartamento",
-    "deleting": "Deleting ...",
     "delete": "Rimuovi L'Appartmento",
-    "leaving": "Leaving ...",
     "leave": "Lascia L'Appartmento",
     "members": "Membri ({{count}})",
-    "more_actions": "Altre azioni",
-    "info": "Info",
     "info_title": "Impossibile Lasciare l'Appartamento",
-    "info_message": "Puoi lasciare l'appartamento solo se non sei un amministratore o se c'è almeno un altro amministratore nell'appartamento. Se sei l'unico membro, puoi invece eliminare l'appartamento per rimuoverlo definitivamente.",
-    "btn_ok": "Ho Capito"
+    "info_message": "Puoi lasciare l'appartamento solo se non sei un amministratore o se c'è almeno un altro amministratore nell'appartamento. Se sei l'unico membro, puoi invece eliminare l'appartamento per rimuoverlo definitivamente."
   },
   "createApartment": {
     "title": "Crea un nuovo Appartamento",
@@ -215,7 +216,16 @@
     "shareInstructions": "Condividi questo codice numerico o il codice QR con i tuoi inquilini per permettergli di accedere all'edificio.",
     "qr_label": "Scansiona per Entrare Istantaneamente",
     "btn_print": "Stampa Volantino Lavanderia",
-    "unknown_address": "Indirizzo sconosciuto"
+    "unknown_address": "Indirizzo sconosciuto",
+    "delete_warning":"ATTENZIONE: Questa azione e' permanente! Sei sicuro di voler rimuovere completamente il condominio e tutti gli appartamenti e la cronologia delle prenotazioni?",
+    "delete_fail": "Errore durante la rimozione del condominio",
+    "delete_success": "Il condominio e' stato cancellato con successo.",
+    "release_warning": "Sei sicuro di voler lasciare l'appartamento?",
+    "release_fail": "Errore durante il rilascio dell'appartamento",
+    "delete": "Rimuovi il Condominio",
+    "leave": "Lascia L'Appartmento",
+    "info_title": "Impossibile Lasciare l'Appartamento",
+    "info_message": "Puoi lasciare l'appartamento solo se non sei un amministratore o se c'è almeno un altro amministratore nell'appartamento. Puoi invece eliminare l'appartamento per rimuoverlo definitivamente."
   },
   "flier":{
    "flier_headline": "Guida App Lavanderia Condominiale",

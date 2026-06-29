@@ -142,7 +142,6 @@ export function useApartmentMembersActions(apartmentId: string) {
   });
 
   return {
-    
     promoteMember: promoteMemberMutation.mutateAsync,
     removeMember: removeMemberMutation.mutateAsync
   };
@@ -164,11 +163,11 @@ export function useDeleteOrLeaveApartment() {
   const deleteApartmentMutation = useMutation({
     mutationFn: (apartmentId:string) => deleteApartment(apartmentId),
     onSuccess: () => {
-      // Svuota i riferimenti dal browser immediatamente
+      // remove local variables
       localStorage.removeItem('apartmentId');
       localStorage.removeItem('apartmentName');
       
-      // Forza il refresh degli elenchi appartamenti globali per l'onboarding
+      // force refresh of queries
       queryClient.invalidateQueries({ queryKey: ['my-apartments'] });
       queryClient.invalidateQueries({ queryKey: ['household-apartments'] });
     }

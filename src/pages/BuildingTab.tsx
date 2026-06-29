@@ -1,10 +1,10 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef  } from "react";
 import { useHistory } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Building } from "lucide-react";
 import { IonText, IonNote } from "@ionic/react";
 import { QRCodeSVG } from 'qrcode.react'; 
-import { printOutline } from 'ionicons/icons';
+import {  printOutline } from 'ionicons/icons';
 
 import PageLayout from "../components/PageLayout";
 import { PageHeader } from "../components/PageHeader";
@@ -12,20 +12,28 @@ import SlotCard from "../components/SlotCard";
 import SectionText from "../components/SectionText";
 import { LoadingSpinner } from "../components/LoadingSpinner";
 
-import { useHouseholdDetails } from "../hooks/useHousehold";
+import { useDeleteLeaveHousehold, useHouseholdDetails, useHouseholdMembers } from "../hooks/useHousehold";
 import { useBookingFilters } from "../hooks/useBookings";
 import { ROUTES } from "../routes/routes.constants";
 import Button from "../components/Button";
 import { printLaundryFlier } from "../services/printService";
 import LaundryIcon from "../logo/LaundryIcon"; 
+import LeaveDeleteActionsBlock from "../components/LeaveDeleteActionsBlock";
 
 export default function BuildingTab() {
   const { t } = useTranslation();
   const history = useHistory();
   const logoRef = useRef<HTMLDivElement>(null);
 
-  const { householdId } = useBookingFilters();
+  const { householdId, isAdminMode } = useBookingFilters();
   const { data: householdData, isPending } = useHouseholdDetails(householdId);
+  const {deleteHousehold, isDeletingHousehold, leaveHousehold, isLeavingHousehold} = useDeleteLeaveHousehold();
+  const {data: householdMembers = [], isPending:isMembersPending} = useHouseholdMembers(householdId);
+
+  const buildingAdmins = useMemo(() => householdMembers.filter(m => m.household_role === 'admin'), [householdMembers]);
+  
+  const canDeleteBuilding = isAdminMode;
+  const canLeaveBuilding = !isAdminMode || buildingAdmins.length > 1;
 
   useEffect(() => {
     if (!isPending && !householdData) {
@@ -49,6 +57,34 @@ export default function BuildingTab() {
     code: householdData.access_code
   });
 
+  const handleDeleteBuilding = async () => {
+    const confirmFirst = window.confirm(t('buildingTab.delete_warning'));
+    if (confirmFirst) {
+        try {
+            await deleteHousehold(householdId);
+            alert(t('buildingTab.delete_success'));
+            history.push(ROUTES.HOUSEHOLD_LOGIN, { replace: true }); 
+        } catch (err) {
+            const errorInstance = err as Error;
+            console.error(t('buildingTab.delete_fail'), err);
+            alert(`${t('buildingTab.delete_fail')}: ${errorInstance.message}`);
+        }
+    }
+      };
+    
+  const handleLeaveBuilding = async () => {
+    if (window.confirm(t('myApartmentTab.release_warning'))) {
+      try {
+          await leaveHousehold(householdId);
+          history.push(ROUTES.HOUSEHOLD_LOGIN, { replace: true });
+      } catch (err) {
+          const errorInstance = err as Error;
+          console.error(t('buildingTab.release_fail'), err);
+          alert(`${t('buildingTab.release_fail')}: ${errorInstance.message}`);
+      }
+  }
+  }
+
   const handlePrintFlier = async () => {
     const componentMarkup = logoRef.current?.innerHTML || '';
 
@@ -65,7 +101,7 @@ export default function BuildingTab() {
     });
   };
 
-  if (isPending) {
+  if (isPending || isMembersPending) {
     return (
       <PageLayout>
         <div style={styles.centerSpinner}>
@@ -144,8 +180,20 @@ export default function BuildingTab() {
               icon={printOutline} 
             />
         </div>
-          
-      </div>
+
+        <LeaveDeleteActionsBlock 
+          onLeave={handleLeaveBuilding}
+          onDelete={handleDeleteBuilding}
+          canLeave={canLeaveBuilding}
+          canDelete={canDeleteBuilding}
+          isLeaving={isLeavingHousehold}
+          isDeleting={isDeletingHousehold}
+          leaveLabelKey={t('buildingTab.leave')}
+          deleteLabelKey={t('buildingTab.delete')}
+          infoTitleKey={t('buildingTab.info_title')}
+          infoMessageKey={t('buildingTab.info_message')} 
+        />        
+        </div>
     </PageLayout>
   );
 }
