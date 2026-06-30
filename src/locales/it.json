@@ -201,7 +201,13 @@
     "row_dark_mode": "Modalità Scura",
     "row_privacy": "Informativa sulla Privacy",
     "btn_logout": "Disconnetti",
-    "logout_failed": "Disconnessione fallita. Riprova."
+    "logout_failed": "Disconnessione fallita. Riprova.",
+    "support_header": "Support & Feedback",
+    "btn_contact_support": "Contatta il Supporto",
+    "btn_report_bug": "Riporta un Bug",
+    "legal_header": "About & Legal",
+    "btn_terms": "Terms of Service",
+    "lbl_version": "App Version"
   },
   "joinHousehold": {
     "title_verify": "Inserisci il Codice",

@@ -204,7 +204,13 @@
     "row_dark_mode": "Dark Mode",
     "row_privacy": "Privacy Policy",
     "btn_logout": "Log Out",
-    "logout_failed": "Sign out failed. Please try again."
+    "logout_failed": "Sign out failed. Please try again.",
+    "support_header": "Support & Feedback",
+    "btn_contact_support": "Contact Support",
+    "btn_report_bug": "Report a Bug",
+    "legal_header": "About & Legal",
+    "btn_terms": "Terms of Service",
+    "lbl_version": "App Version"
   },
   "joinHousehold": {
     "title_verify": "Enter Access Code",

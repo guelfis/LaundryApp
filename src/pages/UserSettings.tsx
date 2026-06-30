@@ -1,7 +1,13 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory } from "react-router-dom";
-import { LogOut, Settings } from "lucide-react";
+import { 
+  IonItem, 
+  IonLabel, 
+  IonNote, 
+  IonSpinner,
+} from "@ionic/react";
+import { LogOut, Settings, Mail, ShieldAlert, FileText, Info} from "lucide-react";
 import { resolveCurrentUserEmail, signOutUser } from "../auth/authUtils";
 import { ROUTES } from "../routes/routes.constants";
 import PageLayout from "../components/PageLayout";
@@ -48,14 +54,93 @@ export default function UserSettings() {
         }
       >
         <div className="flex flex-col gap-6 p-4 max-w-md mx-auto w-full">
+            
             {/* Profile Information Block */}
             <div className="flex flex-col gap-1 p-4 bg-gray-100 dark:bg-gray-800 rounded-xl">
-                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                     {t('settings.profile_header', 'Logged In Account')}
                 </span>
                 <span className="text-base font-bold text-gray-900 dark:text-gray-100 truncate">
                     {userEmail ?? t('settings.loading_user', 'Loading email...')}
                 </span>
+            </div>
+
+            {/* Support & Feedback Block */}
+            <div className="flex flex-col bg-gray-100 dark:bg-gray-800 rounded-xl overflow-hidden">
+                <div className="px-4 pt-4 pb-1">
+                    <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        {t('settings.support_header')}
+                    </span>
+                </div>
+                
+                {/* Contact Support */}
+                <IonItem 
+                    button 
+                    detail={true} 
+                    lines="full"
+                    onClick={() => window.location.href = "mailto:support@yourdomain.com"}
+                >
+                    {/* Fixed slot container for Lucide icon */}
+                    <div slot="start" className="flex items-center justify-center mr-3">
+                        <Mail className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+                    </div>
+                    <IonLabel className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                        {t('settings.btn_contact_support')}
+                    </IonLabel>
+                </IonItem>
+
+                  <IonItem 
+                      button 
+                      detail={true} 
+                      lines="none"
+                      onClick={() => setShowBugForm(true)}
+                  >
+                      <div slot="start" className="flex items-center justify-center mr-3">
+                          <ShieldAlert className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+                      </div>
+                      <IonLabel className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                          {t('settings.btn_report_bug', 'Report a Bug')}
+                      </IonLabel>
+                  </IonItem>
+            </div>
+
+            {/* About & Legal Block */}
+            <div className="flex flex-col bg-gray-100 dark:bg-gray-800 rounded-xl overflow-hidden">
+                <div className="px-4 pt-4 pb-1">
+                    <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        {t('settings.legal_header')}
+                    </span>
+                </div>
+
+                {/* Terms of Service */}
+                <IonItem 
+                    button 
+                    detail={true} 
+                    lines="full"
+                    onClick={() => alert('Show Terms')}
+                >
+                    {/* Fixed slot container for Lucide icon */}
+                    <div slot="start" className="flex items-center justify-center mr-3">
+                        <FileText className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+                    </div>
+                    <IonLabel className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                        {t('settings.btn_terms')}
+                    </IonLabel>
+                </IonItem>
+
+                {/* App Version Info (Non-clickable) */}
+                <IonItem lines="none">
+                    {/* Fixed slot container for Lucide icon */}
+                    <div slot="start" className="flex items-center justify-center mr-3">
+                        <Info className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+                    </div>
+                    <IonLabel className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                        {t('settings.lbl_version')}
+                    </IonLabel>
+                    <IonNote slot="end" className="text-sm font-semibold text-gray-500 dark:text-gray-400">
+                        {__APP_VERSION__}
+                    </IonNote>
+                </IonItem>
             </div>
 
             {/* Destructive Sign Out Button */}
@@ -65,7 +150,7 @@ export default function UserSettings() {
                 className="flex items-center justify-center gap-2 w-full p-4 rounded-xl border border-red-200 bg-red-50 hover:bg-red-100 dark:bg-red-950/30 dark:border-red-900 text-red-600 dark:text-red-400 font-semibold transition-colors disabled:opacity-50"
             >
                 {loading ? (
-                    <div className="w-5 h-5 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
+                    <IonSpinner name="crescent" color="danger" className="w-5 h-5" />
                 ) : (
                   <>
                     <LogOut className="w-5 h-5" />
