@@ -288,6 +288,36 @@ export type Database = {
         }
         Relationships: []
       }
+      support_tickets: {
+        Row: {
+          app_version: string
+          created_at: string
+          id: string
+          message: string
+          ticket_type: Database["public"]["Enums"]["ticket_type_enum"]
+          user_agent: string | null
+          user_email: string | null
+        }
+        Insert: {
+          app_version: string
+          created_at?: string
+          id?: string
+          message: string
+          ticket_type: Database["public"]["Enums"]["ticket_type_enum"]
+          user_agent?: string | null
+          user_email?: string | null
+        }
+        Update: {
+          app_version?: string
+          created_at?: string
+          id?: string
+          message?: string
+          ticket_type?: Database["public"]["Enums"]["ticket_type_enum"]
+          user_agent?: string | null
+          user_email?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -412,6 +442,7 @@ export type Database = {
       apartment_role: "admin" | "member"
       booking_status: "active" | "released"
       household_role: "admin" | "member"
+      ticket_type_enum: "bug" | "support"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -542,6 +573,7 @@ export const Constants = {
       apartment_role: ["admin", "member"],
       booking_status: ["active", "released"],
       household_role: ["admin", "member"],
+      ticket_type_enum: ["bug", "support"],
     },
   },
 } as const
