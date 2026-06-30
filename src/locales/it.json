@@ -202,6 +202,8 @@
     "row_privacy": "Informativa sulla Privacy",
     "btn_logout": "Disconnetti",
     "logout_failed": "Disconnessione fallita. Riprova.",
+    "bug_success": "Bug report inviato con successo!",
+    "bug_error":"Errore nell'invio del bug report. Prova di nuovo.",
     "support_header": "Support & Feedback",
     "btn_contact_support": "Contatta il Supporto",
     "btn_report_bug": "Riporta un Bug",

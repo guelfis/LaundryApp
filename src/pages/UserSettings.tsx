@@ -12,12 +12,19 @@ import { resolveCurrentUserEmail, signOutUser } from "../auth/authUtils";
 import { ROUTES } from "../routes/routes.constants";
 import PageLayout from "../components/PageLayout";
 import { PageHeader } from "../components/PageHeader";
+import { writeSupportTicket } from "../lib/supportTickets";
+import BugForm from "../components/BugForm";
 
 export default function UserSettings() {
     const { t } = useTranslation();
     const history = useHistory();
     const [loading, setLoading] = useState(false);
+    const [sendingBug, setSendingBug] = useState(false);
     const [userEmail, setUserEmail] = useState<string | null>(null);
+
+    // UI state to toggle the bug report form inside the container block
+    const [showBugForm, setShowBugForm] = useState(false);
+    const [bugDescription, setBugDescription] = useState("");
 
     // Safe lifecycle fetch: Resolves the async promise without loop crashes
     useEffect(() => {
@@ -41,6 +48,32 @@ export default function UserSettings() {
         localStorage.removeItem('householdId');
         localStorage.removeItem('householdTimezone');
       }
+    };
+
+    // Submits the bug with automated tracking parameters directly to Supabase
+    const handleInsertBugReport = async () => {
+        if (!bugDescription.trim()) return;
+
+        setSendingBug(true);
+        try {
+            // Invoke the standalone database worker function directly
+            await writeSupportTicket({
+                email: userEmail,
+                ticketType: 'bug',
+                bugDescription: bugDescription,
+                app_version: __APP_VERSION__,
+                userAgent: navigator.userAgent
+            });
+
+            alert(t('settings.bug_success'));
+            setBugDescription("");
+            setShowBugForm(false);
+        } catch (err) {
+            console.error("Failed to post ticket:", err);
+            alert(t('settings.bug_error'));
+        } finally {
+            setSendingBug(false);
+        }
     };
 
     return (
@@ -89,6 +122,8 @@ export default function UserSettings() {
                     </IonLabel>
                 </IonItem>
 
+                {/* Report a Bug Trigger Item */}
+                {!showBugForm ? (
                   <IonItem 
                       button 
                       detail={true} 
@@ -102,6 +137,15 @@ export default function UserSettings() {
                           {t('settings.btn_report_bug', 'Report a Bug')}
                       </IonLabel>
                   </IonItem>
+              ) : (
+                  <BugForm 
+                      setShowBugForm={setShowBugForm}
+                      bugDescription={bugDescription}
+                      setBugDescription={setBugDescription}
+                      sendingBug={sendingBug}
+                      onSend={handleInsertBugReport}
+                  />
+              )}
             </div>
 
             {/* About & Legal Block */}

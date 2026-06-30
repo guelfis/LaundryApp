@@ -9,7 +9,8 @@
         "btn_ok": "Got It",
         "deleting": "Deleting ...",
         "leaving": "Leaving ...",
-        "info": "Info"
+        "info": "Info",
+        "btn_send": "Send"
     },
     "app": {
       "title": "Laundry Planner",
@@ -205,12 +206,18 @@
     "row_privacy": "Privacy Policy",
     "btn_logout": "Log Out",
     "logout_failed": "Sign out failed. Please try again.",
+    "bug_success": "Bug report submitted successfully!",
+    "bug_error":"Failed to submit bug. Please try again.",
     "support_header": "Support & Feedback",
     "btn_contact_support": "Contact Support",
     "btn_report_bug": "Report a Bug",
     "legal_header": "About & Legal",
     "btn_terms": "Terms of Service",
     "lbl_version": "App Version"
+  },
+  "bugForm":{
+    "bug_form_subtitle": "Describe what happened:",
+    "bug_placeholder": "Example: can't book a laundry slot because the modal doesn't open"
   },
   "joinHousehold": {
     "title_verify": "Enter Access Code",
