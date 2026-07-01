@@ -103,7 +103,7 @@ export default function CalendarGridTab() {
     const dayNum = i + 1;
     const dayName = days[(firstDay + i) % 7];
     const dayOfWeekIndex = (firstDay + i) % 7; 
-    const isToday = isCurrentMonth && dayNum === today.getDate();
+    const isToday = isCurrentMonth && dayNum === today.getDay();
     return { dayNum, dayName, isToday, dayOfWeekIndex };
   });
 
