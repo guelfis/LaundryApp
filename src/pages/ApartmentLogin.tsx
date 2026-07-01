@@ -14,7 +14,7 @@ import { useTranslation } from 'react-i18next';
 import { getCleanStorageItem } from '../auth/authUtils';
 import { ROUTES } from '../routes/routes.constants';
 import { addOutline, constructOutline, logOutOutline } from 'ionicons/icons';
-import { IonIcon, IonText, IonButton } from '@ionic/react';
+import { IonIcon, IonText, IonButton, IonToast } from '@ionic/react';
 import { useDeleteLeaveHousehold, useGetUserHouselds } from '../hooks/useHousehold';
 import SlotCard from '../components/SlotCard';
 
@@ -23,6 +23,8 @@ export default function ApartmentLogin() {
   const history = useHistory();
   const location = useLocation();
   const householdId = getCleanStorageItem('householdId') || '';
+  const [toastMessage, setToastMessage] = useState<string>('');
+  const [toastColor, setToastColor] = useState<'success' | 'warning' | 'danger'>('success');   
   
   const { data: myApartmentsRaw = [], isLoading: isLoadingMy } = useMyApartments(householdId);
   const { data: allApartmentsRaw = [], isLoading: isLoadingAll } = useApartments(householdId);
@@ -55,11 +57,13 @@ export default function ApartmentLogin() {
     const handleAutoJoin = async (token: string) => {
       try {
         await joinViaLink(token);
-        alert(t('apartmentLogin.alert_join_success', 'Successfully joined the apartment!'));
+        setToastMessage(t('apartmentLogin.alert_join_success', 'Successfully joined the apartment!'));
+        setToastColor('success');
         history.push(ROUTES.DASHBOARD_MAIN, { replace: true });
       } catch (err) {
         console.error("Link processing error:", err);
-        alert(t('apartmentLogin.alert_join_error', 'This invitation link is invalid, expired, or fully claimed.'));
+        setToastMessage(t('apartmentLogin.alert_join_error', 'This invitation link is invalid, expired, or fully claimed.'));
+        setToastColor('danger');
         history.push(ROUTES.APARTMENT_LOGIN, { replace: true });
       }
     };
@@ -92,7 +96,8 @@ export default function ApartmentLogin() {
       } catch (err) {
           const errorInstance = err as Error;
           console.error(t('buildingTab.release_fail'), err);
-          alert(`${t('buildingTab.release_fail')}: ${errorInstance.message}`);
+          setToastMessage(`${t('buildingTab.release_fail')}: ${errorInstance.message}`);
+          setToastColor('danger');
       }
     }
   };
@@ -228,6 +233,13 @@ export default function ApartmentLogin() {
         onClose={() => setIsCreateAptModalOpen(false)}
         householdId={householdId}
       />
+      <IonToast
+        isOpen={!!toastMessage}
+        message={toastMessage}
+        duration={3000}
+        onDidDismiss={() => setToastMessage('')}
+        color={toastColor}
+      />  
     </PageLayout>
   );
 }

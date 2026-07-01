@@ -6,6 +6,7 @@ import {
   IonLabel, 
   IonNote, 
   IonSpinner,
+  IonToast,
 } from "@ionic/react";
 import { LogOut, Settings, Mail, ShieldAlert, FileText, Info} from "lucide-react";
 import { resolveCurrentUserEmail, signOutUser } from "../auth/authUtils";
@@ -25,6 +26,8 @@ export default function UserSettings() {
     // UI state to toggle the bug report form inside the container block
     const [showBugForm, setShowBugForm] = useState(false);
     const [bugDescription, setBugDescription] = useState("");
+    const [toastMessage, setToastMessage] = useState<string>('');
+    const [toastColor, setToastColor] = useState<'success' | 'warning' | 'danger'>('success');
 
     // Safe lifecycle fetch: Resolves the async promise without loop crashes
     useEffect(() => {
@@ -65,12 +68,14 @@ export default function UserSettings() {
                 userAgent: navigator.userAgent
             });
 
-            alert(t('settings.bug_success'));
+            setToastMessage(t('settings.bug_success'));
+            setToastColor('success');
             setBugDescription("");
             setShowBugForm(false);
         } catch (err) {
             console.error("Failed to post ticket:", err);
-            alert(t('settings.bug_error'));
+            setToastMessage(t('settings.bug_error'));
+            setToastColor('danger');
         } finally {
             setSendingBug(false);
         }
@@ -161,7 +166,7 @@ export default function UserSettings() {
                     button 
                     detail={true} 
                     lines="full"
-                    onClick={() => alert('Show Terms')}
+                    onClick={() => setToastMessage('Show Terms')}
                 >
                     {/* Fixed slot container for Lucide icon */}
                     <div slot="start" className="flex items-center justify-center mr-3">
@@ -202,6 +207,13 @@ export default function UserSettings() {
                   </>
                 )}
             </button>
+            <IonToast
+              isOpen={!!toastMessage}
+              message={toastMessage}
+              duration={3000}
+              onDidDismiss={() => setToastMessage('')}
+              color={toastColor}
+            />
         </div>
       </PageLayout>
     );

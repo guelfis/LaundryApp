@@ -4,6 +4,7 @@ import { Check, X, User } from 'lucide-react';
 import SectionText from '../components/SectionText';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { useTranslation } from 'react-i18next';
+import { IonToast } from '@ionic/react';
 
 interface PendingRequestsSectionProps {
   apartmentId: string;
@@ -14,6 +15,8 @@ export default function PendingRequestsSection({ apartmentId }: PendingRequestsS
   const { data: requests = [], isLoading } = usePendingRequests(apartmentId);
   const resolveRequestMutation = useResolveJoinRequest(apartmentId);
   const [processingId, setProcessingId] = useState<string | null>(null);
+  const [toastMessage, setToastMessage] = useState<string>('');
+  const [toastColor, setToastColor] = useState<'success' | 'warning' | 'danger'>('success');   
 
   const handleAction = async (requestId: string, action: 'approved' | 'rejected') => {
     setProcessingId(requestId);
@@ -23,7 +26,8 @@ export default function PendingRequestsSection({ apartmentId }: PendingRequestsS
       const errorInstance = err as Error;
       console.error(`Failed to ${action} request:`, errorInstance);
       /* 1. Localized error alert */
-      alert(t('pendingRequests.alert_update_error', 'Error updating request: {{error}}', { error: errorInstance.message }));
+      setToastMessage(t('pendingRequests.alert_update_error', 'Error updating request: {{error}}', { error: errorInstance.message }));
+      setToastColor('danger');
     } finally {
       setProcessingId(null);
     }
@@ -96,6 +100,13 @@ export default function PendingRequestsSection({ apartmentId }: PendingRequestsS
           );
         })}
       </div>
+      <IonToast
+        isOpen={!!toastMessage}
+        message={toastMessage}
+        duration={3000}
+        onDidDismiss={() => setToastMessage('')}
+        color={toastColor}
+      />  
     </div>
   );
 }

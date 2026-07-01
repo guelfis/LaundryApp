@@ -1,3 +1,4 @@
+import { IonToast } from '@ionic/react';
 import BottomModal from '../components/BottomModal';
 import ModalButton from '../components/ModalButton';
 import StatusDot from '../components/StatusDot';
@@ -6,6 +7,7 @@ import { useBookingActions, useBookingFilters } from '../hooks/useBookings';
 import { AggregatedSlotInfo, getSlotLabel, SlotTimeState } from './slotsUtils';
 import { Lock } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { useState } from 'react';
 
 interface BookingModalProps {
   isOpen: boolean;
@@ -23,6 +25,8 @@ export default function BookingModal({
 
   const { t } = useTranslation();
   const { apartmentId } = useBookingFilters();
+  const [toastMessage, setToastMessage] = useState<string>('');
+  const [toastColor, setToastColor] = useState<'success' | 'warning' | 'danger'>('success');
   
   const { bookSlot, isBooking, releaseSlot, isReleasing } = useBookingActions();
 
@@ -41,18 +45,21 @@ export default function BookingModal({
       onClose();
     } catch (err) {
       const errorInstance = err as Error;
-      alert(errorInstance.message); 
+      setToastMessage(errorInstance.message); 
+      setToastColor('danger');
     }
   };
    const handleRelease = async () => {
     if (!currentSlot.id) return;
     try {
       const response = await releaseSlot(currentSlot.id);
-      alert(response.message); // released or deleted
+      setToastMessage(response.message); // released or deleted
+      setToastColor('success');
       onClose();
     } catch (err) {
       const errorInstance = err as Error;
-      alert(errorInstance.message);
+      setToastMessage(errorInstance.message);
+      setToastColor('danger');
     }
   };
       
@@ -154,6 +161,13 @@ export default function BookingModal({
         <ModalButton variant="secondary" disabled={isBooking || isReleasing} onClick={onClose}>
           {t('common.button_close')}
         </ModalButton>
+        <IonToast
+          isOpen={!!toastMessage}
+          message={toastMessage}
+          duration={3000}
+          onDidDismiss={() => setToastMessage('')}
+          color={toastColor}
+        />
       </div>
     </BottomModal>
   );

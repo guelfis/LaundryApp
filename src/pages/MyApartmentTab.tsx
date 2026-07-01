@@ -17,6 +17,7 @@ import { PageHeader } from "../components/PageHeader";
 import { Home } from "lucide-react";
 import LeaveDeleteActionsBlock from "../components/LeaveDeleteActionsBlock";
 import { updateApartmentName } from "../lib/apartments";
+import { IonToast } from "@ionic/react";
 
 
 export default function MyApartmentTab() {
@@ -28,7 +29,9 @@ export default function MyApartmentTab() {
     const [apartmentName, setApartmentName] = React.useState(getCleanStorageItem('apartmentName') || 'my apartment');
     const [isEditingName, setIsEditingName] = useState<boolean>(false);
     const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
-    const [isMemberModalOpen, setIsMemberModalOpen] = useState<boolean>(false);    
+    const [isMemberModalOpen, setIsMemberModalOpen] = useState<boolean>(false); 
+    const [toastMessage, setToastMessage] = useState<string>('');
+    const [toastColor, setToastColor] = useState<'success' | 'warning' | 'danger'>('success');   
 
     useEffect(() => {
         resolveCurrentUserId().then(id => setCurrentUserId(id));
@@ -70,7 +73,8 @@ export default function MyApartmentTab() {
             await updateApartmentName(apartmentId, newName);
         } catch (err) {
             console.error("Database sync failure:", err);
-            alert(t('myApartmentTab.update_name_fail'));
+            setToastMessage(t('myApartmentTab.update_name_fail'));
+            setToastColor('danger');
         }
     };
 
@@ -79,12 +83,14 @@ export default function MyApartmentTab() {
         if (confirmFirst) {
             try {
                 await deleteApartment(apartmentId);
-                alert(t('myApartmentTab.delete_success'));
+                setToastMessage(t('myApartmentTab.delete_success'));
+                setToastColor('success');
                 history.push(ROUTES.APARTMENT_LOGIN, { replace: true }); 
             } catch (err) {
                 const errorInstance = err as Error;
                 console.error(t('myApartmentTab.delete_fail'), err);
-                alert(`${t('myApartmentTab.delete_fail')}: ${errorInstance.message}`);
+                setToastMessage(`${t('myApartmentTab.delete_fail')}: ${errorInstance.message}`);
+                setToastColor('danger');
             }
         }
     };
@@ -97,7 +103,8 @@ export default function MyApartmentTab() {
             } catch (err) {
                 const errorInstance = err as Error;
                 console.error(t('myApartmentTab.release_fail'), err);
-                alert(`${t('myApartmentTab.release_fail')}: ${errorInstance.message}`);
+                setToastMessage(`${t('myApartmentTab.release_fail')}: ${errorInstance.message}`);
+                setToastColor('danger');
             }
         }
     };
@@ -187,6 +194,13 @@ export default function MyApartmentTab() {
                 apartmentId={apartmentId}
                 isModalOpen={isMemberModalOpen}
                 onClose={handleCloseMemberModal}
+            />
+            <IonToast
+                isOpen={!!toastMessage}
+                message={toastMessage}
+                duration={3000}
+                onDidDismiss={() => setToastMessage('')}
+                color={toastColor}
             />
         </PageLayout>
     );

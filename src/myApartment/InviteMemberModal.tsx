@@ -5,6 +5,7 @@ import { Check, Copy, Link2, Share2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { getCleanStorageItem } from "../auth/authUtils"; // Imported helper
 import { ROUTES } from "../routes/routes.constants";
+import { IonToast } from "@ionic/react";
 
 interface InviteMemberModalProps {
     apartmentId: string;
@@ -17,6 +18,8 @@ export default function InviteMemberModal({ apartmentId, apartmentName, isModalO
     const { t } = useTranslation();
     const [generatedLink, setGeneratedLink] = useState<string | null>(null);
     const [copied, setCopied] = useState(false);
+    const [toastMessage, setToastMessage] = useState<string>('');
+    const [toastColor, setToastColor] = useState<'success' | 'warning' | 'danger'>('success');   
 
     const generateLinkMutation = useGenerateInviteLink();
     
@@ -24,7 +27,8 @@ export default function InviteMemberModal({ apartmentId, apartmentName, isModalO
         const currentHouseholdId = getCleanStorageItem('householdId') || '';
 
         if (!currentHouseholdId) {
-            alert("Error: Active household reference not resolved.");
+            setToastMessage("Error: Active household reference not resolved.");
+            setToastColor('danger');
             return;
         }
 
@@ -129,6 +133,13 @@ export default function InviteMemberModal({ apartmentId, apartmentName, isModalO
                     </div>
                 </div>
             )}
+            <IonToast
+                isOpen={!!toastMessage}
+                message={toastMessage}
+                duration={3000}
+                onDidDismiss={() => setToastMessage('')}
+                color={toastColor}
+            />  
         </div>
         </BottomModal>
     );

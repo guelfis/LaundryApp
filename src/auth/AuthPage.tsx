@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { IonInput, IonButton, IonItem, IonList, IonText, IonSpinner } from "@ionic/react";
+import { IonInput, IonButton, IonItem, IonList, IonText, IonSpinner, IonToast } from "@ionic/react";
 import { useTranslation } from "react-i18next";
 import { supabase } from "../lib/supabase";
 import PageLayout from "../components/PageLayout";
@@ -11,6 +11,9 @@ export default function AuthPage() {
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string>('');
+  const [toastColor, setToastColor] = useState<'success' | 'warning' | 'danger'>('success');   
+  
 
   const handleAuthSubmit = async () => {
     // Prevent duplicate execution clicks
@@ -18,7 +21,8 @@ export default function AuthPage() {
     
     // Quick local verification checks
     if (!email || !password) {
-      alert("Please fill in all mandatory credentials.");
+      setToastMessage("Please fill in all mandatory credentials.");
+      setToastColor('danger');
       return;
     }
 
@@ -31,19 +35,23 @@ export default function AuthPage() {
           options: { data: { full_name: fullName } } 
         });
         if (error) {
-          alert(error.message);
+          setToastMessage(error.message);
+          setToastColor('danger');
         } else {
-          alert(t('authPage.alert_signup_confirm'));
+          setToastMessage(t('authPage.alert_signup_confirm'));
+          setToastColor('success');
         }
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) {
-          alert(error.message);
+          setToastMessage(error.message);
+          setToastColor('danger');
         }
         // NOTE: On success, AuthContext triggers an authStateChange, causing AppRoutes to swap views automatically!
       }
     } catch (err: Error | unknown) {
-      alert((err as Error)?.message || "An unexpected system error occurred.");
+      setToastMessage((err as Error)?.message || "An unexpected system error occurred.");
+      setToastColor('danger');
     } finally {
       setIsSubmitting(false);
     }
@@ -150,7 +158,13 @@ export default function AuthPage() {
             {isSignUp ? t('authPage.link_have_account') : t('authPage.link_new_user')}
           </button>
         </div>
-
+      <IonToast
+        isOpen={!!toastMessage}
+        message={toastMessage}
+        duration={3000}
+        onDidDismiss={() => setToastMessage('')}
+        color={toastColor}
+      />  
       </div>
     </PageLayout>
   );

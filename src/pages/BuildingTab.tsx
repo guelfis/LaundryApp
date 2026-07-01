@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useRef  } from "react";
+import { useEffect, useMemo, useRef, useState  } from "react";
 import { useHistory } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Building } from "lucide-react";
-import { IonText, IonNote } from "@ionic/react";
+import { IonText, IonNote, IonToast } from "@ionic/react";
 import { QRCodeSVG } from 'qrcode.react'; 
 import {  printOutline } from 'ionicons/icons';
 
@@ -24,6 +24,8 @@ export default function BuildingTab() {
   const { t } = useTranslation();
   const history = useHistory();
   const logoRef = useRef<HTMLDivElement>(null);
+  const [toastMessage, setToastMessage] = useState<string>('');
+  const [toastColor, setToastColor] = useState<'success' | 'warning' | 'danger'>('success');   
 
   const { householdId, isAdminMode } = useBookingFilters();
   const { data: householdData, isPending } = useHouseholdDetails(householdId);
@@ -62,12 +64,14 @@ export default function BuildingTab() {
     if (confirmFirst) {
         try {
             await deleteHousehold(householdId);
-            alert(t('buildingTab.delete_success'));
+            setToastMessage(t('buildingTab.delete_success'));
+            setToastColor('success');
             history.push(ROUTES.HOUSEHOLD_LOGIN, { replace: true }); 
         } catch (err) {
             const errorInstance = err as Error;
             console.error(t('buildingTab.delete_fail'), err);
-            alert(`${t('buildingTab.delete_fail')}: ${errorInstance.message}`);
+            setToastMessage(`${t('buildingTab.delete_fail')}: ${errorInstance.message}`);
+            setToastColor('danger');
         }
     }
       };
@@ -80,7 +84,8 @@ export default function BuildingTab() {
       } catch (err) {
           const errorInstance = err as Error;
           console.error(t('buildingTab.release_fail'), err);
-          alert(`${t('buildingTab.release_fail')}: ${errorInstance.message}`);
+          setToastMessage(`${t('buildingTab.release_fail')}: ${errorInstance.message}`);
+          setToastColor('danger');
       }
     }
   }
@@ -192,7 +197,14 @@ export default function BuildingTab() {
           deleteLabelKey={t('buildingTab.delete')}
           infoTitleKey={t('buildingTab.info_title')}
           infoMessageKey={t('buildingTab.info_message')} 
-        />        
+        />      
+        <IonToast
+          isOpen={!!toastMessage}
+          message={toastMessage}
+          duration={3000}
+          onDidDismiss={() => setToastMessage('')}
+          color={toastColor}
+        />  
         </div>
     </PageLayout>
   );
