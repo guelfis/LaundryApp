@@ -290,33 +290,61 @@ export type Database = {
       }
       support_tickets: {
         Row: {
+          apartment_id: string | null
           app_version: string
           created_at: string
+          household_id: string | null
           id: string
           message: string
+          profile_id: string | null
           ticket_type: Database["public"]["Enums"]["ticket_type_enum"]
           user_agent: string | null
-          user_email: string | null
         }
         Insert: {
+          apartment_id?: string | null
           app_version: string
           created_at?: string
+          household_id?: string | null
           id?: string
           message: string
+          profile_id?: string | null
           ticket_type: Database["public"]["Enums"]["ticket_type_enum"]
           user_agent?: string | null
-          user_email?: string | null
         }
         Update: {
+          apartment_id?: string | null
           app_version?: string
           created_at?: string
+          household_id?: string | null
           id?: string
           message?: string
+          profile_id?: string | null
           ticket_type?: Database["public"]["Enums"]["ticket_type_enum"]
           user_agent?: string | null
-          user_email?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "support_tickets_apartment_id_fkey"
+            columns: ["apartment_id"]
+            isOneToOne: false
+            referencedRelation: "apartment"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_tickets_household_id_fkey"
+            columns: ["household_id"]
+            isOneToOne: false
+            referencedRelation: "household"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_tickets_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

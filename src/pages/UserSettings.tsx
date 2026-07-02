@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory } from "react-router-dom";
 import { 
@@ -9,12 +9,13 @@ import {
   IonToast,
 } from "@ionic/react";
 import { LogOut, Settings, Mail, ShieldAlert, FileText, Info} from "lucide-react";
-import { resolveCurrentUserEmail, signOutUser } from "../auth/authUtils";
+import { resolveCurrentUserEmail, resolveCurrentUserId, signOutUser } from "../auth/authUtils";
 import { ROUTES } from "../routes/routes.constants";
 import PageLayout from "../components/PageLayout";
 import { PageHeader } from "../components/PageHeader";
 import { writeSupportTicket } from "../lib/supportTickets";
 import BugForm from "../components/BugForm";
+import { BookingContext } from "../contexts/BookingContext";
 
 export default function UserSettings() {
     const { t } = useTranslation();
@@ -22,6 +23,7 @@ export default function UserSettings() {
     const [loading, setLoading] = useState(false);
     const [sendingBug, setSendingBug] = useState(false);
     const [userEmail, setUserEmail] = useState<string | null>(null);
+    const [userId, setUserId] = useState<string | null>(null);
 
     // UI state to toggle the bug report form inside the container block
     const [showBugForm, setShowBugForm] = useState(false);
@@ -29,9 +31,14 @@ export default function UserSettings() {
     const [toastMessage, setToastMessage] = useState<string>('');
     const [toastColor, setToastColor] = useState<'success' | 'warning' | 'danger'>('success');
 
+    
+    const { householdId, apartmentId } = useContext(BookingContext)!;
+
     // Safe lifecycle fetch: Resolves the async promise without loop crashes
     useEffect(() => {
         const loadUserMetadata = async () => {
+            const userId =  await resolveCurrentUserId();
+            setUserId(userId);
             const email = await resolveCurrentUserEmail();
             setUserEmail(email);
         };
@@ -61,7 +68,9 @@ export default function UserSettings() {
         try {
             // Invoke the standalone database worker function directly
             await writeSupportTicket({
-                email: userEmail,
+                profile_id: userId ?? '',
+                apartment_id: apartmentId ?? undefined,
+                household_id: householdId ?? undefined,
                 ticketType: 'bug',
                 bugDescription: bugDescription,
                 app_version: __APP_VERSION__,

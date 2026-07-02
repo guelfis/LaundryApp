@@ -9,7 +9,9 @@ Deno.serve(async (req) => {
     const textMessage = `
 🐛 <b>NEW LAUNDRY APP EVENT REPORTED</b>
 
-👤 <b>User:</b> ${record.user_email || 'Anonymous'}
+👤 <b>Profile ID:</b> <code>${record.profile_id || 'N/A'}</code>
+🏠 <b>Apartment ID:</b> <code>${record.apartment_id || 'N/A'}</code>
+🏘️ <b>Household ID:</b> <code>${record.household_id || 'N/A'}</code>
 📁 <b>Type:</b> ${record.ticket_type ? record.ticket_type.toUpperCase() : 'UNKNOWN'}
 📱 <b>Version:</b> v${record.app_version || 'Unknown'}
 

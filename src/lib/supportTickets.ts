@@ -1,7 +1,9 @@
 import { supabase } from "./supabase";
 
 interface WriteSupportTicketProps {
-  email: string | null;          
+  profile_id: string;
+  apartment_id?: string;
+  household_id?: string;  
   ticketType: 'bug' | 'support'; 
   bugDescription: string;
   app_version: string;
@@ -9,7 +11,9 @@ interface WriteSupportTicketProps {
 }
 
 export const writeSupportTicket = async ({
-  email, 
+  profile_id,
+  apartment_id,
+  household_id,
   ticketType, 
   bugDescription, 
   app_version, 
@@ -19,7 +23,9 @@ export const writeSupportTicket = async ({
     .from('support_tickets')
     .insert([
         {
-            user_email: email,
+            profile_id: profile_id,
+            apartment_id: apartment_id,
+            household_id: household_id,
             ticket_type: ticketType,
             message: bugDescription,
             app_version: app_version,
