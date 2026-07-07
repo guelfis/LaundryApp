@@ -8,6 +8,7 @@
     "more_actions": "Altre azioni",
     "btn_ok": "Ho Capito",
     "deleting": "Deleting ...",
+    "logging_out": "Logging Out ...",
     "leaving": "Leaving ...",
     "info": "Info"
   },
@@ -194,6 +195,9 @@
   "settings": {
     "page_title": "Impostazioni",
     "profile_header": "Account Connesso",
+    "account_management": "Impostazioni Account",
+    "email_label": "Cambia Email",
+    "password_label": "Cambia Password",
     "loading_user": "Caricamento email...",
     "section_preferences": "Preferenze",
     "section_account": "Account e Sicurezza",
@@ -201,6 +205,7 @@
     "row_dark_mode": "Modalità Scura",
     "row_privacy": "Informativa sulla Privacy",
     "btn_logout": "Disconnetti",
+    "btn_delete": "Elimina Account",
     "logout_failed": "Disconnessione fallita. Riprova.",
     "bug_success": "Bug report inviato con successo!",
     "bug_error":"Errore nell'invio del bug report. Prova di nuovo.",
@@ -209,7 +214,10 @@
     "btn_report_bug": "Riporta un Bug",
     "legal_header": "About & Legal",
     "btn_terms": "Terms of Service",
-    "lbl_version": "App Version"
+    "lbl_version": "App Version",
+    "language_and_appearance": "Lingua e Aspetto",
+    "language": "Lingua",
+    "theme": "Tema"
   },
   "bugForm":{
     "bug_form_subtitle": "Descrivi cosa è successo:",

@@ -1,14 +1,13 @@
 import { useState, useEffect, useContext } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory } from "react-router-dom";
+import { logOutOutline, trashOutline } from 'ionicons/icons';
+
 import { 
   IonItem, 
-  IonLabel, 
-  IonNote, 
-  IonSpinner,
   IonToast,
 } from "@ionic/react";
-import { LogOut, Settings, Mail, ShieldAlert, FileText, Info} from "lucide-react";
+import {  Settings, Mail, ShieldAlert, FileText, Info, MailPlus, Globe, Palette} from "lucide-react";
 import { resolveCurrentUserEmail, resolveCurrentUserId, signOutUser } from "../auth/authUtils";
 import { ROUTES } from "../routes/routes.constants";
 import PageLayout from "../components/PageLayout";
@@ -16,6 +15,9 @@ import { PageHeader } from "../components/PageHeader";
 import { writeSupportTicket } from "../lib/supportTickets";
 import BugForm from "../components/BugForm";
 import { BookingContext } from "../contexts/BookingContext";
+import { SettingsBlock } from "../components/SettingsBlock";
+import { SettingsItemLabel } from "../components/SettingsItemLabel";
+import ActionButton from "../components/ActionButton";
 
 export default function UserSettings() {
     const { t } = useTranslation();
@@ -66,6 +68,11 @@ export default function UserSettings() {
         localStorage.removeItem('householdId');
         localStorage.removeItem('householdTimezone');
       }
+    };
+
+     const handleDeleteAccount = async () => {
+        setLoading(true);
+        // TODO THIS
     };
 
     // Submits the bug with automated tracking parameters directly to Supabase
@@ -119,15 +126,39 @@ export default function UserSettings() {
                     {userEmail ?? t('settings.loading_user', 'Loading email...')}
                 </span>
             </div>
+            <SettingsBlock title={t('settings.account_management', 'Account Management')}>
+                <IonItem button detail={true} lines="full" onClick={() => setToastMessage('Change Email')}>
+                    <SettingsItemLabel
+                        label={t('settings.email_label', 'Change Email')}
+                        icon={Mail}
+                    />
+                </IonItem>
+                <IonItem button detail={true} lines="full" onClick={() => setToastMessage('Change Password')}>
+                    <SettingsItemLabel
+                        label={t('settings.password_label', 'Change Password')}
+                        icon={ShieldAlert}
+                    />
+                </IonItem>
+            </SettingsBlock>
+
+            <SettingsBlock title={t('settings.language_and_appearance', 'Language & Appearance')}>
+                <IonItem button detail={true} lines="full" onClick={() => setToastMessage('Change Language')}>
+                    <SettingsItemLabel
+                        label={t('settings.language')}
+                        icon={Globe}
+                    />
+                </IonItem>
+                <IonItem button detail={true} lines="full" onClick={() => setToastMessage('Change Password')}>
+                    <SettingsItemLabel
+                        label={t('settings.theme', 'Theme')}
+                        icon={Palette}
+                    />
+                </IonItem>
+            </SettingsBlock>
 
             {/* Support & Feedback Block */}
-            <div className="flex flex-col bg-gray-100 dark:bg-gray-800 rounded-xl overflow-hidden">
-                <div className="px-4 pt-4 pb-1">
-                    <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                        {t('settings.support_header')}
-                    </span>
-                </div>
-                
+            <SettingsBlock title={t('settings.support_header', 'Support & Feedback')}>
+            
                 {/* Contact Support */}
                 <IonItem 
                     button 
@@ -135,13 +166,10 @@ export default function UserSettings() {
                     lines="full"
                     onClick={handleContactSupport}
                 >
-                    {/* Fixed slot container for Lucide icon */}
-                    <div slot="start" className="flex items-center justify-center mr-3">
-                        <Mail className="w-5 h-5 text-gray-500 dark:text-gray-400" />
-                    </div>
-                    <IonLabel className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                        {t('settings.btn_contact_support')}
-                    </IonLabel>
+                    <SettingsItemLabel 
+                        label={t('settings.btn_contact_support')} 
+                        icon={MailPlus}
+                    />
                 </IonItem>
 
                 {/* Report a Bug Trigger Item */}
@@ -152,12 +180,10 @@ export default function UserSettings() {
                       lines="none"
                       onClick={() => setShowBugForm(true)}
                   >
-                      <div slot="start" className="flex items-center justify-center mr-3">
-                          <ShieldAlert className="w-5 h-5 text-gray-500 dark:text-gray-400" />
-                      </div>
-                      <IonLabel className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                          {t('settings.btn_report_bug', 'Report a Bug')}
-                      </IonLabel>
+                      <SettingsItemLabel 
+                        label={t('settings.btn_report_bug', 'Report a Bug')} 
+                        icon={ShieldAlert}
+                    />
                   </IonItem>
               ) : (
                   <BugForm 
@@ -168,16 +194,10 @@ export default function UserSettings() {
                       onSend={handleInsertBugReport}
                   />
               )}
-            </div>
+            </SettingsBlock>
 
             {/* About & Legal Block */}
-            <div className="flex flex-col bg-gray-100 dark:bg-gray-800 rounded-xl overflow-hidden">
-                <div className="px-4 pt-4 pb-1">
-                    <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                        {t('settings.legal_header')}
-                    </span>
-                </div>
-
+            <SettingsBlock title={t('settings.legal_header', 'About & Legal')}>
                 {/* Terms of Service */}
                 <IonItem 
                     button 
@@ -185,45 +205,45 @@ export default function UserSettings() {
                     lines="full"
                     onClick={() => setToastMessage('Show Terms')}
                 >
-                    {/* Fixed slot container for Lucide icon */}
-                    <div slot="start" className="flex items-center justify-center mr-3">
-                        <FileText className="w-5 h-5 text-gray-500 dark:text-gray-400" />
-                    </div>
-                    <IonLabel className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                        {t('settings.btn_terms')}
-                    </IonLabel>
+                    <SettingsItemLabel 
+                        label={t('settings.btn_terms', 'Terms of Service')} 
+                        icon={FileText}
+                    />
                 </IonItem>
 
                 {/* App Version Info (Non-clickable) */}
                 <IonItem lines="none">
-                    {/* Fixed slot container for Lucide icon */}
-                    <div slot="start" className="flex items-center justify-center mr-3">
-                        <Info className="w-5 h-5 text-gray-500 dark:text-gray-400" />
-                    </div>
-                    <IonLabel className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                        {t('settings.lbl_version')}
-                    </IonLabel>
-                    <IonNote slot="end" className="text-sm font-semibold text-gray-500 dark:text-gray-400">
-                        {__APP_VERSION__}
-                    </IonNote>
+                    <SettingsItemLabel
+                        label={t('settings.lbl_version')}
+                        icon={Info}
+                        note={__APP_VERSION__}
+                    />
                 </IonItem>
-            </div>
-
+            </SettingsBlock>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start',  width: '100%' }}>
             {/* Destructive Sign Out Button */}
-            <button
+             <ActionButton
                 onClick={handleLogout}
                 disabled={loading}
-                className="flex items-center justify-center gap-2 w-full p-4 rounded-xl border border-red-200 bg-red-50 hover:bg-red-100 dark:bg-red-950/30 dark:border-red-900 text-red-600 dark:text-red-400 font-semibold transition-colors disabled:opacity-50"
-            >
-                {loading ? (
-                    <IonSpinner name="crescent" color="danger" className="w-5 h-5" />
-                ) : (
-                  <>
-                    <LogOut className="w-5 h-5" />
-                    <span>{t('settings.btn_logout', 'Log Out')}</span>
-                  </>
-                )}
-            </button>
+                isLoading={loading}
+                loadingLabel={t('common.logging_out')}
+                icon={logOutOutline}
+                label={t('settings.btn_logout', 'Log Out')}
+                color="danger"
+            />
+
+            <ActionButton
+                onClick={handleDeleteAccount}
+                disabled={loading}
+                isLoading={loading}
+                loadingLabel={t('common.deleting')}
+                icon={trashOutline}
+                label={t('settings.btn_delete', 'Delete Account')}
+                color="danger"
+            />
+            </div>
+                  
             <IonToast
               isOpen={!!toastMessage}
               message={toastMessage}

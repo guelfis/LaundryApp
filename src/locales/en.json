@@ -9,6 +9,7 @@
         "btn_ok": "Got It",
         "deleting": "Deleting ...",
         "leaving": "Leaving ...",
+        "logging_out": "Logging Out ...",
         "info": "Info",
         "btn_send": "Send"
     },
@@ -198,6 +199,9 @@
   "settings": {
     "page_title": "Settings",
     "profile_header": "Logged In Account",
+    "account_management": "Account Management",
+    "email_label": "Change Email",
+    "password_label": "Change Password",
     "loading_user": "Loading email...",
     "section_preferences": "Preferences",
     "section_account": "Account & Security",
@@ -205,6 +209,7 @@
     "row_dark_mode": "Dark Mode",
     "row_privacy": "Privacy Policy",
     "btn_logout": "Log Out",
+    "btn_delete": "Delete Account",
     "logout_failed": "Sign out failed. Please try again.",
     "bug_success": "Bug report submitted successfully!",
     "bug_error":"Failed to submit bug. Please try again.",
@@ -213,7 +218,10 @@
     "btn_report_bug": "Report a Bug",
     "legal_header": "About & Legal",
     "btn_terms": "Terms of Service",
-    "lbl_version": "App Version"
+    "lbl_version": "App Version",
+    "language_and_appearance": "Language & Appearance",
+    "language": "Language",
+    "theme": "Theme"
   },
   "bugForm":{
     "bug_form_subtitle": "Describe what happened:",
