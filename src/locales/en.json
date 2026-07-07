@@ -219,6 +219,9 @@
     "bug_form_subtitle": "Describe what happened:",
     "bug_placeholder": "Example: can't book a laundry slot because the modal doesn't open"
   },
+  "support":{
+    "email_subject": " Support Request"
+  },
   "joinHousehold": {
     "title_verify": "Enter Access Code",
     "instruction": "Enter your building address to find your building and manage laundry reservations.",

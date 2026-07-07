@@ -45,6 +45,14 @@ export default function UserSettings() {
         loadUserMetadata();
     }, []);
 
+    const handleContactSupport = () => {
+    // Pre-fills a clean subject line containing the version number for context
+        const subject = encodeURIComponent(`${t('support.email_subject')} - v${__APP_VERSION__}`);
+        
+        // Opens mail client cleanly without injecting any message body text
+        window.location.href = `mailto:laundryplanner.support@gmail.com?subject=${subject}`;
+    };
+
     // Handle sign out via your exported helper function
     const handleLogout = async () => {
       setLoading(true);
@@ -125,7 +133,7 @@ export default function UserSettings() {
                     button 
                     detail={true} 
                     lines="full"
-                    onClick={() => window.location.href = "mailto:support@yourdomain.com"}
+                    onClick={handleContactSupport}
                 >
                     {/* Fixed slot container for Lucide icon */}
                     <div slot="start" className="flex items-center justify-center mr-3">

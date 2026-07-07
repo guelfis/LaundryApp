@@ -211,6 +211,13 @@
     "btn_terms": "Terms of Service",
     "lbl_version": "App Version"
   },
+  "bugForm":{
+    "bug_form_subtitle": "Descrivi cosa è successo:",
+    "bug_placeholder": "Esempio: non posso prenotare uno slot di lavanderia perché il modal non si apre"
+  },
+  "support":{
+    "email_subject": " Richiesta di Supporto"
+  },
   "joinHousehold": {
     "title_verify": "Inserisci il Codice",
     "instruction": "Inserisci l'indirizzo di casa per trovare il tuo edificio e gestire le prenotazioni della lavanderia.",
@@ -238,7 +245,7 @@
     "info_message": "Puoi lasciare l'appartamento solo se non sei un amministratore o se c'è almeno un altro amministratore nell'appartamento. Puoi invece eliminare l'appartamento per rimuoverlo definitivamente."
   },
   "flier":{
-   "flier_headline": "Guida App Lavanderia Condominiale",
+    "flier_headline": "Guida App Lavanderia Condominiale",
     "universal_step_title": "Scansiona per Installare e Accedere",
     "universal_step_desc": "Scansiona questo singolo codice QR con la fotocamera. Se non hai l'app, aprirà il link per scaricarla. Se l'hai già installata, aprirà direttamente il condominio!",
     "manual_title": "Metodo Manuale Alternativo",
