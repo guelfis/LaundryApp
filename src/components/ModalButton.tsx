@@ -1,8 +1,9 @@
 import React from 'react';
+import { IonButton } from '@ionic/react';
 
 type ButtonVariant = 'primary' | 'secondary' | 'danger';
 
-interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface ButtonProps extends React.ComponentPropsWithoutRef<typeof IonButton> {
   variant?: ButtonVariant;
   children: React.ReactNode;
 }
@@ -14,7 +15,7 @@ export default function ModalButton({
   ...props 
 }: ButtonProps) {
   
-  const baseStyles = "w-full py-4 rounded-2xl font-bold text-lg active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:pointer-events-none";
+  const baseStyles = "w-full rounded-2xl font-bold text-lg active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:pointer-events-none normal-case h-[56px] [--padding-top:0px] [--padding-bottom:0px] ion-no-margin";
 
   const variantStyles: Record<ButtonVariant, string> = {
     primary: "bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white shadow-lg shadow-blue-200 dark:shadow-none",
@@ -25,11 +26,12 @@ export default function ModalButton({
   };
 
   return (
-    <button
+    <IonButton
+      fill="clear"
       className={`${baseStyles} ${variantStyles[variant]} ${className}`}
       {...props}
     >
       {children}
-    </button>
+    </IonButton>
   );
 }
