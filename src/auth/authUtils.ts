@@ -133,3 +133,12 @@ export const updateAccountPassword = async (newPassword: string): Promise<boolea
   if (error) throw error;
   return true;
 };
+
+/**
+ * Executes the complex transactional postgres automated account deletion RPC routine.
+ */
+export const executeAutomatedAccountPurge = async (): Promise<Error | null> => {
+  const { error } = await supabase.rpc('automated_self_deletion_process');
+  if (error) return error;
+  return null;
+};

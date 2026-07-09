@@ -359,6 +359,7 @@ export type Database = {
         Args: { h_code: string; target_apt_id: string }
         Returns: undefined
       }
+      automated_self_deletion_process: { Args: never; Returns: undefined }
       book_laundry_slot: {
         Args: {
           booking_date: string

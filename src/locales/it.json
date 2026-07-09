@@ -10,7 +10,9 @@
     "deleting": "Deleting ...",
     "logging_out": "Logging Out ...",
     "leaving": "Leaving ...",
-    "info": "Info"
+    "info": "Info",
+    "save": "Salva Modifiche",
+    "btn_send": "Invia"
   },
   "app": {
     "title": "Pianificatore Lavanderia",
@@ -260,6 +262,14 @@
     "manual_desc_link": "Se la fotocamera del telefono non è disponibile, apri il browser internet e visita questo sito per scaricare l'app:",
     "manual_desc_code": "Una volta installata, crea un account, cerca l'indirizzo del condominio e inserisci questo codice di accesso:"
   },
+  "delete_page": {
+    "title": "Stato Eliminazione Account",
+    "banner_text": "Valutazione dei vincoli degli spazi condivisi in parallelo. Tutte le liste di controllo ambientali devono registrare profili verdi prima che l'autorizzazione all'auto-eliminazione dell'account possa avviarsi.",
+    "loading_rules": "VALUTAZIONE CONCORRENTE IN CORSO...",
+    "btn_action_purge": "Elimina il Mio Profilo Permanentemente",
+    "final_double_check": "ATTENZIONE: Questo è il tuo avviso finale assoluto. Premi OK per eliminare permanentemente il tuo account e cancellare a cascata i tuoi record di dati.",
+    "err_purge_failed": "Esecuzione strutturale fallita. Si prega di verificare i parametri di connessione."
+  },
   "emailModal": {
     "title": "Cambia Indirizzo Email",
     "change_sent":"Link di verifica inviati! Controlla sia la tua vecchia che la nuova email per confermare la modifica.",
@@ -280,5 +290,24 @@
     "hint_step1": "Inserisci la tua password attuale.",
     "btn_verify": "Verifica Identità",
     "hint_step2": "Scegli una nuova password sicura per il tuo account."
+  },
+  "delete_checks": {
+    "house_admin_title": "Verifica Admin Edificio",
+    "house_admin_pass": "Superato: Non sei l'unico Amministratore rimasto in questo edificio.",
+    "house_admin_fail": "Bloccato: Sei l'unico Amministratore di questo edificio.",
+    "house_admin_fix": "Promuovi un altro membro dell'edificio ad Admin prima di eliminare il tuo account.",
+    
+    "house_lone_title": "Verifica Membri Edificio",
+    "house_lone_true": "Ultimo Membro: Questo intero edificio verrà cancellato automaticamente.",
+    "house_lone_false": "Spazio Condiviso: Il tuo profilo di iscrizione all'edificio verrà rimosso in modo pulito.",
+    
+    "apt_admin_title": "Verifica Admin Appartamento",
+    "apt_admin_pass": "Superato: Non sei l'unico Amministratore rimasto in questo appartamento.",
+    "apt_admin_fail": "Bloccato: Sei l'unico Amministratore di questo appartamento.",
+    "apt_admin_fix": "Promuovi un altro membro dell'appartamento ad Admin prima di eliminare il tuo account.",
+    
+    "apt_lone_title": "Verifica Residenti Appartamento",
+    "apt_lone_true": "Ultimo Residente: Questo appartamento e i suoi registri di prenotazione verranno auto-eliminati.",
+    "apt_lone_false": "Appartamento Condiviso: La tua specifica assegnazione della stanza verrà rimossa in modo pulito."
   }
 }

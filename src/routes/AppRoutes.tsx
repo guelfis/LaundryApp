@@ -14,6 +14,7 @@ import CreateHousehold from '../pages/CreateHousehold';
 import { useGetUserHouselds } from '../hooks/useHousehold';
 import { BookingProvider } from '../contexts/BookingContext';
 import { ROUTES } from './routes.constants';
+import DeleteAccountStatus from '../pages/DeleteAccountStatus';
 
 export default function AppRoutes() {
   const { session, loading: authLoading } = useAuth();
@@ -133,6 +134,10 @@ export default function AppRoutes() {
           ) : (
             <Redirect to={cachedHouseholdId ? ROUTES.APARTMENT_LOGIN : ROUTES.HOUSEHOLD_LOGIN} />
           )}
+        </Route>
+
+        <Route exact path={ROUTES.ACCOUNT_DELETION}>
+          {session ? <DeleteAccountStatus /> : <Redirect to={ROUTES.LOGIN} />}
         </Route>
 
         {/* Catch-All Standard Routing Resolution Point */}

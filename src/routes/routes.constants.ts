@@ -1,6 +1,7 @@
 export const ROUTES = {
   // Public Space Paths
   LOGIN: '/login',
+  ACCOUNT_DELETION: '/account-deletion',
 
   // Onboarding Space Paths
   HOUSEHOLD_LOGIN: '/household-login',

@@ -11,7 +11,8 @@
         "leaving": "Leaving ...",
         "logging_out": "Logging Out ...",
         "info": "Info",
-        "btn_send": "Send"
+        "btn_send": "Send",
+        "save": "Save Changes"
     },
     "app": {
       "title": "Laundry Planner",
@@ -264,6 +265,14 @@
     "manual_desc_link": "If your camera is unavailable, open your phone's internet browser and go to this website to download the app:",
     "manual_desc_code": "Once installed, create an account, search for our building address, and enter this exact access token code:"
   },
+  "delete_page": {
+    "title": "Account Deletion Status",
+    "banner_text": "Evaluating constraints. All the checks need to pass before you can delete your account. Please wait...",
+    "loading_rules": "CONCURRENT EVALUATION IN PROGRESS...",
+    "btn_action_purge": "Delete My Account Permanently",
+    "final_double_check": "WARNING: This is your absolute final warning. Press OK to permanently delete your account and cascade wipe your data records.",
+    "err_purge_failed": "Deletion failed. Please verify connection metrics."
+  },
   "emailModal": {
     "title": "Update Email Address",
     "change_sent":"Verification links sent! Please check both your old and new emails to confirm the change.",
@@ -284,5 +293,24 @@
     "hint_step1": "Please enter your current password.",
     "btn_verify": "Verify Identity",
     "hint_step2": "Choose a secure new password for your account."
+  },
+  "delete_checks": {
+    "house_admin_title": "Building Admin Check",
+    "house_admin_pass": "Passed: You are not the only Administrator left in this building.",
+    "house_admin_fail": "Blocked: You are the sole Administrator of this building.",
+    "house_admin_fix": "Promote another building member to Admin before deleting your account.",
+    
+    "house_lone_title": "Building Member Check",
+    "house_lone_true": "Last Member: This entire building environment will be auto-deleted.",
+    "house_lone_false": "Shared Space: Your individual building membership profile will be unlinked.",
+    
+    "apt_admin_title": "Apartment Admin Check",
+    "apt_admin_pass": "Passed: You are not the only Administrator left in this apartment.",
+    "apt_admin_fail": "Blocked: You are the sole Administrator of this apartment.",
+    "apt_admin_fix": "Promote another apartment member to Admin before deleting your account.",
+    
+    "apt_lone_title": "Apartment Member Check",
+    "apt_lone_true": "Last Resident: This apartment and its booking logs will be auto-deleted.",
+    "apt_lone_false": "Shared Apartment: Your specific room assignment profile will be cleanly unlinked."
   }
 }

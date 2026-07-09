@@ -40,17 +40,17 @@ export default function UserSettings() {
     
     const { householdId, apartmentId } = useContext(BookingContext)!;
 
-        const loadUserMetadata = async () => {
-            const userId =  await resolveCurrentUserId();
+    const loadUserMetadata = async () => {
+         const userId =  await resolveCurrentUserId();
         if (userId) {
-            setUserId(userId);
+             setUserId(userId);
             const email = await resolveCurrentUserEmail();
             setUserEmail(email);
         }
-        };
+    };
 
     useEffect(() => { 
-        loadUserMetadata();
+        loadUserMetadata(); 
     }, []);
 
     const handleContactSupport = () => {
@@ -76,9 +76,9 @@ export default function UserSettings() {
       }
     };
 
-     const handleDeleteAccount = async () => {
-        setLoading(true);
-        // TODO THIS
+    const handleDeleteAccount = async () => {
+        // we directly navigate to the account deletion status page, which will handle the checks and deletion process
+        history.push(ROUTES.ACCOUNT_DELETION);
     };
 
     // Submits the bug with automated tracking parameters directly to Supabase
