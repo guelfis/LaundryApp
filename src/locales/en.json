@@ -263,5 +263,26 @@
     "manual_title": "Alternative Manual Access",
     "manual_desc_link": "If your camera is unavailable, open your phone's internet browser and go to this website to download the app:",
     "manual_desc_code": "Once installed, create an account, search for our building address, and enter this exact access token code:"
+  },
+  "emailModal": {
+    "title": "Update Email Address",
+    "change_sent":"Verification links sent! Please check both your old and new emails to confirm the change.",
+    "change_error":"Failed to update email.",
+    "modal_hint": "Changing your email requires double verification. Separate confirmation links will be sent to your old and new addresses.",
+    "placeholder":"Enter new email address"
+  },
+  "passwordModal": {
+    "title": "Reset Password",
+    "modal_hint": "Please enter your current password to verify your identity, followed by your new password.",
+    "placeholder_old": "Enter current password",
+    "placeholder_new": "Enter new password (min. 6 chars)",
+    "error_short": "Password constraint warning: Entry must be at least 6 characters long.",
+    "error_incorrect_old": "The current password you entered is incorrect. Please try again.",
+    "change_success": "Password updated successfully!",
+    "change_error": "Failed to reset password. Please try again.",
+    "error_verification": "Password verification failed.",
+    "hint_step1": "Please enter your current password.",
+    "btn_verify": "Verify Identity",
+    "hint_step2": "Choose a secure new password for your account."
   }
 }

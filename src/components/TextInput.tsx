@@ -10,6 +10,7 @@ interface TextInputProps {
   className?: string; 
   errorFn?: (value: string) => string | null; 
   disabled?:boolean;
+  clearInput?: boolean;
 }
 
 export default function TextInput({
@@ -21,6 +22,7 @@ export default function TextInput({
   className = '',
   errorFn = () => null,
   disabled = false,
+  clearInput = false
 }: TextInputProps) {
 
   const [isTouched, setIsTouched] = useState(false);
@@ -67,6 +69,7 @@ export default function TextInput({
             onChange(e.detail.value!);
             validate(e);
           }}
+          clearInput={clearInput}
           className={`unified-text-input ${isValid ? 'ion-valid' : ''} ${isValid === false ? 'ion-invalid' : ''} ${isTouched ? 'ion-touched' : ''}`}
         />      
     </div>

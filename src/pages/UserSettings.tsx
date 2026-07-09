@@ -18,6 +18,8 @@ import { BookingContext } from "../contexts/BookingContext";
 import { SettingsBlock } from "../components/SettingsBlock";
 import { SettingsItemLabel } from "../components/SettingsItemLabel";
 import ActionButton from "../components/ActionButton";
+import ChangeEmailModal from "../settings/ChangeEmailModal";
+import ChangePasswordModal from "../settings/ChangePasswordModal";
 
 export default function UserSettings() {
     const { t } = useTranslation();
@@ -32,18 +34,22 @@ export default function UserSettings() {
     const [bugDescription, setBugDescription] = useState("");
     const [toastMessage, setToastMessage] = useState<string>('');
     const [toastColor, setToastColor] = useState<'success' | 'warning' | 'danger'>('success');
+    const [isEmailOpen, setIsEmailOpen] = useState(false);
+    const [isPasswordOpen, setIsPasswordOpen] = useState(false);
 
     
     const { householdId, apartmentId } = useContext(BookingContext)!;
 
-    // Safe lifecycle fetch: Resolves the async promise without loop crashes
-    useEffect(() => {
         const loadUserMetadata = async () => {
             const userId =  await resolveCurrentUserId();
+        if (userId) {
             setUserId(userId);
             const email = await resolveCurrentUserEmail();
             setUserEmail(email);
+        }
         };
+
+    useEffect(() => { 
         loadUserMetadata();
     }, []);
 
@@ -127,13 +133,13 @@ export default function UserSettings() {
                 </span>
             </div>
             <SettingsBlock title={t('settings.account_management', 'Account Management')}>
-                <IonItem button detail={true} lines="full" onClick={() => setToastMessage('Change Email')}>
+                <IonItem button detail={true} lines="full" onClick={() => setIsEmailOpen(true)}>
                     <SettingsItemLabel
                         label={t('settings.email_label', 'Change Email')}
                         icon={Mail}
                     />
                 </IonItem>
-                <IonItem button detail={true} lines="full" onClick={() => setToastMessage('Change Password')}>
+                <IonItem button detail={true} lines="full" onClick={() => setIsPasswordOpen(true)}>
                     <SettingsItemLabel
                         label={t('settings.password_label', 'Change Password')}
                         icon={ShieldAlert}
@@ -250,6 +256,18 @@ export default function UserSettings() {
               duration={3000}
               onDidDismiss={() => setToastMessage('')}
               color={toastColor}
+            />
+            <ChangeEmailModal 
+                isOpen={isEmailOpen} 
+                onClose={() => setIsEmailOpen(false)} 
+                currentEmail={userEmail} 
+                onSuccess={loadUserMetadata} 
+            />
+
+            <ChangePasswordModal 
+                email={userEmail ?? ''}
+                isOpen={isPasswordOpen} 
+                onClose={() => setIsPasswordOpen(false)} 
             />
         </div>
       </PageLayout>

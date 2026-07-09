@@ -259,5 +259,26 @@
     "manual_title": "Metodo Manuale Alternativo",
     "manual_desc_link": "Se la fotocamera del telefono non è disponibile, apri il browser internet e visita questo sito per scaricare l'app:",
     "manual_desc_code": "Una volta installata, crea un account, cerca l'indirizzo del condominio e inserisci questo codice di accesso:"
+  },
+  "emailModal": {
+    "title": "Cambia Indirizzo Email",
+    "change_sent":"Link di verifica inviati! Controlla sia la tua vecchia che la nuova email per confermare la modifica.",
+    "change_error":"Impossibile aggiornare l'email.",
+    "modal_hint": "Modificare la tua email richiede una doppia verifica. Link di conferma separati saranno inviati al tuo indirizzo vecchio e nuovo.",
+    "placeholder":"Inserisci il nuovo indirizzo email"
+  },
+  "passwordModal": {
+    "title": "Reimposta Password",
+    "modal_hint": "Inserisci la tua password attuale per verificare la tua identità, seguita dalla nuova password.",
+    "placeholder_old": "Inserisci la password attuale",
+    "placeholder_new": "Inserisci la nuova password (min. 6 caratteri)",
+    "error_short": "Avviso di sicurezza: La password deve contenere almeno 6 caratteri.",
+    "error_incorrect_old": "La password attuale inserita non è corretta. Riprova.",
+    "change_success": "Password aggiornata con successo!",
+    "change_error": "Impossibile aggiornare la password. Riprova.",
+    "error_verification": "Verifica password fallita.",
+    "hint_step1": "Inserisci la tua password attuale.",
+    "btn_verify": "Verifica Identità",
+    "hint_step2": "Scegli una nuova password sicura per il tuo account."
   }
 }

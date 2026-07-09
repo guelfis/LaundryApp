@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { IonInput, IonButton, IonItem, IonList, IonText, IonSpinner, IonToast } from "@ionic/react";
 import { useTranslation } from "react-i18next";
-import { supabase } from "../lib/supabase";
 import PageLayout from "../components/PageLayout";
+import { signUpUser, verifyPassword } from "./authUtils";
 
 export default function AuthPage() {
   const { t } = useTranslation();
@@ -29,11 +29,7 @@ export default function AuthPage() {
     setIsSubmitting(true);
     try {
       if (isSignUp) {
-        const { error } = await supabase.auth.signUp({ 
-          email, 
-          password, 
-          options: { data: { full_name: fullName } } 
-        });
+        const  error  = await signUpUser(email, password, fullName);
         if (error) {
           setToastMessage(error.message);
           setToastColor('danger');
@@ -42,7 +38,7 @@ export default function AuthPage() {
           setToastColor('success');
         }
       } else {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        const error = await verifyPassword(email, password);
         if (error) {
           setToastMessage(error.message);
           setToastColor('danger');

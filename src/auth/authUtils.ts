@@ -82,3 +82,54 @@ export async function signOutUser(): Promise<boolean> {
     return false; // Failed operation state
   }
 }
+
+export async function signUpUser(email: string, password: string, fullName: string): Promise<Error | null> {
+  const { error } = await supabase.auth.signUp({ 
+      email, 
+      password, 
+      options: { data: { full_name: fullName } } 
+    });
+    if (error) {
+      return error;
+    }
+    return null; // Success state
+}
+      
+/**
+ * Requests an email change. Triggers Supabase double-confirmation workflow.
+ */
+export const updateUserProfileEmail = async (newEmail: string): Promise<boolean> => {
+  const { error } = await supabase.auth.updateUser({ 
+    email: newEmail.trim() 
+  });
+  if (error) throw error;
+  return true;
+};
+
+/**
+ * Validates a user's current password by re-authenticating their email session.
+ * Returns true if the password matches, or throws an explicit error if validation fails.
+ */
+export const verifyPassword = async (email: string, password: string): Promise<Error | null> => {  
+  const { error } = await supabase.auth.signInWithPassword({
+    email: email,
+    password: password,
+  });
+
+  if (error) {
+    return error
+  }
+  return null;
+};
+
+/**
+ * Securely overwrites the active user's password string over an encrypted HTTPS connection.
+ */
+export const updateAccountPassword = async (newPassword: string): Promise<boolean> => {
+  const { error } = await supabase.auth.updateUser({ 
+    password: newPassword 
+  });
+  
+  if (error) throw error;
+  return true;
+};
