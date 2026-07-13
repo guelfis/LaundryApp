@@ -5,6 +5,8 @@ import { logOutOutline, trashOutline } from 'ionicons/icons';
 
 import { 
   IonItem, 
+  IonSelect, 
+  IonSelectOption, 
   IonToast,
 } from "@ionic/react";
 import {  Settings, Mail, ShieldAlert, FileText, Info, MailPlus, Globe, Palette} from "lucide-react";
@@ -20,6 +22,7 @@ import { SettingsItemLabel } from "../components/SettingsItemLabel";
 import ActionButton from "../components/ActionButton";
 import ChangeEmailModal from "../settings/ChangeEmailModal";
 import ChangePasswordModal from "../settings/ChangePasswordModal";
+import i18n from "../locales/i18n";
 
 export default function UserSettings() {
     const { t } = useTranslation();
@@ -148,11 +151,21 @@ export default function UserSettings() {
             </SettingsBlock>
 
             <SettingsBlock title={t('settings.language_and_appearance', 'Language & Appearance')}>
-                <IonItem button detail={true} lines="full" onClick={() => setToastMessage('Change Language')}>
+                <IonItem lines="full">
                     <SettingsItemLabel
                         label={t('settings.language')}
                         icon={Globe}
                     />
+                    <IonSelect 
+                        slot="end" 
+                        interface="action-sheet" 
+                        value={i18n.language} 
+                        onIonChange={(e) => i18n.changeLanguage(e.detail.value)} 
+                        className="text-sm font-semibold text-gray-500 dark:text-gray-400"
+                    >
+                        <IonSelectOption value="en">English</IonSelectOption>
+                        <IonSelectOption value="it">Italiano</IonSelectOption>
+                    </IonSelect>
                 </IonItem>
                 <IonItem button detail={true} lines="full" onClick={() => setToastMessage('Change Password')}>
                     <SettingsItemLabel
