@@ -105,6 +105,7 @@ export type Database = {
           created_by: string | null
           end_time: string
           id: string
+          notes: string | null
           released_at: string | null
           start_time: string
           status: Database["public"]["Enums"]["booking_status"]
@@ -115,6 +116,7 @@ export type Database = {
           created_by?: string | null
           end_time: string
           id?: string
+          notes?: string | null
           released_at?: string | null
           start_time: string
           status?: Database["public"]["Enums"]["booking_status"]
@@ -125,6 +127,7 @@ export type Database = {
           created_by?: string | null
           end_time?: string
           id?: string
+          notes?: string | null
           released_at?: string | null
           start_time?: string
           status?: Database["public"]["Enums"]["booking_status"]
@@ -469,7 +472,7 @@ export type Database = {
     }
     Enums: {
       apartment_role: "admin" | "member"
-      booking_status: "active" | "released"
+      booking_status: "active" | "released" | "admin"
       household_role: "admin" | "member"
       ticket_type_enum: "bug" | "support"
     }
@@ -600,7 +603,7 @@ export const Constants = {
   public: {
     Enums: {
       apartment_role: ["admin", "member"],
-      booking_status: ["active", "released"],
+      booking_status: ["active", "released", "admin"],
       household_role: ["admin", "member"],
       ticket_type_enum: ["bug", "support"],
     },
