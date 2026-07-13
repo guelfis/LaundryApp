@@ -13,21 +13,17 @@
 }
 
 /* Automatic detection: Dark Mode */
-@media (prefers-color-scheme: dark) {
-  :root {
+html.dark{
     --background-color: #121212;
     --text-color: #f5f5f5;
     
     /* Variabili native di Ionic per forzare il tema scuro */
     --ion-background-color: #121212;
     --ion-text-color: #f5f5f5;
-  }
-  
-  /* Forces the behaviour of talwind dark moile mode */
-  html {
+
     color-scheme: dark;
-  }
-}
+  }    
+
 
 /* 
   FIX ANDROID VIEWPORT: 

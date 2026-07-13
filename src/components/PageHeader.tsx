@@ -30,7 +30,7 @@ export function PageHeader({ title, subtitle, icon, onBack, endContent }: PageHe
                     {icon &&(<div className="bg-transparent p-1 text-gray-900 dark:text-white shrink-0">
                         {icon}
                     </div>)}
-                    <h1 className="text-xl font-black text-gray-900 dark:text-white truncate">
+                    <h1 className="text-xl font-black truncate" style={{ color: 'var(--ion-text-color)' }}>
                         {title}
                     </h1>
                 </div>

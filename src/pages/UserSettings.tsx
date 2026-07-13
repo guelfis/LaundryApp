@@ -23,6 +23,7 @@ import ActionButton from "../components/ActionButton";
 import ChangeEmailModal from "../settings/ChangeEmailModal";
 import ChangePasswordModal from "../settings/ChangePasswordModal";
 import i18n from "../locales/i18n";
+import { Theme, useTheme } from "../theme/ThemeProvider";
 
 export default function UserSettings() {
     const { t } = useTranslation();
@@ -31,6 +32,7 @@ export default function UserSettings() {
     const [sendingBug, setSendingBug] = useState(false);
     const [userEmail, setUserEmail] = useState<string | null>(null);
     const [userId, setUserId] = useState<string | null>(null);
+    const { theme, setTheme } = useTheme();
 
     // UI state to toggle the bug report form inside the container block
     const [showBugForm, setShowBugForm] = useState(false);
@@ -82,6 +84,11 @@ export default function UserSettings() {
     const handleDeleteAccount = async () => {
         // we directly navigate to the account deletion status page, which will handle the checks and deletion process
         history.push(ROUTES.ACCOUNT_DELETION);
+    };
+
+    const handleThemeChange = (e: CustomEvent) => {
+        // Forziamo il cast del valore generato da IonSelect al tipo sicuro Theme ('light' | 'dark' | 'system')
+        setTheme(e.detail.value as Theme);
     };
 
     // Submits the bug with automated tracking parameters directly to Supabase
@@ -167,11 +174,22 @@ export default function UserSettings() {
                         <IonSelectOption value="it">Italiano</IonSelectOption>
                     </IonSelect>
                 </IonItem>
-                <IonItem button detail={true} lines="full" onClick={() => setToastMessage('Change Password')}>
+                <IonItem lines="full" >
                     <SettingsItemLabel
                         label={t('settings.theme', 'Theme')}
                         icon={Palette}
                     />
+                    <IonSelect 
+                        slot="end" 
+                        interface="action-sheet" 
+                        value={theme} 
+                        onIonChange={handleThemeChange}
+                        className="text-sm font-semibold text-gray-500"
+                    >
+                        <IonSelectOption value="light">{t('settings.theme_light', 'Light')}</IonSelectOption>
+                        <IonSelectOption value="dark">{t('settings.theme_dark', 'Dark')}</IonSelectOption>
+                        <IonSelectOption value="system">{t('settings.theme_system', 'System Default')}</IonSelectOption>
+                    </IonSelect>
                 </IonItem>
             </SettingsBlock>
 

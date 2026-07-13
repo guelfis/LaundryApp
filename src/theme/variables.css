@@ -6,7 +6,9 @@
   
   --ion-color-step-150: #d9d9d9;
   --ion-color-step-300: #b3b3b3;
+  --ion-color-step-400: #a0a0a0;
   --ion-color-step-500: #808080;
+  --ion-color-step-850: #000000;
   
    /* --- button colors --- */
   --custom-btn-bg: #ffffff;
@@ -21,8 +23,7 @@
   --app-page-bottom-padding: 16px;
 }
 
-@media (prefers-color-scheme: dark) {
-  body {
+html.dark {
     --ion-background-color: #121212;
     --ion-text-color: #ffffff;
     --ion-tab-bar-background: #1c1c1e;
@@ -44,7 +45,6 @@
     --app-input-radius: 10px;
 
   }
-}
 
 /* 
   Global Automatic Component Unification Rules

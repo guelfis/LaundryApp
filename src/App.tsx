@@ -15,6 +15,7 @@ import '@ionic/react/css/typography.css';
 
 /* Custom theme stylesheets configuration */
 import './theme/variables.css';
+import { ThemeProvider } from './theme/ThemeProvider';
 
 // Initialize Ionic core rendering features
 setupIonicReact();
@@ -25,11 +26,13 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
+        <ThemeProvider>
         <IonApp>
           <IonReactRouter>
             <AppRoutes />
           </IonReactRouter>
         </IonApp>
+        </ThemeProvider>
       </AuthProvider>
     </QueryClientProvider>
   );
