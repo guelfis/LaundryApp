@@ -13,14 +13,14 @@ import DashboardSlotCard from "../components/DashboardSlotCard";
 import { getDate, getDateString, getDateStringFromDate, getTimeSlotString } from "../utils/datesGetter"; 
 import { TravelingBanner } from "../components/TravelingBanner";
 import SlotCard from "../components/SlotCard";
-import SlotModal from "../utils/SlotModal";
+import SlotModal from "../utils/BookingModal";
 import PageLayout from "../components/PageLayout";
 import { PageHeader } from "../components/PageHeader";
 import { ROUTES } from "../routes/routes.constants";
 import { useHistory } from "react-router-dom";
 
 export default function UserDashboard() {
-  const { householdId, householdTimezone, apartmentId } = useBookingFilters();
+  const { householdId, householdTimezone, apartmentId, isAdminMode } = useBookingFilters();
   const { t } = useTranslation();
   const history = useHistory();
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
@@ -55,8 +55,8 @@ export default function UserDashboard() {
     return { morning, evening };
   }, []);
 
-  const { data: members = [] } = useApartmentMembers(apartmentId);
-  const { data: requests = [] } = usePendingRequests(apartmentId);
+  const { data: members = [] } = useApartmentMembers(apartmentId, { enabled: !!apartmentId && !isAdminMode });
+  const { data: requests = [] } = usePendingRequests(apartmentId, { enabled: !!apartmentId && !isAdminMode });
   const { data: bookings = [] } = useBookings(householdId, queryRange.morning, queryRange.evening);
   const { data: apartments = [] } = useApartments(householdId);
   const { data: upcomingBookings = [], isLoading } = useUpcomingBookings(apartmentId);

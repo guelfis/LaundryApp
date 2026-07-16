@@ -84,7 +84,6 @@ export default function AppRoutes() {
 
   // get the timezone of the cached household for passing into the BookingProvider context
   const cachedHousehold = userHouseholds.find(hh => hh.household_id === cachedHouseholdId);
-  const isUserAdminOfThisBuilding = cachedHousehold?.household_role === 'admin';
   const householdTimezone = cachedHousehold ? cachedHousehold.household.timezone : 'Europe/Zurich';
   localStorage.setItem('householdTimezone', householdTimezone);
 
@@ -127,8 +126,8 @@ export default function AppRoutes() {
         </Route>
 
         <Route path={ROUTES.DASHBOARD_MAIN}>
-            {session && cachedHouseholdId && (cachedApartmentId || (isUserAdminOfThisBuilding && isAdminModeActive)) ? (
-            <BookingProvider householdId={cachedHouseholdId} apartmentId={cachedApartmentId || null} householdTimezone={householdTimezone} isAdminMode={isAdminModeActive}>
+            {session && cachedHouseholdId && cachedApartmentId ?(
+            <BookingProvider householdId={cachedHouseholdId} apartmentId={cachedApartmentId} householdTimezone={householdTimezone} isAdminMode={isAdminModeActive}>
               <Dashboard />
             </BookingProvider>
           ) : (

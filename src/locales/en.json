@@ -95,7 +95,8 @@
     "no_available_apartments": "There are no apartments created yet for this building",
     "no_your_apartment": "You are not part of any apartment yet",
     "enter_admin": "Enter as Administrator",
-    "section_admin_actions": "Management"
+    "section_admin_actions": "Management",
+    "error_admin_missing": "System admin profile initialization error. Please contact tech support."
   },
   "inviteMember": {
     "title": "Invite Roommate",
@@ -153,7 +154,8 @@
     "live_status": "Live Status",
     "next_reservations": "Next Reservations",
     "mine": "Mine",
-    "no_bookings": "No upcoming apartment bookings logged yet."
+    "no_bookings": "No upcoming apartment bookings logged yet.",
+    "btn_admin_block": "Block the laudry"
   },
   "dashboardSlotCard": {
     "laundry_free": "Laundry Room is Free",

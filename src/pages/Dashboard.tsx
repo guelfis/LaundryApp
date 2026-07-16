@@ -37,20 +37,27 @@ function Dashboard() {
     if (location.pathname === ROUTES.DASHBOARD_APARTMENT) return DashboardTabs.APARTMENT;
     if (location.pathname === ROUTES.DASHBOARD_SETTINGS) return DashboardTabs.SETTINGS;
     if (location.pathname === ROUTES.DASHBOARD_HOUSEHOLD) return DashboardTabs.HOUSEHOLD;
-    return DashboardTabs.DASHBOARD; // Fallback default
+    return DashboardTabs.DASHBOARD; 
   }, [location.pathname]);
   
   const { apartmentId, isAdminMode } = useBookingFilters();
-  const { data: members = [] } = useApartmentMembers(apartmentId, { enabled: !!apartmentId });
-  const { data: requests = [] } = usePendingRequests(apartmentId, { enabled: !!apartmentId });
   
-  // Se apartmentId è null, l'utente non può essere un admin dell'appartamento, quindi forziamo false
+  // Turn off member and request queries entirely if the user is in Admin Mode
+  const { data: members = [] } = useApartmentMembers(apartmentId, { 
+    enabled: !!apartmentId && !isAdminMode 
+  });
+  const { data: requests = [] } = usePendingRequests(apartmentId, { 
+    enabled: !!apartmentId && !isAdminMode 
+  });
+  
+  // Force tenant apartment admin flags to false if in Admin Mode
   const isUserApartmentAdmin = useMemo(() => {
-    if (!apartmentId) return false;
+    if (!apartmentId || isAdminMode) return false;
     return checkIsAdminApartment(members, currentUserId);
-  }, [members, currentUserId, apartmentId]);
+  }, [members, currentUserId, apartmentId, isAdminMode]);
   
   const hasNotifications = isUserApartmentAdmin && Array.isArray(requests) && requests.length > 0;
+
   return (
     <IonTabs>
       <IonRouterOutlet>
@@ -61,12 +68,20 @@ function Dashboard() {
           <Route exact path={ROUTES.DASHBOARD_CALENDAR}>
             <CalendarGridTab />
           </Route>
-          <Route exact path={ROUTES.DASHBOARD_APARTMENT}>
-            <MyApartmentTab />
-          </Route>
-          <Route exact path={ROUTES.DASHBOARD_HOUSEHOLD}>
-            <BuildingTab/>
-          </Route>
+          
+          {/* Only match the individual apartment route if NOT in global Admin Mode */}
+          {!isAdminMode && (
+            <Route exact path={ROUTES.DASHBOARD_APARTMENT}>
+              <MyApartmentTab />
+            </Route>
+          )}
+
+          {isAdminMode && (
+            <Route exact path={ROUTES.DASHBOARD_HOUSEHOLD}>
+              <BuildingTab/>
+            </Route>
+          )}
+          
           <Route exact path={ROUTES.DASHBOARD_SETTINGS}>
             <UserSettings />
           </Route>
@@ -76,13 +91,13 @@ function Dashboard() {
         </Switch>
       </IonRouterOutlet>
 
-      {/* The bottom layout bar remains fixed outside the router wrapper */}
+      {/* Fixed bottom layout bar adapts perfectly to light/dark themes */}
       <IonTabBar 
         slot="bottom" 
         selectedTab={activeTab}
         style={{
-          borderTop: '1px solid var(--border-color, #b8cbe0)',
-          backgroundColor: 'var(--ion-tab-bar-background, #dce8f5)'
+          borderTop: '1px solid var(--ion-color-step-150, #b8cbe0)',
+          backgroundColor: 'var(--ion-tab-bar-background, var(--ion-background-color, #dce8f5))'
         }}
       >
         <IonTabButton tab={DashboardTabs.DASHBOARD} href={ROUTES.DASHBOARD_MAIN} selected={activeTab===DashboardTabs.DASHBOARD}>
@@ -95,29 +110,31 @@ function Dashboard() {
           <IonLabel style={{ fontSize: '0.875rem' }}>{t('dashboard.calendar')}</IonLabel>
         </IonTabButton>
 
-        {apartmentId && (
+        {/* Show tenant apartment tab ONLY when not running administrative tools */}
+        {apartmentId && !isAdminMode && (
           <IonTabButton tab={DashboardTabs.APARTMENT} href={ROUTES.DASHBOARD_APARTMENT} selected={activeTab===DashboardTabs.APARTMENT}>
-          <div style={{ position: 'relative' }}>
-            <Home className="w-5 h-5" />
-            {hasNotifications && (
-              <span style={{ position: 'absolute', top: '-2px', right: '-2px', display: 'flex', height: '10px', width: '10px' }}>
-                <span className="animate-ping" style={{ position: 'absolute', borderRadius: '9999px', backgroundColor: '#f87171', opacity: 0.75, height: '100%', width: '100%' }}></span>
-                <span style={{ position: 'relative', borderRadius: '9999px', height: '10px', width: '10px', backgroundColor: '#ef4444' }}></span>
-              </span>
-            )}
-          </div>
-          <IonLabel style={{ fontSize: '0.875rem' }}>{t('dashboard.apartment')}</IonLabel>
-        </IonTabButton>
-      )}
+            <div style={{ position: 'relative' }}>
+              <Home className="w-5 h-5" />
+              {hasNotifications && (
+                <span style={{ position: 'absolute', top: '-2px', right: '-2px', display: 'flex', height: '10px', width: '10px' }}>
+                  <span className="animate-ping" style={{ position: 'absolute', borderRadius: '9999px', backgroundColor: 'var(--ion-color-danger)', opacity: 0.75, height: '100%', width: '100%' }}></span>
+                  <span style={{ position: 'relative', borderRadius: '9999px', height: '10px', width: '10px', backgroundColor: 'var(--ion-color-danger)' }}></span>
+                </span>
+              )}
+            </div>
+            <IonLabel style={{ fontSize: '0.875rem' }}>{t('dashboard.apartment')}</IonLabel>
+          </IonTabButton>
+        )}
 
-      {isAdminMode && (
-        <IonTabButton tab={DashboardTabs.HOUSEHOLD} href={ROUTES.DASHBOARD_HOUSEHOLD} selected={activeTab===DashboardTabs.HOUSEHOLD}>
-          <div style={{ position: 'relative' }}>
-            <Building className="w-5 h-5" />
-          </div>
-          <IonLabel style={{ fontSize: '0.875rem' }}>{t('dashboard.household')}</IonLabel>
-        </IonTabButton>
-      )}
+        {/* 4. CONDITIONAL VISIBILITY: Show whole-building control panel tab ONLY when Admin Mode is active */}
+        {isAdminMode && (
+          <IonTabButton tab={DashboardTabs.HOUSEHOLD} href={ROUTES.DASHBOARD_HOUSEHOLD} selected={activeTab===DashboardTabs.HOUSEHOLD}>
+            <div style={{ position: 'relative' }}>
+              <Building className="w-5 h-5" />
+            </div>
+            <IonLabel style={{ fontSize: '0.875rem' }}>{t('dashboard.household')}</IonLabel>
+          </IonTabButton>
+        )}
         
         <IonTabButton tab={DashboardTabs.SETTINGS} href={ROUTES.DASHBOARD_SETTINGS} selected={activeTab===DashboardTabs.SETTINGS}>
           <Settings className="w-5 h-5" />

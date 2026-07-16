@@ -32,7 +32,11 @@ export default function ApartmentLogin() {
   const { leaveHousehold, isLeavingHousehold} = useDeleteLeaveHousehold();
 
   const myApartments = useMemo(() => (myApartmentsRaw || []).filter((apt): apt is Apartment => apt !== null && apt !== undefined), [myApartmentsRaw]);
-  const allApartments = useMemo(() => (allApartmentsRaw || []).filter((apt): apt is Apartment => apt !== null && apt !== undefined), [allApartmentsRaw]);
+  const allApartments = useMemo(() => {
+    return (allApartmentsRaw || [])
+      .filter((apt): apt is Apartment => apt !== null && apt !== undefined)
+      .filter((apt) => apt.display_name !== '_ADMIN_'); // <-- Keeps it hidden from tenant directories
+  }, [allApartmentsRaw]);
   
   const currentBuilding = useMemo(() => {
     return (buildings || []).find(build => build && build.household_id === householdId);
@@ -82,9 +86,20 @@ export default function ApartmentLogin() {
   };
 
   const enterAsAdmin = () => {
-    localStorage.removeItem('apartmentId'); 
-    localStorage.removeItem('apartmentName');
+    // Find the internal systemic apartment in the unfiltered database response cache
+    const adminApt = (allApartmentsRaw || []).find(apt => apt && apt.display_name === '_ADMIN_');
+
+    if (!adminApt) {
+      setToastMessage(t('apartmentLogin.error_admin_missing'));
+      setToastColor('danger');
+      return;
+    }
+
+    // Set storage keys using the explicit systemic row ID
+    localStorage.setItem('apartmentId', adminApt.id); 
+    localStorage.setItem('apartmentName', adminApt.display_name);
     localStorage.setItem('isAdminModeActive', 'true');
+    
     setTimeout(() => history.push(ROUTES.DASHBOARD_MAIN), 0);
   };
 
