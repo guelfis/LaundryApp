@@ -53,6 +53,7 @@ export interface AggregatedSlotInfo {
   endTime: string | null;
   apartmentId: string | null;
   displaySubstring: string;
+  notes?: string | null;
 }
 
 /**
@@ -92,27 +93,51 @@ export const getAggregatedBookingsMap = (
 
   // 2. Reduce the groups into aggregated display nodes
   Object.entries(grouped).forEach(([key, slotBookings]) => {
-    const activeBooking = slotBookings.find((b) => b.status === 'active');
+    // 1. PRIORITY CHECK: Look for an admin blockout first!
+    const adminBooking = slotBookings.find((b) => b.status === 'admin');
+    // 2. TENANT CHECK: Fallback to look for a standard active tenant booking
+    const tenantBooking = slotBookings.find((b) => b.status === 'active');
     
-    if (activeBooking) {
-      const booked_by_user = activeBooking.apartment_id === currentApartmentId;
-      // TODO: add a way to recognize booked by maintainance
-      const name = apartments[activeBooking.apartment_id ?? ''] || i18n.t('slotSubstring.another_apartment');
+    if (adminBooking) {
+      
+      // Check if the current user actually had a personal booking hidden underneath this admin block
+      const userWasOverridden = tenantBooking && tenantBooking.apartment_id === currentApartmentId;
+
       finalMap[key] = {
-        id: activeBooking.id,
+        id: adminBooking.id, // Keep the admin booking ID so the admin can click and delete it
+        status: SlotStatus.NOT_RESERVABLE,
+        bookedBy: i18n.t('slotStatus.not_reservable'),
+        startTime: adminBooking.start_time,
+        endTime: adminBooking.end_time,
+        apartmentId: adminBooking.apartment_id,
+        displaySubstring: userWasOverridden 
+          ? i18n.t('slotSubstring.not_reservable_override') 
+          : i18n.t('slotSubstring.not_reservable_blocked'),
+        notes: adminBooking.notes || null,
+      };
+      return;
+    }
+    if (tenantBooking) {
+      const apartmentName = apartments[tenantBooking.apartment_id ?? ''];
+      const booked_by_user = tenantBooking.apartment_id === currentApartmentId;
+      
+      finalMap[key] = {
+        id: tenantBooking.id,
         status: booked_by_user ? SlotStatus.BOOKED_BY_USER : SlotStatus.BOOKED,
-        bookedBy: name,
-        startTime: activeBooking.start_time,
-        endTime: activeBooking.end_time,
-        apartmentId: activeBooking.apartment_id,
+        bookedBy: apartmentName,
+        startTime: tenantBooking.start_time,
+        endTime: tenantBooking.end_time,
+        apartmentId: tenantBooking.apartment_id,
         displaySubstring: booked_by_user 
-            ? i18n.t('slotSubstring.booked_by_you') 
-            : `${i18n.t('slotSubstring.booked_by')} ${name}.`,
+          ? i18n.t('slotSubstring.booked_by_you') 
+          : `${i18n.t('slotSubstring.booked_by')} ${apartmentName}.`,
+        notes: tenantBooking.notes || null,
       };
       return;
     }
 
     const releasedBooking = slotBookings.find((b) => b.status === 'released');
+    
     if (releasedBooking) {
       const name = apartments[releasedBooking.apartment_id ?? ''] || i18n.t('slotSubstring.another_apartment');
       finalMap[key] = {

@@ -7,7 +7,7 @@ import { SlotStatus } from '../constants/SlotStatus';
 import { AggregatedSlotInfo, emptySlotFallback, getAggregatedBookingsMap, getSlotKey, getSlotLabel, getSlotTimeState, SlotTimeState } from '../utils/slotsUtils';
 import { useBookingFilters, useMonthBookings } from '../hooks/useBookings';
 import { LoadingSpinner } from '../components/LoadingSpinner';
-import SlotModal from '../utils/BookingModal';
+import BookingModal from '../utils/BookingModal';
 import { useApartments } from '../hooks/useApartments';
 import { useTranslation } from 'react-i18next';
 import PageLayout from '../components/PageLayout';
@@ -208,7 +208,7 @@ export default function CalendarGridTab() {
 
       {/* Embedded Actions Confirmation sheet layout [google:4] */}
       {selectedSlot && (
-        <SlotModal
+        <BookingModal
           isOpen={!!selectedSlot}
           onClose={() => setSelectedSlot(null)}
           selectedSlot={selectedSlot}

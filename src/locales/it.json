@@ -39,12 +39,15 @@
     "booked_by": "e' gia prenotato da",
     "released": "e' stato liberato. Ora puo' essere pronotato per il tempo rimanente.",
     "available": "e' libero e puo' essere prenotato.",
-    "another_apartment": "un altro appartamento"
+    "another_apartment": "un altro appartamento",
+    "not_reservable_override": "Bloccato dall'amministrazione (La tua prenotazione originale è sospesa).",
+    "not_reservable_blocked": "non e' prenotabile (Bloccato dall'amministrazione)."
   },
   "slotStatus":{
     "booked": "Occupato",
     "free": "Libero",
-    "reserved": "Riservato"
+    "reserved": "Riservato",
+    "not_reservable": "Non Prenotabile"
   },
   "dashboard":{
     "calendar": "Calendario",

@@ -39,12 +39,15 @@
     "booked_by": "is already booked by",
     "released": "has been released! It can be booked again for the remaining time before the next slot starts.",
     "available": "is available for booking",
-    "another_apartment": "another apartment"
+    "another_apartment": "another apartment",
+    "not_reservable_override": "Blocked by administration (Your original reservation is paused).",
+    "not_reservable_blocked": "is not reservable (Blocked by administration)."
   },
   "slotStatus":{
     "booked": "Booked",
     "free": "Free",
-    "reserved": "Reserved"
+    "reserved": "Reserved",
+    "not_reservable": "Not Reservable"
   },
   "dashboard":{
     "calendar": "Calendar",
