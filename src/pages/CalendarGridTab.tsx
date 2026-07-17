@@ -71,7 +71,7 @@ export default function CalendarGridTab() {
   const { t } = useTranslation();
   const days = getLocalizedDaysOfWeek();
 
-  const [selectedSlot, setSelectedSlot] = useState<{ dateString: string, slotTimes: number[], slotTimeState: SlotTimeState } | null>(null);
+  const [selectedSlot, setSelectedSlot] = useState<{ dateString: string, slotTimes: number[], slotTimeState: SlotTimeState, nextSlotAvailable: boolean, nextSlotTimes: number[] | null } | null>(null);
   
   const [selectedBooking, setSelectedBooking] = useState<AggregatedSlotInfo>(emptySlotFallback);
   const { viewDate, setViewDate, householdId, apartmentId } = useBookingFilters();
@@ -86,8 +86,8 @@ export default function CalendarGridTab() {
     return getAggregatedBookingsMap(bookings, apartmentsMap, apartmentId);
   }, [bookings, apartmentsMap, apartmentId]);
 
-  const handleOpenModal = (dayNum: number, slotTimes: number[], slotInfo: AggregatedSlotInfo, slotTimeState: SlotTimeState) => {
-    setSelectedSlot({ dateString: getDateString(dayNum, activeMonth, year), slotTimes: slotTimes , slotTimeState:slotTimeState});
+  const handleOpenModal = (dayNum: number, slotTimes: number[], slotInfo: AggregatedSlotInfo, slotTimeState: SlotTimeState, nextSlotAvailable: boolean, nextSlotTimes: number[] | null ) => {
+    setSelectedSlot({ dateString: getDateString(dayNum, activeMonth, year), slotTimes: slotTimes , slotTimeState:slotTimeState, nextSlotAvailable, nextSlotTimes });
     setSelectedBooking(slotInfo);
   };
 
@@ -191,13 +191,31 @@ export default function CalendarGridTab() {
                 const endTime = getDate(dayNum, activeMonth, year, slot[1]);
                 const slotTimeState = getSlotTimeState(startTime, endTime);
                 const isCurrentTimeSlot = slotTimeState === 'live';
+                
+                // compute availability for the next chronological slot only if the current slot is free 
+                const nextSlotIndex = col + 1;
+                const nextSlotConfig = SLOTS[nextSlotIndex]; // Verifies if a subsequent daily slot column configuration exists
+                
+                let isNextAvailable = false;
+                let nextSlotTimesArray: number[] | null = null;
+
+                // Calculate data availability targets only if not in Admin Mode and current slot is free
+                if ( slotInfo.status === SlotStatus.AVAILABLE && nextSlotConfig) {
+                  const nextSlotLookupKey = getSlotKey(dayNum, activeMonth, year, nextSlotConfig[0]);
+                  const nextSlotInfo = aggregatedBookingsMap[nextSlotLookupKey] ?? emptySlotFallback();
+                  
+                  if (nextSlotInfo.status === SlotStatus.AVAILABLE) {
+                    isNextAvailable = true;
+                    nextSlotTimesArray = nextSlotConfig;
+                  }
+                }
 
                 return (
                   <SlotCell 
                     key={col} 
                     slotStatus={slotInfo.status}
                     isCurrentTimeSlot={isCurrentTimeSlot}
-                    onClick={() => handleOpenModal(dayNum, slot, slotInfo, slotTimeState)}
+                    onClick={() => handleOpenModal(dayNum, slot, slotInfo, slotTimeState, isNextAvailable, nextSlotTimesArray)}
                   />
                 );
               })}
@@ -213,6 +231,8 @@ export default function CalendarGridTab() {
           onClose={() => setSelectedSlot(null)}
           selectedSlot={selectedSlot}
           currentSlot={selectedBooking}
+          nextSlotAvailable={selectedSlot.nextSlotAvailable}
+          nextSlotTimes={selectedSlot.nextSlotTimes}
         />
       )}
     </div>

@@ -49,26 +49,33 @@ export const useBookings = (householdId: string, startDate: Date, endDate: Date)
 interface BookSlotParams {
   apartmentId: string;
   dateStr: string;   // Format 'YYYY-MM-DD'
-  startHour: number; // e.g. 7, 12, 17
-  endHour: number;   // e.g. 12, 17, 22
+  startHour: number[]; // e.g. [7, 12, 17]
+  endHour: number[];   // e.g. [12, 17, 22]
 }
 
 export function useBookingActions() {
   const queryClient = useQueryClient();
 
-  // mutation: books the remaining time of the slot or an entire one. 
   const bookSlotMutation = useMutation({
-    mutationFn: async ({ apartmentId, dateStr, startHour, endHour }: BookSlotParams) => 
-      bookLaundrySlot(apartmentId, dateStr, startHour, endHour),
+    mutationFn: async ({ apartmentId, dateStr, startHour, endHour }: BookSlotParams) => {  
+      
+      // Map over the parallel arrays index-by-index directly.
+      // Index 0 triggers: bookLaundrySlot(id, date, 7, 9)
+      // Index 1 triggers: bookLaundrySlot(id, date, 10, 12)
+      const promises = startHour.map((startH, index) => {
+        const endH = endHour[index];
+        return bookLaundrySlot(apartmentId, dateStr, startH, endH);
+      });
+
+      return Promise.all(promises);
+    },
     onSuccess: () => {
-      // FIX: Clear both calendar lists AND home dashboard caches simultaneously to avoid split-screen lag
       queryClient.invalidateQueries({ queryKey: ['bookings'] });
       queryClient.invalidateQueries({ queryKey: ['upcoming-bookings'] });
       queryClient.invalidateQueries({ queryKey: ['next-available-slots'] });
     }
   });
 
-  // mutation, releases a slot if ongoing, deletes it if in the future
   const releaseSlotMutation = useMutation({
     mutationFn: async (bookingId: string) => releaseLaundrySlot(bookingId),
     onSuccess: () => {
@@ -85,6 +92,7 @@ export function useBookingActions() {
     isReleasing: releaseSlotMutation.isPending
   };
 }
+
 
 export function useUpcomingBookings(apartmentId: string , options?: { enabled?: boolean }) {
   return useQuery({
