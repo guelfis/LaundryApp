@@ -13,11 +13,12 @@ import DashboardSlotCard from "../components/DashboardSlotCard";
 import { getDate, getDateString, getDateStringFromDate, getTimeSlotString } from "../utils/datesGetter"; 
 import { TravelingBanner } from "../components/TravelingBanner";
 import SlotCard from "../components/SlotCard";
-import SlotModal from "../utils/BookingModal";
 import PageLayout from "../components/PageLayout";
 import { PageHeader } from "../components/PageHeader";
 import { ROUTES } from "../routes/routes.constants";
 import { useHistory } from "react-router-dom";
+import BookingModal from "../bookingModals/BookingModal";
+import Button from "../components/Button";
 
 export default function UserDashboard() {
   const { householdId, householdTimezone, apartmentId, isAdminMode } = useBookingFilters();

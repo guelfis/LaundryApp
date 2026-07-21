@@ -3,12 +3,12 @@ import BottomModal from '../components/BottomModal';
 import ModalButton from '../components/ModalButton';
 import { SlotStatus } from '../constants/SlotStatus';
 import { useBookingActions, useBookingFilters } from '../hooks/useBookings';
-import { AggregatedSlotInfo, getSlotLabel, SlotTimeState } from './slotsUtils';
+import { AggregatedSlotInfo, getSlotLabel, SlotTimeState } from '../utils/slotsUtils';
 import { Lock } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useState, useEffect } from 'react';
-import { SlotBadge } from './SlotBadge';
-import { SlotSpecsCard } from './SlotSpecCard';
+import { SlotBadge } from '../utils/SlotBadge';
+import { SlotSpecsCard } from '../utils/SlotSpecCard';
 
 interface BookingModalProps {
   isOpen: boolean;
@@ -29,7 +29,7 @@ export default function BookingModal({
 }: BookingModalProps) {
 
   const { t } = useTranslation();
-  const { apartmentId } = useBookingFilters();
+  const { apartmentId, isAdminMode } = useBookingFilters();
   const [bookConsecutive, setBookConsecutive] = useState(false);
   const [toastMessage, setToastMessage] = useState<string>('');
   const [toastColor, setToastColor] = useState<'success' | 'warning' | 'danger'>('success');
@@ -116,7 +116,7 @@ export default function BookingModal({
       <SlotSpecsCard dateString={selectedSlot.dateString} slotLabel={displaySlotLabel} />
 
         {/* CONSECUTIVE SUGGESTION ENGINE: Renders only if slot is empty and next one is free */}
-        {currentSlot.status === SlotStatus.AVAILABLE && nextSlotAvailable && nextSlotTimes && selectedSlot.slotTimeState === 'future' && (
+        {currentSlot.status === SlotStatus.AVAILABLE && nextSlotAvailable && nextSlotTimes && selectedSlot.slotTimeState === 'future'  && !isAdminMode && (
           <IonItem lines="none" style={{ '--background': 'rgba(var(--ion-color-primary-rgb), 0.05)', borderRadius: '12px', '--padding-start': '12px' }}>
             <IonCheckbox 
               slot="start" 
@@ -145,7 +145,7 @@ export default function BookingModal({
       <div className="flex flex-col gap-4 pb-4">
         {selectedSlot.slotTimeState !== 'past' && (
           <>
-            {(currentSlot.status === SlotStatus.AVAILABLE || currentSlot.status === SlotStatus.RELEASED) && (
+            {(currentSlot.status === SlotStatus.AVAILABLE || currentSlot.status === SlotStatus.RELEASED) && !isAdminMode && (
               <ModalButton variant="primary" disabled={isBooking} onClick={handleBook}>
                 {t('slotModal.book_button')}
               </ModalButton>

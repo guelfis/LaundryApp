@@ -7,7 +7,7 @@ import { SlotStatus } from '../constants/SlotStatus';
 import { AggregatedSlotInfo, emptySlotFallback, getAggregatedBookingsMap, getSlotKey, getSlotLabel, getSlotTimeState, SlotTimeState } from '../utils/slotsUtils';
 import { useBookingFilters, useMonthBookings } from '../hooks/useBookings';
 import { LoadingSpinner } from '../components/LoadingSpinner';
-import BookingModal from '../utils/BookingModal';
+import BookingModal from '../bookingModals/BookingModal';
 import { useApartments } from '../hooks/useApartments';
 import { useTranslation } from 'react-i18next';
 import PageLayout from '../components/PageLayout';
