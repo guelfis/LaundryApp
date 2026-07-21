@@ -1,4 +1,4 @@
-import { IonToast, IonItem, IonLabel, IonCheckbox } from '@ionic/react';
+import { IonToast} from '@ionic/react';
 import BottomModal from '../components/BottomModal';
 import ModalButton from '../components/ModalButton';
 import { SlotStatus } from '../constants/SlotStatus';
@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next';
 import { useState, useEffect } from 'react';
 import { SlotBadge } from '../utils/SlotBadge';
 import { SlotSpecsCard } from '../utils/SlotSpecCard';
+import SuggestionToggle from '../components/SuggestionToggle';
 
 interface BookingModalProps {
   isOpen: boolean;
@@ -33,7 +34,7 @@ export default function BookingModal({
   const [bookConsecutive, setBookConsecutive] = useState(false);
   const [toastMessage, setToastMessage] = useState<string>('');
   const [toastColor, setToastColor] = useState<'success' | 'warning' | 'danger'>('success');
-  
+
   const { bookSlot, isBooking, releaseSlot, isReleasing } = useBookingActions();
 
   useEffect(() => {
@@ -68,7 +69,7 @@ export default function BookingModal({
       apartmentId,
       dateStr: selectedSlot.dateString, 
       startHour: startHoursArray,
-      endHour: endHoursArray
+      endHour: endHoursArray,
     });
     
     onClose();
@@ -116,22 +117,13 @@ export default function BookingModal({
       <SlotSpecsCard dateString={selectedSlot.dateString} slotLabel={displaySlotLabel} />
 
         {/* CONSECUTIVE SUGGESTION ENGINE: Renders only if slot is empty and next one is free */}
-        {currentSlot.status === SlotStatus.AVAILABLE && nextSlotAvailable && nextSlotTimes && selectedSlot.slotTimeState === 'future'  && !isAdminMode && (
-          <IonItem lines="none" style={{ '--background': 'rgba(var(--ion-color-primary-rgb), 0.05)', borderRadius: '12px', '--padding-start': '12px' }}>
-            <IonCheckbox 
-              slot="start" 
-              checked={bookConsecutive} 
-              onIonChange={e => setBookConsecutive(e.detail.checked)}
-            />
-            <div className="flex-1" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-            <IonLabel className="text-sm font-medium" style={{ color: 'var(--ion-color-primary)' }}>
-              {t('slotModal.suggest_consecutive', 'Book Consecutive Slot')} ({getSlotLabel(nextSlotTimes)})
-            </IonLabel>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
-              {t('slotModal.suggest_consecutive_desc', 'Book this slot as well')}
-            </p>
-            </div>
-          </IonItem>
+        {currentSlot.status === SlotStatus.AVAILABLE && nextSlotAvailable && nextSlotTimes && selectedSlot.slotTimeState === 'future' && !isAdminMode && (
+          <SuggestionToggle
+            checked={bookConsecutive}
+            onToggle={setBookConsecutive}
+            title={`${t('slotModal.suggest_consecutive', 'Book Consecutive Slot')} (${getSlotLabel(nextSlotTimes)})`}
+            description={t('slotModal.suggest_consecutive_desc', 'Book this slot as well')}
+          />
         )}
 
         <p className="text-sm leading-relaxed px-1" style={{ color: 'var(--ion-color-step-700)' }}>
