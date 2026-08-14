@@ -1,7 +1,7 @@
 import { SlotStatus } from '../constants/SlotStatus';
 import { Booking } from '../lib/databaseTypes';
 import i18n from '../locales/i18n';
-import { getBuildingHour } from './datesGetter';
+import { getBuildingHour, getDateString } from './datesGetter';
 import { getHouseholdTimezone } from './getters';
 
 export const getSlotKey = (day: number, month: number, year: number, slotStartHour: number) => {
@@ -187,4 +187,51 @@ export function getSlotTimeState(startTime: Date, endTime: Date): SlotTimeState 
   }
 
   return 'future';
+}
+
+export interface ParsedSlotSelection {
+  dateString: string;
+  slotTimes: number[];
+  slotTimeState: SlotTimeState;
+}
+
+/**
+ * Transforms a raw database record's start/end timestamps into 
+ * localized calendar grid components matching the building clock .
+ */
+export function parseSlotRowToSelection(
+  startTimeStr: string | null,
+  endTimeStr: string | null,
+  householdTimezone: string
+): ParsedSlotSelection | null {
+  if (!startTimeStr || !endTimeStr) return null;
+
+  const startDate = new Date(startTimeStr);
+  const endDate = new Date(endTimeStr);
+
+  // Synchronize wall-clock outputs with the property's physical location 
+  const formatter = new Intl.DateTimeFormat('en-US', {
+    timeZone: householdTimezone,
+    year: 'numeric', 
+    month: 'numeric', 
+    day: 'numeric', 
+    hour: 'numeric', 
+    hour12: false
+  });
+  
+  const parts = formatter.formatToParts(startDate);
+  const endParts = formatter.formatToParts(endDate);
+
+  const year = parseInt(parts.find(p => p.type === 'year')!.value, 10);
+  const activeMonth = parseInt(parts.find(p => p.type === 'month')!.value, 10) - 1; // Normalize to 0-indexed month
+  const dayNum = parseInt(parts.find(p => p.type === 'day')!.value, 10);
+  
+  const startHour = parseInt(parts.find(p => p.type === 'hour')!.value, 10);
+  const endHour = parseInt(endParts.find(p => p.type === 'hour')!.value, 10);
+
+  return {
+    dateString: getDateString(dayNum, activeMonth, year),
+    slotTimes: [startHour, endHour],
+    slotTimeState: getSlotTimeState(startDate, endDate)
+  };
 }

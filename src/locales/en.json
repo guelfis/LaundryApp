@@ -32,7 +32,9 @@
       "message_is_yours": "You are holding this laundry spot. If you no longer need to use the machines, please release it so other apartments can book it.",
       "message_selected": "The selected timeframe",
       "date": "Date",
-      "hours": "Hours Block"
+      "hours": "Hours Block",
+      "suggest_consecutive_desc": "Book this slot as well",
+      "suggest_consecutive": "Book Consecutive Slot"
   },
   "slotSubstring": {
     "booked_by_you": "is booked by your apartment.",

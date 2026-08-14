@@ -103,3 +103,23 @@ export const getLocalizedDaysOfWeek = (): string[] => {
     formatter.format(new Date(Date.UTC(2026, 0, 4 + i)))
   );
 };
+
+/**
+ * Returns the current date and hour components synchronized 
+ * to the building's physical timezone wall-clock .
+ */
+export function getBuildingCurrentDateTime(timezone: string) {
+  const today = new Date();
+  const formatter = new Intl.DateTimeFormat('en-US', {
+    timeZone: timezone,
+    year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', hour12: false
+  });
+  
+  const parts = formatter.formatToParts(today);
+  const year = parseInt(parts.find(p => p.type === 'year')!.value, 10);
+  const monthIndex = parseInt(parts.find(p => p.type === 'month')!.value, 10) - 1; // 0-indexed
+  const day = parseInt(parts.find(p => p.type === 'day')!.value, 10);
+  const hour = parseInt(parts.find(p => p.type === 'hour')!.value, 10);
+
+  return { year, monthIndex, day, hour };
+}

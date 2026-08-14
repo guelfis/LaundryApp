@@ -23,6 +23,7 @@ export default function Button({ label, onClick, icon, disabled=false, isLoading
     // Danger: Clean Ionic Red
     danger: "[--background:var(--ion-color-danger,#eb445a)] [--background-hover:var(--ion-color-danger-shade)] [--color:#ffffff]"
   };
+
   return (
     <IonButton
       fill="clear" // Allows our custom background and dashed borders to render properly
@@ -51,6 +52,7 @@ const styles = {
     
     // 3. BORDERS: Implements your custom dashed border layout
     border: '1px var(--ion-color-step-300, #b3b3b3)',
+    '--border-radius': '16px',
     
     // 4. TEXT FORMATTING: Enforces structural font weights
     fontWeight: '700',
