@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { SLOTS } from '../constants/dates';
 import MonthSwitcher from '../utils/MonthSwitcher';
-import { getDate, getDateString, getDaysInMonth, getFirstDayOfMonth, getLocalizedDaysOfWeek } from '../utils/datesGetter';
+import { getDate, getDateString, getLocalizedDaysOfWeek } from '../utils/datesGetter';
 import { cn } from '../utils/cn';
 import { SlotStatus } from '../constants/SlotStatus';
 import { AggregatedSlotInfo, emptySlotFallback, getAggregatedBookingsMap, getSlotKey, getSlotLabel, getSlotTimeState, SlotTimeState } from '../utils/slotsUtils';
@@ -15,6 +15,7 @@ import { PageHeader } from '../components/PageHeader';
 import { Calendar } from 'lucide-react';
 import { ROUTES } from '../routes/routes.constants';
 import { useHistory } from 'react-router-dom';
+import { generateMonthRows } from '../utils/calendarUtils';
 
 const dayColStyles = "w-24 shrink-0 px-4 py-3";
 
@@ -65,6 +66,8 @@ function SlotCell({ onClick, slotStatus, isCurrentTimeSlot }: SlotCellProps) {
   );
 }
 
+
+
 export default function CalendarGridTab() {
   const history = useHistory();
   const todayRowRef = useRef<HTMLDivElement | null>(null);
@@ -93,19 +96,8 @@ export default function CalendarGridTab() {
 
   const activeMonth = viewDate.getMonth();
   const year = viewDate.getFullYear();
-  const daysInMonth = getDaysInMonth(activeMonth, year);
-  const firstDay = getFirstDayOfMonth(activeMonth, year);
-
-  const today = new Date();
-  const isCurrentMonth = activeMonth === today.getMonth() && year === today.getFullYear();
-
-  const rows = Array.from({ length: daysInMonth }, (_, i) => {
-    const dayNum = i + 1;
-    const dayName = days[(firstDay + i) % 7];
-    const dayOfWeekIndex = (firstDay + i) % 7; 
-    const isToday = isCurrentMonth && dayNum === today.getDay();
-    return { dayNum, dayName, isToday, dayOfWeekIndex };
-  });
+  
+  const rows = generateMonthRows(days, viewDate);
 
   useEffect(() => {
     if (todayRowRef.current) {

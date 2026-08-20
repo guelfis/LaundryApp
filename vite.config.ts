@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite';
+import { defineConfig } from 'vitest/config';
 import { VitePWA } from 'vite-plugin-pwa';
 import react from '@vitejs/plugin-react';
 import { readFileSync } from 'fs';
@@ -47,5 +47,17 @@ export default defineConfig({
   define: {
     // Inject ONLY the version string into the app
     __APP_VERSION__: JSON.stringify(packageJson.version),
+  },
+  test: {
+    // Enable global API like 'describe', 'test', and 'expect' without importing them
+    globals: true, 
+    // Simulate a browser environment in the terminal
+    environment: 'jsdom',
+    // Path to the setup file executed before running tests
+    setupFiles: './src/setupTests.js',
+    alias: {
+      // Redirects the bundler to an absolute path to avoid resolving mobile source files
+      'react-native-localize': resolve(__dirname, './src/__mocks__/react-native-localize.ts'),
+    },
   },
 });
