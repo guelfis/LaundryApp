@@ -70,6 +70,7 @@ export default function BookingModal({
       dateStr: selectedSlot.dateString, 
       startHour: startHoursArray,
       endHour: endHoursArray,
+      isAdminBlock: isAdminMode 
     });
     
     onClose();

@@ -118,7 +118,8 @@ export default function AdminBlockModal({ isOpen, onClose, bookings }: AdminBloc
           apartmentId: adminApartment.id,
           dateStr: startDate,
           startHour: startHoursArray,
-          endHour: endHoursArray
+          endHour: endHoursArray,
+          isAdminBlock: true
         });
       } else {
         // CASE B: Multiple days calculation range loop engine
@@ -139,7 +140,8 @@ export default function AdminBlockModal({ isOpen, onClose, bookings }: AdminBloc
             apartmentId: adminApartment.id,
             dateStr: dateStrToken,
             startHour: startHoursArray,
-            endHour: endHoursArray
+            endHour: endHoursArray,
+            isAdminBlock: true
           });
 
           startHoursArray.length = 0;

@@ -53,12 +53,13 @@ export async function getUpcomingBookings(apartmentId: string, maxEntries: numbe
 }
 
 
-export async function bookLaundrySlot(apartmentId: string, dateStr: string, startH: number, endH: number) {
+export async function bookLaundrySlot(apartmentId: string, dateStr: string, startH: number, endH: number, isAdminBlock: boolean = false) {
   const { data, error } = await supabase.rpc('book_laundry_slot', {
     target_apartment_id: apartmentId,
     booking_date: dateStr,
     start_hour: startH,
-    end_hour: endH
+    end_hour: endH,
+    requested_status: isAdminBlock ? 'admin' : 'active'
   });
 
   if (error) throw error;

@@ -363,15 +363,26 @@ export type Database = {
         Returns: undefined
       }
       automated_self_deletion_process: { Args: never; Returns: undefined }
-      book_laundry_slot: {
-        Args: {
-          booking_date: string
-          end_hour: number
-          start_hour: number
-          target_apartment_id: string
-        }
-        Returns: Json
-      }
+      book_laundry_slot:
+        | {
+            Args: {
+              booking_date: string
+              end_hour: number
+              start_hour: number
+              target_apartment_id: string
+            }
+            Returns: Json
+          }
+        | {
+            Args: {
+              booking_date: string
+              end_hour: number
+              requested_status?: string
+              start_hour: number
+              target_apartment_id: string
+            }
+            Returns: Json
+          }
       create_household_as_landlord: {
         Args: {
           formatted_address: string
