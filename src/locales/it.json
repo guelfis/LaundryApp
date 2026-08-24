@@ -158,7 +158,10 @@
     "live_status": "Stato in Tempo Reale",
     "next_reservations": "Prossime Prenotazioni",
     "mine": "Mio",
-    "no_bookings": "Nessuna prenotazione futura registrata nell'appartamento."
+    "no_bookings": "Nessuna prenotazione futura registrata nell'appartamento.",
+    "btn_admin_block": "Blocca la Lavanderia",
+    "admin_action": "Amministrazione",
+    "block_laundry": "Blocca la lavanderia per tutto il condominio per manutenzione o riparazioni"
   },
   "dashboardSlotCard": {
     "your_session": "Tua Sessione Attiva",
@@ -315,5 +318,16 @@
     "apt_lone_title": "Verifica Residenti Appartamento",
     "apt_lone_true": "Ultimo Residente: Questo appartamento e i suoi registri di prenotazione verranno auto-eliminati.",
     "apt_lone_false": "Appartamento Condiviso: La tua specifica assegnazione della stanza verrà rimossa in modo pulito."
+  },
+  "adminBlockModal": {
+    "title": "Blocca Lavanderia",
+    "select_start_date": "Seleziona Data Inizio",
+    "select_end_date": "Seleziona Data Fine",
+    "multiple_days": "Blocco Multi-Giorno",
+    "notes_label": "Motivazione del Blocco (Opzionale)",
+    "notes_placeholder": "es. Pulizia profonda, Fuori servizio...",
+    "btn_apply": "Blocca la lavanderia",
+    "error_incomplete": "Per favore seleziona tutti i limiti di data e ora.",
+    "success": "Lavanderia bloccata con successo"
   }
 }

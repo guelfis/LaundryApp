@@ -19,6 +19,7 @@ import { ROUTES } from "../routes/routes.constants";
 import { useHistory } from "react-router-dom";
 import BookingModal from "../bookingModals/BookingModal";
 import Button from "../components/Button";
+import AdminBookingModal from "../bookingModals/AdminBookingModal";
 
 export default function UserDashboard() {
   const { householdId, householdTimezone, apartmentId, isAdminMode } = useBookingFilters();
@@ -35,6 +36,7 @@ export default function UserDashboard() {
     nextSlotTimes: number[] | null
   } | null>(null);
   const [selectedBooking, setSelectedBooking] = useState<AggregatedSlotInfo>(emptySlotFallback());
+  const [isAdminModalOpen, setIsAdminModalOpen] = useState<boolean>(false);
 
   useEffect(() => {
     resolveCurrentUserId().then((id) => setCurrentUserId(id));
@@ -94,7 +96,7 @@ export default function UserDashboard() {
     
     const bClock = getBuildingCurrentDateTime(householdTimezone);
 
-    // 2. Identify the active slot array item index [google:0]
+    // 2. Identify the active slot array item index 
     const currentSlotIndex = SLOTS.findIndex(([start, end]) => bClock.hour >= start && bClock.hour < end);
     const nextSlotConfig = SLOTS[currentSlotIndex + 1] || null;
     let isNextAvailable = false;
@@ -106,7 +108,7 @@ export default function UserDashboard() {
       
       if (nextSlotInfo.status === SlotStatus.AVAILABLE) {
         isNextAvailable = true;
-    }
+      }
     }
     
     
@@ -127,12 +129,12 @@ export default function UserDashboard() {
     );
 
     if (parsedSelection) {
-    setSelectedSlot({ 
+      setSelectedSlot({
         ...parsedSelection,
         nextSlotAvailable: nextAvailable,
         nextSlotTimes: nextTimes
       });
-    setSelectedBooking(slotInfo);
+      setSelectedBooking(slotInfo);
     }
   };
 
@@ -181,7 +183,7 @@ export default function UserDashboard() {
           <DashboardSlotCard 
             state={ongoingState.slotStatus}
             onClick={() => {
-                const bookingInfo = aggregatedBookingsMap[ongoingState.slotKey ?? ""] ?? emptySlotFallback();
+              const bookingInfo = aggregatedBookingsMap[ongoingState.slotKey ?? ""] ?? emptySlotFallback();
               
               // If the live slot is completely free, generate fallback parameters cleanly
               if (ongoingState.slotStatus === SlotStatus.AVAILABLE && ongoingState.slotKey) {
@@ -197,13 +199,29 @@ export default function UserDashboard() {
                   
                   bookingInfo.startTime = fallbackStart.toISOString();
                   bookingInfo.endTime = fallbackEnd.toISOString();
-              }
+                }
               }
               // Open the modal with verified parameters and consecutive slot flags
               handleOpenModal(bookingInfo, ongoingState.nextSlotAvailable, ongoingState.nextSlotConfig);
             }}
           />
         </div>
+
+        {/* ADMIN BLOCK */}
+        
+        {isAdminMode && (
+          <div className="flex flex-col gap-2">
+            <SectionText title={t("userDashboard.admin_action")} />
+            <p className="text-xs text-gray-400 pl-1 mt-1">{t("userDashboard.block_laundry")}</p>
+            <Button 
+              onClick={() => setIsAdminModalOpen(true)}
+              variant="primary"
+              icon="shieldAlert"
+              label={t('userDashboard.btn_admin_block')}
+            />
+          </div>
+        )}
+      
 
         {/* 4. UPCOMING RESERVATIONS LIST */}
         <div className="flex flex-col gap-2">
@@ -243,6 +261,13 @@ export default function UserDashboard() {
             currentSlot={selectedBooking}
             nextSlotAvailable={selectedSlot.nextSlotAvailable}
             nextSlotTimes={selectedSlot.nextSlotTimes}
+          />
+        )}
+        {isAdminModalOpen && (
+          <AdminBookingModal
+            isOpen={isAdminModalOpen}
+            onClose={() => setIsAdminModalOpen(false)}
+            bookings={upcomingBookings}
           />
         )}
 

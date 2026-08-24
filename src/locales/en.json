@@ -12,7 +12,8 @@
         "logging_out": "Logging Out ...",
         "info": "Info",
         "btn_send": "Send",
-        "save": "Save Changes"
+        "save": "Save Changes",
+        "done": "Done"
     },
     "app": {
       "title": "Laundry Planner",
@@ -160,7 +161,9 @@
     "next_reservations": "Next Reservations",
     "mine": "Mine",
     "no_bookings": "No upcoming apartment bookings logged yet.",
-    "btn_admin_block": "Block the laudry"
+    "btn_admin_block": "Block the laudry",
+    "admin_action": "Administration",
+    "block_laundry": "Block the laundry for the entire building for maintanance of repairs"
   },
   "dashboardSlotCard": {
     "laundry_free": "Laundry Room is Free",
@@ -319,5 +322,17 @@
     "apt_lone_title": "Apartment Member Check",
     "apt_lone_true": "Last Resident: This apartment and its booking logs will be auto-deleted.",
     "apt_lone_false": "Shared Apartment: Your specific room assignment profile will be cleanly unlinked."
+  },
+  "adminBlockModal": {
+    "title": "Block Laundry Room",
+    "select_start_date": "Select Start Date",
+    "select_end_date": "Select End Date",
+    "multiple_days": "Multiple Days Blockout",
+    "notes_label": "Reason for Blockout (Optional)",
+    "notes_placeholder": "e.g., Deep cleaning, Out of order...",
+    "btn_apply": "Block Laundry",
+    "error_incomplete": "Please configure all date and hour boundaries first.",
+    "success": "Laundry Blocked successfully",
+    "error_admin_missing": "Error: You are not an admin of the building"
   }
 }
