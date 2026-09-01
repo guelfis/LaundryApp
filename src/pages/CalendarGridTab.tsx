@@ -40,6 +40,7 @@ interface SlotCellProps {
 }
 
 function SlotCell({ onClick, slotStatus, isCurrentTimeSlot }: SlotCellProps) {
+  const isAdminBlocked = slotStatus === SlotStatus.NOT_RESERVABLE;
   const isBooked = slotStatus === SlotStatus.BOOKED;
   const isYours = slotStatus === SlotStatus.BOOKED_BY_USER;
   
@@ -53,10 +54,12 @@ function SlotCell({ onClick, slotStatus, isCurrentTimeSlot }: SlotCellProps) {
         // 1. Clean Pastel Background Colors
         isYours 
           ? "bg-blue-100/80 text-blue-800 font-medium" 
-          : isBooked 
-            ? "bg-red-100/80 text-red-800"              
-            : "bg-transparent",
-            
+          : isAdminBlocked
+            ? "bg-gray-200/80 text-gray-600 font-medium"
+            : isBooked 
+              ? "bg-red-100/80 text-red-800"              
+              : "bg-transparent",
+              
         // 2. The Indicator Frame: ONLY active on the current live time slot
         isCurrentTimeSlot 
           ? "border border-blue-400/60 rounded-lg shadow-sm" 

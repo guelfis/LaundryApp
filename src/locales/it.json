@@ -33,6 +33,7 @@
     "message_selected": "Lo slot selezionato",
     "date": "Data",
     "hours": "Blocco orario",
+    "notes": "Nota",
     "suggest_consecutive_desc": "Prenota anche questo slot",
     "suggest_consecutive": "Prenota anche lo slot successivo"
   },

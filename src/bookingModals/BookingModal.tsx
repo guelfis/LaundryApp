@@ -46,9 +46,6 @@ export default function BookingModal({
   const handleBook = async () => {
   if (!apartmentId) return;
   try {
-    // 1. Establish the array of slots to book
-    // Standard slot looks like: 
-    // Consecutive slot looks like: 
     const finalSlotTimes = bookConsecutive && nextSlotTimes 
       ? [...selectedSlot.slotTimes, ...nextSlotTimes]
       : selectedSlot.slotTimes;
@@ -114,8 +111,8 @@ export default function BookingModal({
           <SlotBadge status={currentSlot.status} isLive={selectedSlot.slotTimeState === 'live'} />
         </div>
 
-      {/* 2. SPECIFICATION BLOCK: Clean, Scannable Grid Card */}
-      <SlotSpecsCard dateString={selectedSlot.dateString} slotLabel={displaySlotLabel} />
+        {/* 2. SPECIFICATION BLOCK: Clean, Scannable Grid Card */}
+        <SlotSpecsCard dateString={selectedSlot.dateString} slotLabel={displaySlotLabel} />
 
         {/* CONSECUTIVE SUGGESTION ENGINE: Renders only if slot is empty and next one is free */}
         {currentSlot.status === SlotStatus.AVAILABLE && nextSlotAvailable && nextSlotTimes && selectedSlot.slotTimeState === 'future' && !isAdminMode && (
@@ -133,6 +130,17 @@ export default function BookingModal({
             : isYours ? t('slotModal.message_is_yours') : `${t('slotModal.message_selected')} ${currentSlot.displaySubstring}`
           }
         </p>
+
+        {currentSlot.notes && (
+          <div className='flex items-center mt-4'>
+            <span className="text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--ion-color-step-400)' }}>
+              {t('slotModal.notes')} :
+            </span>
+            <p className="text-sm leading-relaxed px-1" style={{ color: 'var(--ion-color-step-700)' }}>
+              {currentSlot.notes}
+            </p>
+          </div>
+        )}
       </div>
 
       <div className="flex flex-col gap-4 pb-4">

@@ -34,6 +34,7 @@
       "message_selected": "The selected timeframe",
       "date": "Date",
       "hours": "Hours Block",
+      "notes": "Notes",
       "suggest_consecutive_desc": "Book this slot as well",
       "suggest_consecutive": "Book Consecutive Slot"
   },
