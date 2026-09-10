@@ -16,6 +16,13 @@ import { BookingProvider } from '../contexts/BookingContext';
 import { ROUTES } from './routes.constants';
 import DeleteAccountStatus from '../pages/DeleteAccountStatus';
 
+
+interface RouterNavigationState {
+  householdId?: string;
+  apartmentId?: string;
+  isAdminModeActive?: boolean;
+}
+
 export default function AppRoutes() {
   const { session, loading: authLoading } = useAuth();
   const { data: userHouseholds = [], isLoading: isLoadingHouseholds } = useGetUserHouselds();
@@ -24,72 +31,53 @@ export default function AppRoutes() {
   const location = useLocation();
   const { t } = useTranslation();
 
-  // State flags for checking household database permissions
-  const [checkingPermissions, setCheckingPermissions] = useState(true);
-  const [hasHouseholdAccess, setHasHouseholdAccess] = useState(false);
+  // Initialization flag for the initial boot configuration routing sweep
+  const [isInitializing, setIsInitializing] = useState(true);
 
-  // Read current locally stored choices
+  // 💡 SEPARATION OF CONCERNS FIXED: Read base structural membership tokens once.
+  // We completely strip raw localStorage checks out of the top-level rendering engine dependencies list.
   const cachedHouseholdId = getCleanStorageItem('householdId');
   const cachedApartmentId = getCleanStorageItem('apartmentId');
   const isAdminModeActive = localStorage.getItem('isAdminModeActive') === 'true';
 
   useEffect(() => {
-    async function determineNavigationTarget() {
-      // 1. If still calculating base session tokens, halt execution
-      if (authLoading) return;
+    // Halt calculations if auth endpoints or household query caches are pending
+    if (authLoading || isLoadingHouseholds) return;
 
-      // 2. If the user is unauthenticated, skip calculations and lock them to login
-      if (!session?.user?.id) {
-        setCheckingPermissions(false);
-        if (location.pathname !== ROUTES.LOGIN) {
-          history.push(ROUTES.LOGIN);
-        }
-        return;
+    // Route Guard: Handle clean redirection targeting unauthenticated tokens
+    if (!session?.user?.id) {
+      setIsInitializing(false);
+      if (location.pathname !== ROUTES.LOGIN) {
+        history.push(ROUTES.LOGIN);
       }
+      return;
+    }
 
-      try {
-        setCheckingPermissions(true);
-
-        
-
-        const belongsToAnyHousehold = Array.isArray(userHouseholds) && userHouseholds.length > 0;
-        setHasHouseholdAccess(belongsToAnyHousehold);
-        
-        // 4. ROUTING DECISION MATRIX TREE
-        if (location.pathname === ROUTES.LOGIN || location.pathname === '/') {
-          if (!belongsToAnyHousehold) {
-            // User is fresh: must link up or configure a brand new house structure
-            history.push(ROUTES.HOUSEHOLD_LOGIN);
-          } else if (!cachedHouseholdId) {
-            // Belongs to homes but hasn't picked an active scope item this session
-            history.push(ROUTES.HOUSEHOLD_LOGIN);
-          } else if (!cachedApartmentId) {
-            // Inside household, but needs to link to a physical room/apartment
-            history.push(ROUTES.APARTMENT_LOGIN);
-          } else {
-            // Everything validated: jump directly into the interface workspace
-            history.push(ROUTES.DASHBOARD_MAIN);
-          }
-        }
-      } catch (err) {
-        console.error("Critical failure during navigation mapping evaluation:", err);
-      } finally {
-        setCheckingPermissions(false);
+    // 💡 DETERMINISTIC ROOT ENTRY MATRIX: Only calculate redirection paths when hitting base entrance points.
+    // This allows active sub-pages to handle internal forward routing manually via state without triggering top-level loop resets.
+    if (location.pathname === '/' || location.pathname === ROUTES.LOGIN) {
+      const belongsToAnyHousehold = Array.isArray(userHouseholds) && userHouseholds.length > 0;
+      
+      if (!belongsToAnyHousehold) {
+        history.push(ROUTES.HOUSEHOLD_LOGIN);
+      } else if (!cachedHouseholdId) {
+        history.push(ROUTES.HOUSEHOLD_LOGIN);
+      } else if (!cachedApartmentId) {
+        history.push(ROUTES.APARTMENT_LOGIN);
+      } else {
+        history.push(ROUTES.DASHBOARD_MAIN);
       }
     }
 
-    determineNavigationTarget();
-    // Dependency constraints capture layout updates cleanly without looping
-  }, [session, authLoading, cachedHouseholdId, cachedApartmentId, location.pathname, history, userHouseholds, hasHouseholdAccess]);
+    setIsInitializing(false);
+  // 💡 IMMUTABLE SCOPE LIST: Removed local cache IDs from dependencies to preserve runtime stability on click tasks
+  }, [session, authLoading, isLoadingHouseholds, location.pathname, history, userHouseholds, cachedHouseholdId, cachedApartmentId]);
 
-  // get the timezone of the cached household for passing into the BookingProvider context
+  // Read current context metadata values cleanly
   const cachedHousehold = userHouseholds.find(hh => hh.household_id === cachedHouseholdId);
   const householdTimezone = cachedHousehold ? cachedHousehold.household.timezone : 'Europe/Zurich';
-  localStorage.setItem('householdTimezone', householdTimezone);
 
-
-  // Combined full view blocker loader to keep transition cycles uniform
-  if (authLoading || checkingPermissions || isLoadingHouseholds) {
+  if (authLoading || isLoadingHouseholds || isInitializing) {
     return (
       <IonPage>
         <IonContent className="ion-padding ion-text-center" style={{ '--background': 'var(--ion-background-color)' }}>
@@ -104,6 +92,8 @@ export default function AppRoutes() {
     );
   }
 
+  const hasHouseholdAccess = Array.isArray(userHouseholds) && userHouseholds.length > 0;
+
   return (
     <IonRouterOutlet id="main-app-content">
       <Switch>
@@ -112,7 +102,7 @@ export default function AppRoutes() {
           {!session ? <AuthPage /> : <Redirect to={ROUTES.HOUSEHOLD_LOGIN} />}
         </Route>
 
-        {/* Private Workspace Area with Real-Time Conditional Guards */}
+        {/* Private Setup Configurations */}
         <Route exact path={ROUTES.HOUSEHOLD_LOGIN}>
           {session ? <HouseholdLogin /> : <Redirect to={ROUTES.LOGIN} />}
         </Route>
@@ -125,21 +115,37 @@ export default function AppRoutes() {
           {session ? (hasHouseholdAccess ? <ApartmentLogin /> : <Redirect to={ROUTES.HOUSEHOLD_LOGIN} />) : <Redirect to={ROUTES.LOGIN} />}
         </Route>
 
+        
         <Route path={ROUTES.DASHBOARD_MAIN}>
-            {session && cachedHouseholdId && cachedApartmentId ?(
-            <BookingProvider householdId={cachedHouseholdId} apartmentId={cachedApartmentId} householdTimezone={householdTimezone} isAdminMode={isAdminModeActive}>
-              <Dashboard />
-            </BookingProvider>
-          ) : (
-            <Redirect to={cachedHouseholdId ? ROUTES.APARTMENT_LOGIN : ROUTES.HOUSEHOLD_LOGIN} />
-          )}
+          {() => {
+            const routerState = location.state as RouterNavigationState | undefined;
+
+            // Check Router State memory first, then fall back to storage tokens if the user manually reloaded the browser tab
+            const activeHouseholdId = routerState?.householdId || cachedHouseholdId;
+            const activeApartmentId = routerState?.apartmentId || cachedApartmentId;
+            const activeAdminFlag = routerState?.isAdminModeActive ?? isAdminModeActive;
+
+            if (session && activeHouseholdId && activeApartmentId) {
+              return (
+                <BookingProvider 
+                  householdId={activeHouseholdId} 
+                  apartmentId={activeApartmentId} 
+                  householdTimezone={householdTimezone} 
+                  isAdminMode={activeAdminFlag}
+                >
+                  <Dashboard />
+                </BookingProvider>
+              );
+            }
+            return <Redirect to={cachedHouseholdId ? ROUTES.APARTMENT_LOGIN : ROUTES.HOUSEHOLD_LOGIN} />;
+          }}
         </Route>
+
 
         <Route exact path={ROUTES.ACCOUNT_DELETION}>
           {session ? <DeleteAccountStatus /> : <Redirect to={ROUTES.LOGIN} />}
         </Route>
 
-        {/* Catch-All Standard Routing Resolution Point */}
         <Route path="*">
           <Redirect to={session ? (cachedApartmentId ? ROUTES.DASHBOARD_MAIN : ROUTES.APARTMENT_LOGIN) : ROUTES.LOGIN} />
         </Route>

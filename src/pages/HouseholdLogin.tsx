@@ -45,15 +45,17 @@ export default function HouseholdLogin() {
     }
 
     const onClickBuilding = (householdId: string) => {
-        localStorage.removeItem('apartmentId');
-        localStorage.removeItem('isAdminModeActive');
-        localStorage.removeItem('householdTimezone'); 
-        localStorage.removeItem('apartmentName');
+        history.push({
+            pathname: ROUTES.APARTMENT_LOGIN,
+            state: { householdId: householdId }
+        });
 
-        localStorage.setItem('householdId', householdId);
-        setTimeout(() => {
-            history.push(ROUTES.APARTMENT_LOGIN);
-        }, 0);
+        // Save to local storage in a deferred non-blocking thread task
+        Promise.resolve().then(() => {
+            localStorage.setItem('householdId', householdId);
+            localStorage.removeItem('apartmentId');
+            localStorage.removeItem('isAdminModeActive');
+        });
     };
 
     return (

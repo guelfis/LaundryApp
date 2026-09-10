@@ -50,12 +50,9 @@ const ApartmentsList = ({
 
 const styles = {
   listContainer: {
-    flexGrow: 1,
     width: '100%',
     maxWidth: '100%',
     boxSizing: 'border-box' as const,
-    overflowY: 'auto' as const,
-    overflowX: 'hidden' as const, 
     padding: '0px'
   },
   gridGap: {

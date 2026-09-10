@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { Redirect, useHistory, useLocation } from 'react-router-dom';
 import PageLayout from '../components/PageLayout';
 import { useApartments, useMyApartments, useJoinViaLink } from '../hooks/useApartments'; 
@@ -29,13 +29,14 @@ export default function ApartmentLogin() {
   const { data: myApartmentsRaw = [], isLoading: isLoadingMy } = useMyApartments(householdId);
   const { data: allApartmentsRaw = [], isLoading: isLoadingAll } = useApartments(householdId);
   const { data: buildings = [], isLoading: isLoadingHouseholds } = useGetUserHouselds();
-  const { leaveHousehold, isLeavingHousehold} = useDeleteLeaveHousehold();
+  const { leaveHousehold, isLeavingHousehold } = useDeleteLeaveHousehold();
 
+  // Stable memoized dataset filters
   const myApartments = useMemo(() => (myApartmentsRaw || []).filter((apt): apt is Apartment => apt !== null && apt !== undefined), [myApartmentsRaw]);
   const allApartments = useMemo(() => {
     return (allApartmentsRaw || [])
       .filter((apt): apt is Apartment => apt !== null && apt !== undefined)
-      .filter((apt) => apt.display_name !== '_ADMIN_'); // <-- Keeps it hidden from tenant directories
+      .filter((apt) => apt.display_name !== '_ADMIN_'); 
   }, [allApartmentsRaw]);
   
   const currentBuilding = useMemo(() => {
@@ -55,6 +56,7 @@ export default function ApartmentLogin() {
     );
   }, [allApartments, myApartments]);
 
+  // Memoize search params object instance to prevent reference mutation loops on re-renders
   const searchParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
 
   useEffect(() => {
@@ -78,15 +80,27 @@ export default function ApartmentLogin() {
     }
   }, [searchParams, joinViaLink, history, t]); 
 
-  const enterApartment = (apt: Apartment) => {
-    localStorage.removeItem('isAdminModeActive');
-    localStorage.setItem('apartmentId', apt.id);
-    localStorage.setItem('apartmentName', apt.display_name);
-    setTimeout(() => history.push(ROUTES.DASHBOARD_MAIN), 0);
-  };
+  const enterApartment = useCallback((apt: Apartment) => {
+    // Jump into dashboard instantly passing the memory state tokens
+    history.push({
+        pathname: ROUTES.DASHBOARD_MAIN,
+        state: { 
+            apartmentId: apt.id, 
+            apartmentName: apt.display_name,
+            householdId: householdId,
+            isAdminModeActive: false 
+        }
+    });
 
-  const enterAsAdmin = () => {
-    // Find the internal systemic apartment in the unfiltered database response cache
+    // Sync storage tracking asynchronously afterward
+    Promise.resolve().then(() => {
+        localStorage.setItem('apartmentId', apt.id);
+        localStorage.setItem('apartmentName', apt.display_name);
+        localStorage.removeItem('isAdminModeActive');
+    });
+}, [history, householdId]);
+
+  const enterAsAdmin = useCallback(() => {
     const adminApt = (allApartmentsRaw || []).find(apt => apt && apt.display_name === '_ADMIN_');
 
     if (!adminApt) {
@@ -95,15 +109,25 @@ export default function ApartmentLogin() {
       return;
     }
 
-    // Set storage keys using the explicit systemic row ID
-    localStorage.setItem('apartmentId', adminApt.id); 
-    localStorage.setItem('apartmentName', adminApt.display_name);
-    localStorage.setItem('isAdminModeActive', 'true');
-    
-    setTimeout(() => history.push(ROUTES.DASHBOARD_MAIN), 0);
-  };
+    history.push({
+        pathname: ROUTES.DASHBOARD_MAIN,
+        state: { 
+            apartmentId: adminApt.id, 
+            apartmentName: adminApt.display_name,
+            householdId: householdId,
+            isAdminModeActive: true 
+        }
+    });
 
-  const  handleLeaveBuilding =  async () =>  {
+    // Sync storage tracking asynchronously afterward
+    Promise.resolve().then(() => {
+        localStorage.setItem('apartmentId', adminApt.id);
+        localStorage.setItem('apartmentName', adminApt.display_name);
+        localStorage.setItem('isAdminModeActive', 'true');
+    });
+  }, [allApartmentsRaw, history, householdId, t]);
+
+  const handleLeaveBuilding = async () => {
     if (window.confirm(t('buildingTab.release_warning'))) {
       try {
           await leaveHousehold(householdId);
@@ -117,10 +141,10 @@ export default function ApartmentLogin() {
     }
   };
 
-  const handleJoinRequest = (apt: Apartment) => {
+  const handleJoinRequest = useCallback((apt: Apartment) => {
     setSelectedApt(apt);
     setIsJoinModalOpen(true);
-  };
+  }, []);
 
   if (!householdId) {
     return <Redirect to={ROUTES.HOUSEHOLD_LOGIN} />;
@@ -151,15 +175,12 @@ export default function ApartmentLogin() {
         <PageHeader 
           title={t('apartmentLogin.page_title', 'Apartment Setup')} 
           icon={<Home className="w-7 h-7 text-blue-500 dark:text-blue-400" />} 
-          // 1. ADDED LEAVE BUILDING BUTTON TO THE RIGHT SIDE OF HEADER
           endContent={
             <IonButton fill="clear" color="danger" onClick={handleLeaveBuilding} style={{ margin: 0 }}>
               <IonIcon slot="icon-only" icon={logOutOutline} />
             </IonButton>
           }
-          onBack={
-            () => history.push(ROUTES.HOUSEHOLD_LOGIN)
-          }
+          onBack={() => history.push(ROUTES.HOUSEHOLD_LOGIN)}
         />
       }
     >
@@ -169,7 +190,7 @@ export default function ApartmentLogin() {
         width: '100%',
         boxSizing: 'border-box',
         padding: '16px 20px 40px 20px',
-        gap: '28px'
+        gap: '28px',
       }}>
         
         {/* MANAGEMENT HERO ROW */}
@@ -180,9 +201,7 @@ export default function ApartmentLogin() {
               onClick={enterAsAdmin}
               title={t('apartmentLogin.enter_admin')}
               icon={<IonIcon icon={constructOutline} style={{ fontSize: '20px', color: '#d97706' }} />}
-              style={{
-                borderColor: 'var(--ion-color-step-200, #333333)',
-              }}
+              style={{ borderColor: 'var(--ion-color-step-200, #333333)' }}
               endContent={
                 <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
                   Admin
@@ -216,7 +235,6 @@ export default function ApartmentLogin() {
             </IonText>
           )}
 
-          {/* 2. RE-INTEGRATED DYNAMIC CREATE APARTMENT ACTION ROW */}
           <div style={{ marginTop: '4px', width: '100%' }}>
             <IonButton 
               fill="clear" 
