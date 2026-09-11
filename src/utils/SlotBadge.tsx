@@ -13,7 +13,7 @@ export function SlotBadge({ status, isLive }: SlotBadgeProps) {
   
   if (status === SlotStatus.NOT_RESERVABLE) {
     return (
-      <span className="flex items-center gap-1.5 font-bold text-xs px-3 py-1.5 rounded-xl" style={{ backgroundColor: 'var(--ion-color-step-150, #e0e0e0)', color: 'var(--ion-color-step-700, #444)' }}>
+      <span className="flex items-center gap-1.5 font-bold text-xs px-3 py-1.5 rounded-xl" style={{ backgroundColor: 'var(--ion-color-step-150, #e0e0e0)', color: 'var(--ion-color-step-700, #a6a3a3)' }}>
         <StatusDot color="grey" pulse={isLive} />
         {t('slotStatus.not_reservable')}
       </span>
