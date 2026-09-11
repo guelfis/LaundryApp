@@ -34,7 +34,7 @@ export default function AppRoutes() {
   // Initialization flag for the initial boot configuration routing sweep
   const [isInitializing, setIsInitializing] = useState(true);
 
-  // 💡 SEPARATION OF CONCERNS FIXED: Read base structural membership tokens once.
+  // Read base structural membership tokens once.
   // We completely strip raw localStorage checks out of the top-level rendering engine dependencies list.
   const cachedHouseholdId = getCleanStorageItem('householdId');
   const cachedApartmentId = getCleanStorageItem('apartmentId');
@@ -53,7 +53,7 @@ export default function AppRoutes() {
       return;
     }
 
-    // 💡 DETERMINISTIC ROOT ENTRY MATRIX: Only calculate redirection paths when hitting base entrance points.
+    // Only calculate redirection paths when hitting base entrance points.
     // This allows active sub-pages to handle internal forward routing manually via state without triggering top-level loop resets.
     if (location.pathname === '/' || location.pathname === ROUTES.LOGIN) {
       const belongsToAnyHousehold = Array.isArray(userHouseholds) && userHouseholds.length > 0;
@@ -70,7 +70,6 @@ export default function AppRoutes() {
     }
 
     setIsInitializing(false);
-  // 💡 IMMUTABLE SCOPE LIST: Removed local cache IDs from dependencies to preserve runtime stability on click tasks
   }, [session, authLoading, isLoadingHouseholds, location.pathname, history, userHouseholds, cachedHouseholdId, cachedApartmentId]);
 
   // Read current context metadata values cleanly

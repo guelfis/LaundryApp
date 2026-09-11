@@ -120,8 +120,6 @@ export default function CalendarGridTab() {
     history.push(ROUTES.APARTMENT_LOGIN);
   };
 
-  if (isLoading) return <LoadingSpinner />;
-
   return (
     <PageLayout 
       scrollable={false}
@@ -164,58 +162,62 @@ export default function CalendarGridTab() {
             overflowX: 'hidden',
             WebkitOverflowScrolling: 'touch',
           }}
-        >          
-        {rows.map(({ dayNum, dayName, isToday, dayOfWeekIndex }, idx) => (
-            <div
-              key={dayNum}
-              ref={isToday ? todayRowRef : null}
-              id={isToday ? 'today-calendar-row' : undefined}
-              className={cn(
-                'flex border-b last:border-b-0 transition-colors',
-                isToday
-                  ? 'bg-blue-50/40 border-blue-200 border-2'
-                  : idx % 2 !== 0 ? 'bg-gray-50/50' : 'bg-white'
-              )}
-            >
-              <DayCell dayName={dayName} dayNum={dayNum} isToday={isToday} dayOfWeekIndex={dayOfWeekIndex} />
-              
-              {SLOTS.map((slot, col) => {
-                const slotKey = getSlotKey(dayNum, activeMonth, year, slot[0]);
-                const slotInfo = aggregatedBookingsMap[slotKey] ?? emptySlotFallback();
-                const startTime = getDate(dayNum, activeMonth, year, slot[0]);
-                const endTime = getDate(dayNum, activeMonth, year, slot[1]);
-                const slotTimeState = getSlotTimeState(startTime, endTime);
-                const isCurrentTimeSlot = slotTimeState === 'live';
-                
-                // compute availability for the next chronological slot only if the current slot is free 
-                const nextSlotIndex = col + 1;
-                const nextSlotConfig = SLOTS[nextSlotIndex]; // Verifies if a subsequent daily slot column configuration exists
-                
-                let isNextAvailable = false;
-                let nextSlotTimesArray: number[] | null = null;
-
-                // Calculate data availability targets only if not in Admin Mode and current slot is free
-                if ( slotInfo.status === SlotStatus.AVAILABLE && nextSlotConfig) {
-                  const nextSlotLookupKey = getSlotKey(dayNum, activeMonth, year, nextSlotConfig[0]);
-                  const nextSlotInfo = aggregatedBookingsMap[nextSlotLookupKey] ?? emptySlotFallback();
+        >  
+        {isLoading ? ( 
+          <LoadingSpinner/>
+          ) : (
+            rows.map(({ dayNum, dayName, isToday, dayOfWeekIndex }, idx) => (
+                <div
+                  key={dayNum}
+                  ref={isToday ? todayRowRef : null}
+                  id={isToday ? 'today-calendar-row' : undefined}
+                  className={cn(
+                    'flex border-b last:border-b-0 transition-colors',
+                    isToday
+                      ? 'bg-blue-50/40 border-blue-200 border-2'
+                      : idx % 2 !== 0 ? 'bg-gray-50/50' : 'bg-white'
+                  )}
+                >
+                  <DayCell dayName={dayName} dayNum={dayNum} isToday={isToday} dayOfWeekIndex={dayOfWeekIndex} />
                   
-                  if (nextSlotInfo.status === SlotStatus.AVAILABLE) {
-                    isNextAvailable = true;
-                    nextSlotTimesArray = nextSlotConfig;
-                  }
-                }
+                  {SLOTS.map((slot, col) => {
+                    const slotKey = getSlotKey(dayNum, activeMonth, year, slot[0]);
+                    const slotInfo = aggregatedBookingsMap[slotKey] ?? emptySlotFallback();
+                    const startTime = getDate(dayNum, activeMonth, year, slot[0]);
+                    const endTime = getDate(dayNum, activeMonth, year, slot[1]);
+                    const slotTimeState = getSlotTimeState(startTime, endTime);
+                    const isCurrentTimeSlot = slotTimeState === 'live';
+                    
+                    // compute availability for the next chronological slot only if the current slot is free 
+                    const nextSlotIndex = col + 1;
+                    const nextSlotConfig = SLOTS[nextSlotIndex]; // Verifies if a subsequent daily slot column configuration exists
+                    
+                    let isNextAvailable = false;
+                    let nextSlotTimesArray: number[] | null = null;
 
-                return (
-                  <SlotCell 
-                    key={col} 
-                    slotStatus={slotInfo.status}
-                    isCurrentTimeSlot={isCurrentTimeSlot}
-                    onClick={() => handleOpenModal(dayNum, slot, slotInfo, slotTimeState, isNextAvailable, nextSlotTimesArray)}
-                  />
-                );
-              })}
-            </div>
-          ))}
+                    // Calculate data availability targets only if not in Admin Mode and current slot is free
+                    if ( slotInfo.status === SlotStatus.AVAILABLE && nextSlotConfig) {
+                      const nextSlotLookupKey = getSlotKey(dayNum, activeMonth, year, nextSlotConfig[0]);
+                      const nextSlotInfo = aggregatedBookingsMap[nextSlotLookupKey] ?? emptySlotFallback();
+                      
+                      if (nextSlotInfo.status === SlotStatus.AVAILABLE) {
+                        isNextAvailable = true;
+                        nextSlotTimesArray = nextSlotConfig;
+                      }
+                    }
+
+                    return (
+                      <SlotCell 
+                        key={col} 
+                        slotStatus={slotInfo.status}
+                        isCurrentTimeSlot={isCurrentTimeSlot}
+                        onClick={() => handleOpenModal(dayNum, slot, slotInfo, slotTimeState, isNextAvailable, nextSlotTimesArray)}
+                      />
+                    );
+                  })}
+                </div>
+              ))
+          )}
         </div>
       </div>
 
