@@ -1,6 +1,6 @@
 import { IonIcon } from "@ionic/react";
-import { LoadingSpinner } from "../components/LoadingSpinner";
-import SlotCard from "../components/SlotCard";
+import { LoadingSpinner } from "../baseComponents/LoadingSpinner";
+import SlotCard from "../baseComponents/SlotCard";
 import { Apartment } from "../lib/databaseTypes";
 import { lockClosedOutline } from 'ionicons/icons';
 

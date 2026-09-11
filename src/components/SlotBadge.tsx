@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { SlotStatus } from "../constants/SlotStatus";
-import StatusDot from "../components/StatusDot";
+import StatusDot from "../baseComponents/StatusDot";
 
 interface SlotBadgeProps {
   status: SlotStatus;

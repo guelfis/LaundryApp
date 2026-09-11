@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useMemo, useState } from "react";
-import SectionText from "../components/SectionText";
+import SectionText from "../baseComponents/SectionText";
 import MembersList from "../components/MembersList";
 import { useApartmentMembers, useApartments, useDeleteOrLeaveApartment } from "../hooks/useApartments";
 import InviteMemberModal from "../myApartment/InviteMemberModal";
@@ -12,8 +12,8 @@ import { ApartmentMember } from "../lib/databaseTypes";
 import { useHistory } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { ROUTES } from "../routes/routes.constants";
-import PageLayout from "../components/PageLayout";
-import { PageHeader } from "../components/PageHeader";
+import PageLayout from "../baseComponents/PageLayout";
+import { PageHeader } from "../baseComponents/PageHeader";
 import { Home } from "lucide-react";
 import LeaveDeleteActionsBlock from "../components/LeaveDeleteActionsBlock";
 import { updateApartmentName } from "../lib/apartments";

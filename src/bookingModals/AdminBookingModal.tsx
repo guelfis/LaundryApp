@@ -1,6 +1,6 @@
 import { IonToast, IonDatetime, IonModal } from '@ionic/react';
-import BottomModal from '../components/BottomModal';
-import ModalButton from '../components/ModalButton';
+import BottomModal from '../baseComponents/BottomModal';
+import ModalButton from '../baseComponents/ModalButton';
 import { SLOTS } from '../constants/dates';
 import { useBookingActions, useBookingFilters } from '../hooks/useBookings';
 import { useApartments } from '../hooks/useApartments';
@@ -9,7 +9,7 @@ import { useState, useEffect, useMemo } from 'react';
 import SuggestionToggle from '../components/SuggestionToggle';
 import SlotsGrid from '../components/SlotsGrid';
 import NotesArea from '../components/NotesArea';
-import { DatePicker } from '../components/DatePicker';
+import { DatePicker } from '../baseComponents/DatePicker';
 import { Booking } from '../lib/databaseTypes';
 import { calculateMaxEndDate, getAvailableSlotsForDate, getFirstAvailableStartDate, processAdminBlocks, toggleSlotInCollection } from '../utils/adminModalUtils';
 

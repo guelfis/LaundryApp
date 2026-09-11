@@ -12,14 +12,14 @@ import {
 import {  Settings, Mail, ShieldAlert, FileText, Info, MailPlus, Globe, Palette} from "lucide-react";
 import { resolveCurrentUserEmail, resolveCurrentUserId, signOutUser } from "../auth/authUtils";
 import { ROUTES } from "../routes/routes.constants";
-import PageLayout from "../components/PageLayout";
-import { PageHeader } from "../components/PageHeader";
+import PageLayout from "../baseComponents/PageLayout";
+import { PageHeader } from "../baseComponents/PageHeader";
 import { writeSupportTicket } from "../lib/supportTickets";
 import BugForm from "../components/BugForm";
 import { BookingContext } from "../contexts/BookingContext";
 import { SettingsBlock } from "../components/SettingsBlock";
 import { SettingsItemLabel } from "../components/SettingsItemLabel";
-import ActionButton from "../components/ActionButton";
+import ActionButton from "../baseComponents/ActionButton";
 import ChangeEmailModal from "../settings/ChangeEmailModal";
 import ChangePasswordModal from "../settings/ChangePasswordModal";
 import i18n from "../locales/i18n";

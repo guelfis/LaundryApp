@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import TextInput from "../components/TextInput";
+import TextInput from "../baseComponents/TextInput";
 import EditSaveButton from "../components/EditSaveButton";
 import { useTranslation } from "react-i18next";
 import { validateApartmentName } from "./validateApartmentName";

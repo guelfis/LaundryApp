@@ -1,5 +1,5 @@
 import { IonNote } from "@ionic/react";
-import Button from "./Button";
+import Button from "../baseComponents/Button";
 
 interface FooterSectionProps {
   buttonLabel: string;

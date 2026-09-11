@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { SlotStatus } from '../constants/SlotStatus';
-import SlotCard from './SlotCard';
+import SlotCard from '../baseComponents/SlotCard';
 import { CalendarClock } from 'lucide-react';
 
 interface DashboardSlotCardProps {

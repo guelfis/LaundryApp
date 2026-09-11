@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { verifyPassword, updateAccountPassword } from "../auth/authUtils"; // FIXED: Abstracted imports
-import BottomModal from "../components/BottomModal";
-import TextInput from "../components/TextInput";
-import ModalButton from "../components/ModalButton";
+import BottomModal from "../baseComponents/BottomModal";
+import TextInput from "../baseComponents/TextInput";
+import ModalButton from "../baseComponents/ModalButton";
 import { IonToast } from "@ionic/react";
 
 interface ChangePasswordModalProps {

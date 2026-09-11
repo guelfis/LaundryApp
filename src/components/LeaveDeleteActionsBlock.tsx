@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { IonButton, IonIcon, IonAlert } from '@ionic/react';
 import { logOutOutline, trashOutline, informationCircleOutline } from 'ionicons/icons';
-import ActionButton from './ActionButton';
-import SectionText from './SectionText';
+import ActionButton from '../baseComponents/ActionButton';
+import SectionText from '../baseComponents/SectionText';
 import { useTranslation } from 'react-i18next';
 
 interface LeaveDeleteActionsBlockProps {

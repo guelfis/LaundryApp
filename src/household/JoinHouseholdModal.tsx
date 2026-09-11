@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next";
-import BottomModal from "../components/BottomModal";
+import BottomModal from "../baseComponents/BottomModal";
 
-import SlotCard from "../components/SlotCard";
+import SlotCard from "../baseComponents/SlotCard";
 // import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useVerifyHouseholdAccess } from "../hooks/useHousehold";

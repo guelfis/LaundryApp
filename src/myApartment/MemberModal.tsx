@@ -1,5 +1,5 @@
 import { LogOut, Shield } from "lucide-react";
-import BottomModal from "../components/BottomModal";
+import BottomModal from "../baseComponents/BottomModal";
 import { ApartmentMember } from "../lib/databaseTypes";
 import { useApartmentMembersActions } from "../hooks/useApartments";
 import { useTranslation } from "react-i18next";

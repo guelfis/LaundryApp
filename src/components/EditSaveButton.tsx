@@ -1,6 +1,6 @@
 import React from 'react';
 import { Pencil, Check, X } from 'lucide-react';
-import { IconButton } from './IconButton';
+import { IconButton } from '../baseComponents/IconButton';
 
 interface EditSaveButtonProps {
   isEditing: boolean;

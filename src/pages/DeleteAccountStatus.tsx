@@ -3,12 +3,12 @@ import { useTranslation } from "react-i18next";
 import { useHistory } from "react-router-dom";
 import { IonSpinner, IonItem, IonLabel } from "@ionic/react";
 import { CheckCircle2, XCircle, AlertTriangle, ShieldAlert, Building } from "lucide-react";
-import PageLayout from "../components/PageLayout";
-import { PageHeader } from "../components/PageHeader";
+import PageLayout from "../baseComponents/PageLayout";
+import { PageHeader } from "../baseComponents/PageHeader";
 import { fetchParallelDeletionRequirements, GroupedDeletionRequirementModel } from "../services/accountDeletionValidator";
 import { executeAutomatedAccountPurge, resolveCurrentUserId, signOutUser } from "../auth/authUtils";
 import { SettingsBlock } from "../components/SettingsBlock";
-import Button from "../components/Button";
+import Button from "../baseComponents/Button";
 import {trashOutline}  from 'ionicons/icons';
 
 export default function DeleteAccountStatus() {

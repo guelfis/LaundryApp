@@ -1,14 +1,14 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { Redirect, useHistory, useLocation } from 'react-router-dom';
-import PageLayout from '../components/PageLayout';
+import PageLayout from '../baseComponents/PageLayout';
 import { useApartments, useMyApartments, useJoinViaLink } from '../hooks/useApartments'; 
 import { Apartment } from '../lib/databaseTypes';
 import ApartmentsList from '../apartmentSetup/ApartmentsList';
 import JoinRequestModal from '../apartmentSetup/JoinRequestModal'; 
-import { PageHeader } from '../components/PageHeader';
+import { PageHeader } from '../baseComponents/PageHeader';
 import { Home } from 'lucide-react';
-import { LoadingSpinner } from '../components/LoadingSpinner';
-import SectionText from '../components/SectionText';
+import { LoadingSpinner } from '../baseComponents/LoadingSpinner';
+import SectionText from '../baseComponents/SectionText';
 import CreateApartmentModal from '../apartmentSetup/CreateApartmentModal';
 import { useTranslation } from 'react-i18next';
 import { getCleanStorageItem } from '../auth/authUtils';
@@ -16,7 +16,7 @@ import { ROUTES } from '../routes/routes.constants';
 import { addOutline, constructOutline, logOutOutline } from 'ionicons/icons';
 import { IonIcon, IonText, IonButton, IonToast } from '@ionic/react';
 import { useDeleteLeaveHousehold, useGetUserHouselds } from '../hooks/useHousehold';
-import SlotCard from '../components/SlotCard';
+import SlotCard from '../baseComponents/SlotCard';
 
 export default function ApartmentLogin() {
   const { t } = useTranslation();

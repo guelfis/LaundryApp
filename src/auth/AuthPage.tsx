@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { IonInput, IonButton, IonItem, IonList, IonText, IonSpinner, IonToast } from "@ionic/react";
 import { useTranslation } from "react-i18next";
-import PageLayout from "../components/PageLayout";
+import PageLayout from "../baseComponents/PageLayout";
 import { signUpUser, verifyPassword } from "./authUtils";
 
 export default function AuthPage() {

@@ -1,10 +1,10 @@
 import { useMemo, useState } from "react";
-import BottomModal from "../components/BottomModal";
-import ModalButton from "../components/ModalButton";
+import BottomModal from "../baseComponents/BottomModal";
+import ModalButton from "../baseComponents/ModalButton";
 import { useApartments, useCreateApartment } from "../hooks/useApartments";
 import { Send } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import TextInput from "../components/TextInput";
+import TextInput from "../baseComponents/TextInput";
 import { validateApartmentName } from "../utils/validateApartmentName";
 
 interface CreateApartmentModalProps {

@@ -4,12 +4,12 @@ import { useTranslation } from "react-i18next";
 import { Building } from "lucide-react";
 import { IonText, IonToast } from "@ionic/react";
 
-import PageLayout from "../components/PageLayout";
-import { PageHeader } from "../components/PageHeader";
-import SectionText from "../components/SectionText";
-import TextInput from "../components/TextInput";
+import PageLayout from "../baseComponents/PageLayout";
+import { PageHeader } from "../baseComponents/PageHeader";
+import SectionText from "../baseComponents/SectionText";
+import TextInput from "../baseComponents/TextInput";
 import FooterSection from "../components/FooterSection";
-import SlotCard from "../components/SlotCard";
+import SlotCard from "../baseComponents/SlotCard";
 
 import { ROUTES } from "../routes/routes.constants";
 import { LocationResolution } from "../household/AddressSearch";

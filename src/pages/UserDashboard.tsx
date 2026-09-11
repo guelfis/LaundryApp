@@ -1,24 +1,24 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import SectionText from "../components/SectionText";
+import SectionText from "../baseComponents/SectionText";
 import { useApartmentMembers, useApartments, usePendingRequests } from "../hooks/useApartments";
 import { useUpcomingBookings, useBookings, useBookingFilters } from "../hooks/useBookings";
 import { resolveCurrentUserId, checkIsAdminApartment } from "../auth/authUtils";
 import { Calendar, LayoutDashboard } from "lucide-react"; 
-import { LoadingSpinner } from "../components/LoadingSpinner";
+import { LoadingSpinner } from "../baseComponents/LoadingSpinner";
 import { SLOTS } from "../constants/dates";
 import { AggregatedSlotInfo, emptySlotFallback, getAggregatedBookingsMap, getCurrentSlotKey, getSlotKey, parseSlotRowToSelection, SlotTimeState } from "../utils/slotsUtils";
 import { SlotStatus } from "../constants/SlotStatus";
 import DashboardSlotCard from "../components/DashboardSlotCard";
 import { getBuildingCurrentDateTime, getDate, getDateStringFromDate, getTimeSlotString } from "../utils/datesGetter"; 
 import { TravelingBanner } from "../components/TravelingBanner";
-import SlotCard from "../components/SlotCard";
-import PageLayout from "../components/PageLayout";
-import { PageHeader } from "../components/PageHeader";
+import SlotCard from "../baseComponents/SlotCard";
+import PageLayout from "../baseComponents/PageLayout";
+import { PageHeader } from "../baseComponents/PageHeader";
 import { ROUTES } from "../routes/routes.constants";
 import { useHistory } from "react-router-dom";
 import BookingModal from "../bookingModals/BookingModal";
-import Button from "../components/Button";
+import Button from "../baseComponents/Button";
 import AdminBookingModal from "../bookingModals/AdminBookingModal";
 
 export default function UserDashboard() {

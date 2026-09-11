@@ -1,14 +1,14 @@
 import { IonToast} from '@ionic/react';
-import BottomModal from '../components/BottomModal';
-import ModalButton from '../components/ModalButton';
+import BottomModal from '../baseComponents/BottomModal';
+import ModalButton from '../baseComponents/ModalButton';
 import { SlotStatus } from '../constants/SlotStatus';
 import { useBookingActions, useBookingFilters } from '../hooks/useBookings';
 import { AggregatedSlotInfo, getSlotLabel, SlotTimeState } from '../utils/slotsUtils';
 import { Lock } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useState, useEffect } from 'react';
-import { SlotBadge } from '../utils/SlotBadge';
-import { SlotSpecsCard } from '../utils/SlotSpecCard';
+import { SlotBadge } from '../components/SlotBadge';
+import { SlotSpecsCard } from '../components/SlotSpecCard';
 import SuggestionToggle from '../components/SuggestionToggle';
 
 interface BookingModalProps {

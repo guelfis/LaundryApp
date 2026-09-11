@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { usePendingRequests, useResolveJoinRequest } from '../hooks/useApartments';
 import { Check, X, User } from 'lucide-react';
-import SectionText from '../components/SectionText';
-import { LoadingSpinner } from '../components/LoadingSpinner';
+import SectionText from '../baseComponents/SectionText';
+import { LoadingSpinner } from '../baseComponents/LoadingSpinner';
 import { useTranslation } from 'react-i18next';
 import { IonToast } from '@ionic/react';
 

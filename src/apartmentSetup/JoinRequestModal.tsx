@@ -1,7 +1,7 @@
-import BottomModal from '../components/BottomModal';
+import BottomModal from '../baseComponents/BottomModal';
 import { Send, Clock, Home } from 'lucide-react';
 import { useState } from 'react';
-import ModalButton from '../components/ModalButton';
+import ModalButton from '../baseComponents/ModalButton';
 import { useRequestToJoin } from '../hooks/useApartments';
 import { useTranslation } from 'react-i18next';
 

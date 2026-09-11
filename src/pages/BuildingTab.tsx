@@ -6,16 +6,16 @@ import { IonText, IonNote, IonToast } from "@ionic/react";
 import { QRCodeSVG } from 'qrcode.react'; 
 import {  printOutline } from 'ionicons/icons';
 
-import PageLayout from "../components/PageLayout";
-import { PageHeader } from "../components/PageHeader";
-import SlotCard from "../components/SlotCard";
-import SectionText from "../components/SectionText";
-import { LoadingSpinner } from "../components/LoadingSpinner";
+import PageLayout from "../baseComponents/PageLayout";
+import { PageHeader } from "../baseComponents/PageHeader";
+import SlotCard from "../baseComponents/SlotCard";
+import SectionText from "../baseComponents/SectionText";
+import { LoadingSpinner } from "../baseComponents/LoadingSpinner";
 
 import { useDeleteLeaveHousehold, useHouseholdDetails, useHouseholdMembers } from "../hooks/useHousehold";
 import { useBookingFilters } from "../hooks/useBookings";
 import { ROUTES } from "../routes/routes.constants";
-import Button from "../components/Button";
+import Button from "../baseComponents/Button";
 import { printLaundryFlier } from "../services/printService";
 import LaundryIcon from "../logo/LaundryIcon"; 
 import LeaveDeleteActionsBlock from "../components/LeaveDeleteActionsBlock";
