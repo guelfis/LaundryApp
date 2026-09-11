@@ -5,7 +5,7 @@ import { useApartmentMembers, useApartments, useDeleteOrLeaveApartment } from ".
 import InviteMemberModal from "../myApartment/InviteMemberModal";
 import { checkIsAdminApartment, getCleanStorageItem, resolveCurrentUserId } from "../auth/authUtils";
 import PendingRequestsSection from "../myApartment/PendingRequestsSection";
-import ApartmentNameEditableSection from "../utils/ApartmentNameEditableSection";
+import ApartmentNameEditableSection from "../components/ApartmentNameEditableSection";
 import { BookingContext } from "../contexts/BookingContext";
 import MemberModal from "../myApartment/MemberModal";
 import { ApartmentMember } from "../lib/databaseTypes";
