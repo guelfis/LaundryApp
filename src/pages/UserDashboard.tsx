@@ -227,7 +227,7 @@ export default function UserDashboard() {
         <div className="flex flex-col gap-2">
           <SectionText title={t("userDashboard.next_reservations")} />
           {upcomingBookings.length > 0 ? (
-            <div className="bg-white dark:bg-slate-800/40 border border-gray-100 dark:border-slate-800 rounded-2xl divide-y divide-gray-100 dark:divide-slate-800/50 overflow-hidden shadow-sm">
+            <div >
               {Object.values(upcomingAggregated).map((slotInfo) => {
                 const dateObj = new Date(slotInfo.startTime ?? "");
                 const localizedDate = getDateStringFromDate(dateObj);
