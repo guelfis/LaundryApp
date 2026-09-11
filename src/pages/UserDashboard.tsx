@@ -89,7 +89,7 @@ export default function UserDashboard() {
     const currentSlotKey = getCurrentSlotKey(SLOTS);
 
     if (!currentSlotKey) {
-      return { bookingId: null, slotStatus: SlotStatus.NOT_RESERVABLE, slotKey: null, nextSlotAvailable: false, nextSlotConfig: null };
+      return { bookingId: null, slotStatus: SlotStatus.AFTER_HOURS, slotKey: null, nextSlotAvailable: false, nextSlotConfig: null };
     }
     
     const activeBooking = aggregatedBookingsMap[currentSlotKey] ?? emptySlotFallback();

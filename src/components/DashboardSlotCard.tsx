@@ -40,6 +40,12 @@ export default function DashboardSlotCard({
       containerClass: "bg-gray-50 dark:bg-slate-800/40 border-gray-100 dark:border-slate-800"
     },
     [SlotStatus.NOT_RESERVABLE]: {
+      iconColor: "text-orange-500",
+      badgeText: t("dashboardSlotCard.not_reservable"),
+      descText: t("dashboardSlotCard.not_reservable_desc"),
+      containerClass: "bg-orange-100/70 dark:bg-slate-900/40 border-gray-200 dark:border-slate-800 opacity-70"
+    },
+    [SlotStatus.AFTER_HOURS]: {
       iconColor: "text-gray-500",
       badgeText: t("dashboardSlotCard.afterHour"),
       descText: t("dashboardSlotCard.afterHour_desc"),
@@ -51,7 +57,7 @@ export default function DashboardSlotCard({
 
   return (
     <SlotCard
-      icon={<CalendarClock className="w-5 h-5 text-blue-500"/>}
+      icon={<CalendarClock className={`w-5 h-5 ${config.iconColor}`} />}
       title={config.badgeText}
       subtitle={config.descText}
       containerClass={config.containerClass}

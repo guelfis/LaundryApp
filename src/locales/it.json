@@ -166,11 +166,13 @@
   },
   "dashboardSlotCard": {
     "your_session": "Tua Sessione Attiva",
-    "your_session_desc": "La lavanderia è attualmente riservata al tuo profilo.",
+    "your_session_desc": "Prenotato sotto il tuo profilo.",
     "slot_occupied": "Slot Occupato",
-    "slot_occupied_desc": "Un coinquilino sta attualmente utilizzando la sessione di lavanderia dell'appartamento.",
+    "slot_occupied_desc": "Usato da un altro appartamento.",
     "afterHour": "Dopo l'orario",
-    "afterHour_desc": "Questo slot è dopo l'orario prenotabile. Torna più tardi per prenotarlo."
+    "afterHour_desc": "Attualmente chiuso per la notte.",
+    "not_reservable": "Non Prenotabile",
+    "not_reservable_desc": "Bloccato dall'amministrazione."
   },
   "travelingBanner":{
     "title": "Modalità Viaggio Attiva",
