@@ -88,6 +88,16 @@ export default function AdminBlockModal({ isOpen, onClose, bookings }: AdminBloc
     setSelectedEndSlots(prev => toggleSlotInCollection(prev, slot));
   };
 
+  const isDateSelected = () => {
+   if (selectedStartSlots.length === 0){
+    return false;
+   }
+   if (isMultiDay && selectedEndSlots.length === 0) {
+    return false;
+   }
+   return true;
+  }
+
   if (!isOpen) return null;
 
   const handleApplyBlock = async () => {
@@ -97,7 +107,7 @@ export default function AdminBlockModal({ isOpen, onClose, bookings }: AdminBloc
       return;
     }
 
-    if (selectedStartSlots.length === 0 || (isMultiDay && selectedEndSlots.length === 0)) {
+    if (!isDateSelected()) {
       setToastMessage(t('adminBlockModal.error_incomplete'));
       setToastColor('warning');
       return;
@@ -221,7 +231,7 @@ export default function AdminBlockModal({ isOpen, onClose, bookings }: AdminBloc
 
       {/* 5. ACTION CONTROLS & SUB-MODALS */}
       <div className="flex flex-col gap-4 pb-4">
-        <ModalButton variant="danger" disabled={isBooking} onClick={handleApplyBlock}>
+        <ModalButton variant="danger" disabled={isBooking || !isDateSelected()} onClick={handleApplyBlock}>
           {t('adminBlockModal.btn_apply')}
         </ModalButton>
 
