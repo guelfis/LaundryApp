@@ -46,11 +46,15 @@ export const useBookings = (householdId: string, startDate: Date, endDate: Date)
   });
 };
 
+export interface Slot {
+  startHour: number;
+  endHour: number;
+}
+
 interface BookSlotParams {
   apartmentId: string;
   dateStr: string;   // Format 'YYYY-MM-DD'
-  startHour: number[]; // e.g. [7, 12, 17]
-  endHour: number[];   // e.g. [12, 17, 22]
+  slotHours: Slot[]; // Array of slot objects with startHour and endHour
   isAdminBlock: boolean; // Flag to indicate if the booking is an admin block
 }
 
@@ -58,14 +62,13 @@ export function useBookingActions() {
   const queryClient = useQueryClient();
 
   const bookSlotMutation = useMutation({
-    mutationFn: async ({ apartmentId, dateStr, startHour, endHour, isAdminBlock }: BookSlotParams) => {  
+    mutationFn: async ({ apartmentId, dateStr, slotHours, isAdminBlock }: BookSlotParams) => {  
       
       // Map over the parallel arrays index-by-index directly.
       // Index 0 triggers: bookLaundrySlot(id, date, 7, 9)
       // Index 1 triggers: bookLaundrySlot(id, date, 10, 12)
-      const promises = startHour.map((startH, index) => {
-        const endH = endHour[index];
-        return bookLaundrySlot(apartmentId, dateStr, startH, endH, isAdminBlock);
+      const promises = slotHours.map((slot) => {
+        return bookLaundrySlot(apartmentId, dateStr, slot.startHour, slot.endHour, isAdminBlock);
       });
 
       return Promise.all(promises);

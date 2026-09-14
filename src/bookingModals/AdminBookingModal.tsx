@@ -2,7 +2,7 @@ import { IonToast, IonDatetime, IonModal } from '@ionic/react';
 import BottomModal from '../baseComponents/BottomModal';
 import ModalButton from '../baseComponents/ModalButton';
 import { SLOTS } from '../constants/dates';
-import { useBookingActions, useBookingFilters } from '../hooks/useBookings';
+import { Slot, useBookingActions, useBookingFilters } from '../hooks/useBookings';
 import { useApartments } from '../hooks/useApartments';
 import { useTranslation } from 'react-i18next';
 import { useState, useEffect, useMemo } from 'react';
@@ -104,21 +104,18 @@ export default function AdminBlockModal({ isOpen, onClose, bookings }: AdminBloc
     }
 
     try {
-      const startHoursArray: number[] = [];
-      const endHoursArray: number[] = [];
+      const slots: Slot[] = [];
 
       if (!isMultiDay) {
         // CASE A: Single day block -> Push all selected atomic slots into parallel parameter arrays
         selectedStartSlots.forEach(slot => {
-          startHoursArray.push(slot[0]);
-          endHoursArray.push(slot[1]);
+          slots.push({ startHour: slot[0], endHour: slot[1] });
         });
 
         await bookSlot({
           apartmentId: adminApartment.id,
           dateStr: startDate,
-          startHour: startHoursArray,
-          endHour: endHoursArray,
+          slotHours: slots,
           isAdminBlock: true
         });
       } else {
@@ -132,20 +129,17 @@ export default function AdminBlockModal({ isOpen, onClose, bookings }: AdminBloc
           const dateStrToken = currentDay.toISOString().split('T')[0];
 
           SLOTS.forEach((slotConfig) => {
-            startHoursArray.push(slotConfig[0]);
-            endHoursArray.push(slotConfig[1]);
+            slots.push({ startHour: slotConfig[0], endHour: slotConfig[1] });
           });
 
           await bookSlot({
             apartmentId: adminApartment.id,
             dateStr: dateStrToken,
-            startHour: startHoursArray,
-            endHour: endHoursArray,
+            slotHours: slots,
             isAdminBlock: true
           });
 
-          startHoursArray.length = 0;
-          endHoursArray.length = 0;
+          slots.length = 0; // Clear the slots array for the next day
 
           currentDay.setDate(currentDay.getDate() + 1);
         }

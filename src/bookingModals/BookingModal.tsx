@@ -2,7 +2,7 @@ import { IonToast} from '@ionic/react';
 import BottomModal from '../baseComponents/BottomModal';
 import ModalButton from '../baseComponents/ModalButton';
 import { SlotStatus } from '../constants/SlotStatus';
-import { useBookingActions, useBookingFilters } from '../hooks/useBookings';
+import { Slot, useBookingActions, useBookingFilters } from '../hooks/useBookings';
 import { AggregatedSlotInfo, getSlotLabel, SlotTimeState } from '../utils/slotsUtils';
 import { Lock } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -50,13 +50,11 @@ export default function BookingModal({
       ? [...selectedSlot.slotTimes, ...nextSlotTimes]
       : selectedSlot.slotTimes;
 
-    const startHoursArray: number[] = [];
-    const endHoursArray: number[] = [];
+    const slots: Slot[] = [];
 
     // 2. Loop through the flat array in pairs of 2 to extract [start, end] for each atomic slot
     for (let i = 0; i < finalSlotTimes.length; i += 2) {
-      startHoursArray.push(finalSlotTimes[i]);
-      endHoursArray.push(finalSlotTimes[i + 1]);
+      slots.push({ startHour: finalSlotTimes[i], endHour: finalSlotTimes[i + 1] });
     }
 
     // 3. Fire the mutation with matching parallel arrays
@@ -65,8 +63,7 @@ export default function BookingModal({
     await bookSlot({
       apartmentId,
       dateStr: selectedSlot.dateString, 
-      startHour: startHoursArray,
-      endHour: endHoursArray,
+      slotHours: slots,
       isAdminBlock: isAdminMode 
     });
     
