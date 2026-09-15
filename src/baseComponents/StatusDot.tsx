@@ -1,6 +1,6 @@
 
 // Define strict color parameters to prevent typo bugs in your code
-interface StatusDotProps {
+export interface StatusDotProps {
   color: 'green' | 'red' | 'blue' | 'grey';
   pulse?: boolean; // Optional parameter to add subtle animation
 }

@@ -51,7 +51,8 @@
     "booked": "Booked",
     "free": "Free",
     "reserved": "Reserved",
-    "not_reservable": "Not Reservable"
+    "not_reservable": "Not Reservable",
+    "overridden": "Overridden"
   },
   "dashboard":{
     "calendar": "Calendar",
@@ -176,7 +177,9 @@
     "afterHour": "Off Hours",
     "afterHour_desc": "Currently closed for the night.",
     "not_reservable": "Not Reservable",
-    "not_reservable_desc": "Blocked by administration."
+    "not_reservable_desc": "Blocked by administration.",
+    "overridden": "Overridden",
+    "overridden_desc": "Overridden by an admin block."
   },
   "travelingBanner":{
     "title": "Traveling Mode Active",

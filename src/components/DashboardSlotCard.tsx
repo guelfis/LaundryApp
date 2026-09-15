@@ -45,6 +45,12 @@ export default function DashboardSlotCard({
       descText: t("dashboardSlotCard.not_reservable_desc"),
       containerClass: "bg-orange-100/70 dark:bg-slate-900/40 border-gray-200 dark:border-slate-800 opacity-70"
     },
+    [SlotStatus.OVERRIDDEN]: {
+      iconColor: "text-red-500",
+      badgeText: t("dashboardSlotCard.overridden"),
+      descText: t("dashboardSlotCard.overridden_desc"),
+      containerClass: "bg-red-100/70 dark:bg-slate-900/40 border-gray-200 dark:border-slate-800 opacity-70"
+    },
     [SlotStatus.AFTER_HOURS]: {
       iconColor: "text-gray-500",
       badgeText: t("dashboardSlotCard.afterHour"),

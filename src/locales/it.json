@@ -50,7 +50,8 @@
     "booked": "Occupato",
     "free": "Libero",
     "reserved": "Riservato",
-    "not_reservable": "Non Prenotabile"
+    "not_reservable": "Non Prenotabile",
+    "overridden": "Sospeso"
   },
   "dashboard":{
     "calendar": "Calendario",
@@ -112,7 +113,8 @@
     "btn_share": "Condividi Link",
     "share_title": "Unisciti a {{name}}",
     "share_text": "Usa questo link di invito per unirti al calendario del nostro appartamento!"
-  },"memberModal": {
+  },
+  "memberModal": {
     "btn_make_admin": "Rendi admin",
     "btn_remove_member": "Rimuovi membro",
     "alert_promote_error": "Impossibile nominare il membro come amministratore: {{error}}",
@@ -172,7 +174,9 @@
     "afterHour": "Dopo l'orario",
     "afterHour_desc": "Attualmente chiuso per la notte.",
     "not_reservable": "Non Prenotabile",
-    "not_reservable_desc": "Bloccato dall'amministrazione."
+    "not_reservable_desc": "Bloccato dall'amministrazione.",
+    "overridden": "Sospeso",
+    "overridden_desc": "Sospeso da un blocco amministrativo."
   },
   "travelingBanner":{
     "title": "Modalità Viaggio Attiva",

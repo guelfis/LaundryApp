@@ -84,7 +84,7 @@ export const getAggregatedBookingsMap = (
     const bYear = parseInt(parts.find(p => p.type === 'year')!.value, 10);
     const bMonth = parseInt(parts.find(p => p.type === 'month')!.value, 10) - 1; // Normalize to 0-indexed month
     const bDay = parseInt(parts.find(p => p.type === 'day')!.value, 10);
-    const bHour = getBuildingHour(d); // Translates 15:00 UTC cleanly into 17 [google:4]
+    const bHour = getBuildingHour(d); // Translates 15:00 UTC cleanly into 17 
 
     const key = getSlotKey(bDay, bMonth, bYear, bHour);
     if (!grouped[key]) grouped[key] = [];
@@ -105,7 +105,7 @@ export const getAggregatedBookingsMap = (
 
       finalMap[key] = {
         id: adminBooking.id, // Keep the admin booking ID so the admin can click and delete it
-        status: SlotStatus.NOT_RESERVABLE,
+        status: userWasOverridden ? SlotStatus.OVERRIDDEN : SlotStatus.NOT_RESERVABLE,
         bookedBy: i18n.t('slotStatus.not_reservable'),
         startTime: adminBooking.start_time,
         endTime: adminBooking.end_time,
