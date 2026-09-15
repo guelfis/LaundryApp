@@ -1,31 +1,29 @@
-import { useEffect, useMemo, useState } from "react";
+import {  useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import SectionText from "../baseComponents/SectionText";
 import { useApartmentMembers, useApartments, usePendingRequests } from "../hooks/useApartments";
-import { useUpcomingBookings, useBookings, useBookingFilters } from "../hooks/useBookings";
-import { resolveCurrentUserId, checkIsAdminApartment } from "../auth/authUtils";
-import { Calendar, LayoutDashboard } from "lucide-react"; 
+import { useUpcomingBookings, useBookings } from "../hooks/useBookings";
+import { checkIsAdminApartment } from "../auth/authUtils";
+import { Calendar } from "lucide-react"; 
 import { LoadingSpinner } from "../baseComponents/LoadingSpinner";
 import { SLOTS } from "../constants/dates";
 import { AggregatedSlotInfo, emptySlotFallback, getAggregatedBookingsMap, getCurrentSlotKey, getSlotKey, parseSlotRowToSelection, SlotTimeState } from "../utils/slotsUtils";
 import { SlotStatus } from "../constants/SlotStatus";
 import DashboardSlotCard from "../components/DashboardSlotCard";
 import { getBuildingCurrentDateTime, getDate, getDateStringFromDate, getTimeSlotString } from "../utils/datesGetter"; 
-import { TravelingBanner } from "../components/TravelingBanner";
 import SlotCard from "../baseComponents/SlotCard";
-import PageLayout from "../baseComponents/PageLayout";
-import { PageHeader } from "../baseComponents/PageHeader";
-import { ROUTES } from "../routes/routes.constants";
-import { useHistory } from "react-router-dom";
-import BookingModal from "../bookingModals/BookingModal";
-import Button from "../baseComponents/Button";
-import AdminBookingModal from "../bookingModals/AdminBookingModal";
 
-export default function UserDashboard() {
-  const { householdId, householdTimezone, apartmentId, isAdminMode } = useBookingFilters();
+import BookingModal from "../bookingModals/BookingModal";
+
+interface UserDashboardProps {
+  householdId: string;
+  householdTimezone: string;
+  apartmentId: string;
+  currentUserId: string | null;
+}
+
+export default function UserDashboard({ householdId, householdTimezone, apartmentId, currentUserId }: UserDashboardProps) {
   const { t } = useTranslation();
-  const history = useHistory();
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   // Shared React calendar grid hooks variables
   const [selectedSlot, setSelectedSlot] = useState<{ 
@@ -36,20 +34,7 @@ export default function UserDashboard() {
     nextSlotTimes: number[] | null
   } | null>(null);
   const [selectedBooking, setSelectedBooking] = useState<AggregatedSlotInfo>(emptySlotFallback());
-  const [isAdminModalOpen, setIsAdminModalOpen] = useState<boolean>(false);
 
-  useEffect(() => {
-    resolveCurrentUserId().then((id) => setCurrentUserId(id));
-  }, []);
-
-  // Traveling banner validation trigger check
-  const travelingStatus = useMemo(() => {
-    const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone; 
-    return {
-      isTraveling: userTimezone !== householdTimezone,
-      userTimezone
-    };
-  }, [householdTimezone]);
 
   // Sync calendar date metrics range boundaries
   const queryRange = useMemo(() => {
@@ -64,8 +49,8 @@ export default function UserDashboard() {
     return { morning, evening };
   }, []);
 
-  const { data: members = [] } = useApartmentMembers(apartmentId, { enabled: !!apartmentId && !isAdminMode });
-  const { data: requests = [] } = usePendingRequests(apartmentId, { enabled: !!apartmentId && !isAdminMode });
+  const { data: members = [] } = useApartmentMembers(apartmentId, { enabled: !!apartmentId  });
+  const { data: requests = [] } = usePendingRequests(apartmentId, { enabled: !!apartmentId  });
   const { data: bookings = [] } = useBookings(householdId, queryRange.morning, queryRange.evening);
   const { data: apartments = [] } = useApartments(householdId);
   const { data: upcomingBookings = [], isLoading } = useUpcomingBookings(apartmentId);
@@ -102,7 +87,7 @@ export default function UserDashboard() {
     let isNextAvailable = false;
 
     // 3. Evaluate the subsequent consecutive slot properties
-    if (!isAdminMode && activeBooking.status === SlotStatus.AVAILABLE && nextSlotConfig) {
+    if ( activeBooking.status === SlotStatus.AVAILABLE && nextSlotConfig) {
       const nextSlotKey = getSlotKey(bClock.day, bClock.monthIndex, bClock.year, nextSlotConfig[0]);
       const nextSlotInfo = aggregatedBookingsMap[nextSlotKey] ?? emptySlotFallback();
       
@@ -111,7 +96,6 @@ export default function UserDashboard() {
       }
     }
     
-    
     return {
       bookingId: activeBooking.id,
       slotStatus: activeBooking.status,
@@ -119,7 +103,7 @@ export default function UserDashboard() {
       nextSlotAvailable: isNextAvailable,
       nextSlotConfig
     };
-  }, [aggregatedBookingsMap, isAdminMode, householdTimezone]);
+  }, [aggregatedBookingsMap, householdTimezone]);
 
   const handleOpenModal = (slotInfo: AggregatedSlotInfo, nextAvailable = false, nextTimes: number[] | null = null) => {
     const parsedSelection = parseSlotRowToSelection(
@@ -148,21 +132,8 @@ export default function UserDashboard() {
   }
 
   return (
-    <PageLayout 
-      header={
-        <PageHeader 
-            title="Dashboard"
-            icon={<LayoutDashboard className="w-7 h-7 text-blue-500" />} 
-            onBack={() => history.push(ROUTES.APARTMENT_LOGIN)} 
-        />
-      }
-    >
-      <div className="w-full px-4 py-2 flex flex-col gap-6 flex-1 overflow-y-auto">
-        
-        {/* 1. TRAVELING ALERT BANNER SYSTEM */}
-        {travelingStatus.isTraveling && (
-          <TravelingBanner userTz={travelingStatus.userTimezone} buildingTz={householdTimezone} />
-        )}
+    
+      <div className="flex flex-col gap-6">
 
         {/* 2. NOTIFICATION BANNER (ADMIN ONLY) */}
         {isUserAdmin && requests.length > 0 && (
@@ -207,21 +178,6 @@ export default function UserDashboard() {
           />
         </div>
 
-        {/* ADMIN BLOCK */}
-        
-        {isAdminMode && (
-          <div className="flex flex-col gap-2">
-            <SectionText title={t("userDashboard.admin_action")} />
-            <p className="text-xs text-gray-400 pl-1 mt-1">{t("userDashboard.block_laundry")}</p>
-            <Button 
-              onClick={() => setIsAdminModalOpen(true)}
-              variant="primary"
-              icon="shieldAlert"
-              label={t('userDashboard.btn_admin_block')}
-            />
-          </div>
-        )}
-      
 
         {/* 4. UPCOMING RESERVATIONS LIST */}
         <div className="flex flex-col gap-2">
@@ -263,16 +219,8 @@ export default function UserDashboard() {
             nextSlotTimes={selectedSlot.nextSlotTimes}
           />
         )}
-        {isAdminModalOpen && (
-          <AdminBookingModal
-            isOpen={isAdminModalOpen}
-            onClose={() => setIsAdminModalOpen(false)}
-            bookings={upcomingBookings}
-          />
-        )}
-
+      
       </div>
-  </PageLayout>
 );
 
 }

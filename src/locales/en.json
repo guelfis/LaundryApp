@@ -44,7 +44,7 @@
     "released": "has been released! It can be booked again for the remaining time before the next slot starts.",
     "available": "is available for booking",
     "another_apartment": "another apartment",
-    "not_reservable_override": "Blocked by administration (Your original reservation is paused).",
+    "not_reservable_override": "is overridden by administration block.",
     "not_reservable_blocked": "is not reservable (Blocked by administration)."
   },
   "slotStatus":{
@@ -162,7 +162,9 @@
     "live_status": "Live Status",
     "next_reservations": "Next Reservations",
     "mine": "Mine",
-    "no_bookings": "No upcoming apartment bookings logged yet.",
+    "no_bookings": "No upcoming apartment bookings logged yet."
+  },
+  "adminDashboard": {
     "btn_admin_block": "Block the laudry",
     "admin_action": "Administration",
     "block_laundry": "Block the laundry for the entire building for maintanance of repairs"

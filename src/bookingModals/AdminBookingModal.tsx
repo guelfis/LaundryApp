@@ -2,8 +2,7 @@ import { IonToast, IonDatetime, IonModal } from '@ionic/react';
 import BottomModal from '../baseComponents/BottomModal';
 import ModalButton from '../baseComponents/ModalButton';
 import { SLOTS } from '../constants/dates';
-import { Slot, useBookingActions, useBookingFilters } from '../hooks/useBookings';
-import { useApartments } from '../hooks/useApartments';
+import { Slot, useBookingActions } from '../hooks/useBookings';
 import { useTranslation } from 'react-i18next';
 import { useState, useEffect, useMemo } from 'react';
 import SuggestionToggle from '../components/SuggestionToggle';
@@ -17,15 +16,14 @@ interface AdminBlockModalProps {
   isOpen: boolean;
   onClose: () => void;
   bookings: Booking[]; // Pass the list of all admin bookings from the parent component
+  apartmentId: string; // Optional, in case you want to filter bookings by apartment
 }
 
-export default function AdminBlockModal({ isOpen, onClose, bookings }: AdminBlockModalProps) {
+export default function AdminBlockModal({ isOpen, onClose, bookings, apartmentId }: AdminBlockModalProps) {
   const { t } = useTranslation();
-  const { householdId } = useBookingFilters();
-  const { data: apartments = [] } = useApartments(householdId);
   const { bookSlot, isBooking } = useBookingActions();
 
-  const adminApartment = apartments.find(a => a.display_name === '_ADMIN_');
+  // TODO: it uses upcoming bookings to generate available slots, but it doesn't currently take into account the current slot
   
   //  Generate the dictionary of admin blocks for quick lookup and validation
   const adminBlocksMap = useMemo(() => {
@@ -101,7 +99,7 @@ export default function AdminBlockModal({ isOpen, onClose, bookings }: AdminBloc
   if (!isOpen) return null;
 
   const handleApplyBlock = async () => {
-    if (!adminApartment) {
+    if (!apartmentId) {
       setToastMessage(t('adminBlockModal.error_admin_missing'));
       setToastColor('danger');
       return;
@@ -123,7 +121,7 @@ export default function AdminBlockModal({ isOpen, onClose, bookings }: AdminBloc
         });
 
         await bookSlot({
-          apartmentId: adminApartment.id,
+          apartmentId: apartmentId,
           dateStr: startDate,
           slotHours: slots,
           isAdminBlock: true
@@ -143,7 +141,7 @@ export default function AdminBlockModal({ isOpen, onClose, bookings }: AdminBloc
           });
 
           await bookSlot({
-            apartmentId: adminApartment.id,
+            apartmentId: apartmentId,
             dateStr: dateStrToken,
             slotHours: slots,
             isAdminBlock: true

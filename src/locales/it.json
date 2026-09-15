@@ -161,7 +161,9 @@
     "live_status": "Stato in Tempo Reale",
     "next_reservations": "Prossime Prenotazioni",
     "mine": "Mio",
-    "no_bookings": "Nessuna prenotazione futura registrata nell'appartamento.",
+    "no_bookings": "Nessuna prenotazione futura registrata nell'appartamento."
+  },
+  "adminDashboard": {
     "btn_admin_block": "Blocca la Lavanderia",
     "admin_action": "Amministrazione",
     "block_laundry": "Blocca la lavanderia per tutto il condominio per manutenzione o riparazioni"

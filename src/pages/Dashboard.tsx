@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next';
 // Components & Hooks
 import CalendarGridTab from './CalendarGridTab';
 import MyApartmentTab from './MyApartmentTab';
-import MyDashboard from './UserDashboard';
+import DashboardBase from './DashboardBase';
 import UserSettings from './UserSettings';
 import { usePendingRequests, useApartmentMembers } from '../hooks/useApartments';
 import { checkIsAdminApartment, resolveCurrentUserId } from '../auth/authUtils';
@@ -63,7 +63,7 @@ function Dashboard() {
       <IonRouterOutlet>
         <Switch>
           <Route exact path={ROUTES.DASHBOARD_MAIN}>
-            <MyDashboard />
+            <DashboardBase />
           </Route>
           <Route exact path={ROUTES.DASHBOARD_CALENDAR}>
             <CalendarGridTab />
