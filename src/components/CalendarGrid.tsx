@@ -10,6 +10,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import BookingModal from '../bookingModals/BookingModal';
 import { getDate, getDateString, getLocalizedDaysOfWeek } from '../utils/datesGetter';
 import { useTranslation } from 'react-i18next';
+import { useIonViewDidEnter } from '@ionic/react';
 
 const dayColStyles = "w-24 shrink-0 px-4 py-3";
 
@@ -93,16 +94,27 @@ export default function CalendarGrid({ activeMonth, viewDate }: CalendarGridProp
 
   const rows = generateMonthRows(days, viewDate);
 
-  useEffect(() => {
-    if (todayRowRef.current) {
+  // Scroll to the "today" row when the component mounts and when the month changes
+  useIonViewDidEnter(() => {
+    if (!isLoading && todayRowRef.current) {
       todayRowRef.current.scrollIntoView({
-        behavior: 'smooth', 
-        block: 'start',    
+        behavior: 'smooth',
+        block: 'start',
       });
     }
-  }, [activeMonth]); 
+  });
 
-   const handleOpenModal = (dayNum: number, slotTimes: number[], slotInfo: AggregatedSlotInfo, slotTimeState: SlotTimeState, nextSlotAvailable: boolean, nextSlotTimes: number[] | null ) => {
+  // Keep a separate, tiny effect ONLY to handle layout scrolling when the month changes
+  useEffect(() => {
+    if (!isLoading && todayRowRef.current) {
+      todayRowRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+    }
+  }, [activeMonth, isLoading]);
+
+  const handleOpenModal = (dayNum: number, slotTimes: number[], slotInfo: AggregatedSlotInfo, slotTimeState: SlotTimeState, nextSlotAvailable: boolean, nextSlotTimes: number[] | null ) => {
     setSelectedSlot({ dateString: getDateString(dayNum, activeMonth, activeYear), slotTimes: slotTimes , slotTimeState:slotTimeState, nextSlotAvailable, nextSlotTimes });
     setSelectedBooking(slotInfo);
   };
