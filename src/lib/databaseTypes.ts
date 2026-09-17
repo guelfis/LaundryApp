@@ -33,3 +33,15 @@ type UseSearchHouseholdResult = ReturnType<typeof useSearchHousehold>;
 
 // 2. Extract the exact data type wrapped inside TanStack Query's result object
 export type HouseholdData = NonNullable<UseSearchHouseholdResult['data']>;
+
+export interface HouseholdSlot {
+  id: string;
+  start: number;
+  end: number;
+}
+
+export interface SlotsPolicy {
+  startHour: number;
+  endHour: number;
+  slots: HouseholdSlot[];
+}

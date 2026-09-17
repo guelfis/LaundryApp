@@ -1,3 +1,5 @@
+import { standardSlots } from '../constants/dates';
+import { HouseholdSlot, SlotsPolicy } from './databaseTypes';
 import { supabase } from './supabase';
 
 export async function getHouseholds() {
@@ -63,7 +65,11 @@ export async function createHouseholdAsLandlord({
     formatted_address: formattedAddress,
     target_lat: latitude,
     target_lng: longitude,
-    target_timezone: timezone
+    target_timezone: timezone,
+    // TODO: remove hardcoded values and make them dynamic based on user input or configuration
+    custom_start_hour: 7,
+    custom_end_hour: 22,
+    custom_slots: JSON.stringify(standardSlots)
   });
 
   if (error) throw error;
@@ -148,4 +154,23 @@ export async function getHouseholdMembers(householdId: string) {
 
   if (error) throw error;
   return data;
+}
+
+export async function getHouseholdSlotsPolicy(householdId: string): Promise<SlotsPolicy | null> {
+  const { data, error } = await supabase
+    .from('household')
+    .select('start_hour, end_hour, slots')
+    .eq('id', householdId)
+    .maybeSingle();
+
+  if (error) throw error;
+  if (!data) return null;
+
+  // 2. Unpack and map the database snake_case keys into your frontend camelCase structure
+  return {
+    startHour: data.start_hour,
+    endHour: data.end_hour,
+    // Explicitly cast the generic Json field to your clean runtime Slot array type
+    slots: data.slots as unknown as HouseholdSlot[]
+  };
 }

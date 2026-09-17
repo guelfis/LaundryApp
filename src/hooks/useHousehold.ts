@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { createHouseholdAsLandlord, deleteHousehold, getHouseholdById, getHouseholdMembers, getUserHouseholds, leaveHousehold, searchHouseholdByCoords, verifyHouseholdAccessById } from '../lib/households';
+import { createHouseholdAsLandlord, deleteHousehold, getHouseholdById, getHouseholdMembers, getHouseholdSlotsPolicy, getUserHouseholds, leaveHousehold, searchHouseholdByCoords, verifyHouseholdAccessById } from '../lib/households';
+import { SlotsPolicy } from '../lib/databaseTypes';
 
 interface CreateHouseholdVariables {
   name: string;
@@ -116,5 +117,13 @@ export function useHouseholdMembers(householdId: string | null, options?: { enab
     queryKey: ['household-members', householdId],
     queryFn: () => getHouseholdMembers(householdId!),
     enabled: options?.enabled ?? !!householdId, 
+  });
+}
+
+export function useHouseholdSlotsPolicy(householdId: string) {
+  return useQuery<SlotsPolicy | null>({
+    queryKey: ['householdPolicy', householdId],
+    queryFn: () => getHouseholdSlotsPolicy(householdId),
+    enabled: !!householdId,
   });
 }

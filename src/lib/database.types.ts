@@ -179,30 +179,39 @@ export type Database = {
           access_code: string
           address: string | null
           created_at: string | null
+          end_hour: number
           id: string
           latitude: number | null
           longitude: number | null
           name: string
+          slots: Json
+          start_hour: number
           timezone: string
         }
         Insert: {
           access_code: string
           address?: string | null
           created_at?: string | null
+          end_hour?: number
           id?: string
           latitude?: number | null
           longitude?: number | null
           name: string
+          slots?: Json
+          start_hour?: number
           timezone?: string
         }
         Update: {
           access_code?: string
           address?: string | null
           created_at?: string | null
+          end_hour?: number
           id?: string
           latitude?: number | null
           longitude?: number | null
           name?: string
+          slots?: Json
+          start_hour?: number
           timezone?: string
         }
         Relationships: []
@@ -407,6 +416,9 @@ export type Database = {
           }
       create_household_as_landlord: {
         Args: {
+          custom_end_hour: number
+          custom_slots: Json
+          custom_start_hour: number
           formatted_address: string
           household_name: string
           target_lat: number
