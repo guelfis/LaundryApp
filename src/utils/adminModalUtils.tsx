@@ -1,4 +1,4 @@
-import { Booking } from "../lib/databaseTypes";
+import { Booking, HouseholdSlot } from "../lib/databaseTypes";
 
 export interface DayBlockSummary {
   blockedSlots: number[][];
@@ -12,7 +12,7 @@ export type AdminBlocksMap = Record<string, DayBlockSummary>;
  */
 export function processAdminBlocks(
   bookings: Booking[],
-  masterSlots: number[][],
+  masterSlots: HouseholdSlot[],
   currentDateSource: Date = new Date() // Injectable for clean unit testing
 ) {
   const blocksMap: AdminBlocksMap = {};
@@ -25,8 +25,8 @@ export function processAdminBlocks(
   
   masterSlots.forEach(slot => {
     // If the slot end hour is less than or equal to the current hour, it's in the past
-    if (slot[1] <= currentHour) {
-      blocksMap[todayStr].blockedSlots.push(slot);
+    if (slot.end <= currentHour) {
+      blocksMap[todayStr].blockedSlots.push([slot.start, slot.end]);
     }
   });
 
@@ -84,11 +84,11 @@ export function calculateMaxEndDate(startDate: string, blocksMap: AdminBlocksMap
   return nextFullyBookedDate; // Pass this straight into the End Date picker's max attribute
 }
 
-export function toggleSlotInCollection(collection: number[][], slot: number[]): number[][] {
-  const exists = collection.some(s => s[0] === slot[0] && s[1] === slot[1]);
+export function toggleSlotInCollection(collection: HouseholdSlot[], slot: HouseholdSlot): HouseholdSlot[] {
+  const exists = collection.some(s => s.start === slot.start && s.end === slot.end);
   
   if (exists) {
-    return collection.filter(s => !(s[0] === slot[0] && s[1] === slot[1]));
+    return collection.filter(s => !(s.start === slot.start && s.end === slot.end));
   }
   
   return [...collection, slot];
@@ -105,17 +105,17 @@ export function toggleSlotInCollection(collection: number[][], slot: number[]): 
 export function getAvailableSlotsForDate(
   dateStr: string,
   adminBlocksMap: AdminBlocksMap,
-  masterSlots: number[][],
+  masterSlots: HouseholdSlot[],
   currentDateSource: Date = new Date()
-): number[][] {
+): HouseholdSlot[] {
   const todayStr = currentDateSource.toISOString().split('T')[0];
   const currentHour = currentDateSource.getHours();
 
   // 1. Filter out slots that have already finished if the day is today
   let slotsToFilter = masterSlots;
   if (dateStr === todayStr) {
-    // Changing slot[0] to slot[1] keeps the current active slot open for selection
-    slotsToFilter = masterSlots.filter(slot => slot[1] > currentHour);
+    // Changing slot.start to slot.end keeps the current active slot open for selection
+    slotsToFilter = masterSlots.filter(slot => slot.end > currentHour);
   }
 
   // 2. Filter out slots that the admin has already reserved
@@ -123,7 +123,7 @@ export function getAvailableSlotsForDate(
   if (!blockData) return slotsToFilter;
 
   return slotsToFilter.filter(slot => 
-    !blockData.blockedSlots.some(blocked => blocked[0] === slot[0] && blocked[1] === slot[1])
+    !blockData.blockedSlots.some(blocked => blocked[0] === slot.start && blocked[1] === slot.end)
   );
 }
 

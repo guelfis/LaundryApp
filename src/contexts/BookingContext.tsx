@@ -1,4 +1,5 @@
 import React, { createContext, useState } from 'react';
+import { SlotsPolicy } from '../lib/databaseTypes';
 
 interface BookingContextType {
   viewDate: Date;
@@ -7,6 +8,7 @@ interface BookingContextType {
   apartmentId: string;
   householdTimezone: string;
   isAdminMode: boolean;
+  slotsPolicy: SlotsPolicy;
 }
 
 export const BookingContext = createContext<BookingContextType | undefined>(undefined);
@@ -17,11 +19,12 @@ interface BookingProviderProps {
   apartmentId: string;
   householdTimezone: string;
   isAdminMode: boolean;
+  slotsPolicy: SlotsPolicy;
 }
 
 
 // BookingContext.tsx
-export const BookingProvider: React.FC<BookingProviderProps> = ({ children, householdId, apartmentId, householdTimezone, isAdminMode }) => {
+export const BookingProvider: React.FC<BookingProviderProps> = ({ children, householdId, apartmentId, householdTimezone, isAdminMode, slotsPolicy }) => {
   const [viewDate, setViewDate] = useState(new Date());
   
   return (
@@ -32,7 +35,8 @@ export const BookingProvider: React.FC<BookingProviderProps> = ({ children, hous
         householdId, 
         apartmentId, 
         householdTimezone, 
-        isAdminMode 
+        isAdminMode,
+        slotsPolicy
       }}>
       {children}
     </BookingContext.Provider>

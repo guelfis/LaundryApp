@@ -11,11 +11,10 @@ import Dashboard from '../pages/Dashboard';
 import ApartmentLogin from '../pages/ApartmentLogin';
 import HouseholdLogin from '../pages/HouseholdLogin';
 import CreateHousehold from '../pages/CreateHousehold';
-import { useGetUserHouselds } from '../hooks/useHousehold';
+import { useGetUserHouselds, useHouseholdSlotsPolicy } from '../hooks/useHousehold';
 import { BookingProvider } from '../contexts/BookingContext';
 import { ROUTES } from './routes.constants';
 import DeleteAccountStatus from '../pages/DeleteAccountStatus';
-
 
 interface RouterNavigationState {
   householdId?: string;
@@ -75,8 +74,10 @@ export default function AppRoutes() {
   // Read current context metadata values cleanly
   const cachedHousehold = userHouseholds.find(hh => hh.household_id === cachedHouseholdId);
   const householdTimezone = cachedHousehold ? cachedHousehold.household.timezone : 'Europe/Zurich';
+  const { data: slots, isLoading: isSlotsLoading } = useHouseholdSlotsPolicy(cachedHouseholdId || '');
 
-  if (authLoading || isLoadingHouseholds || isInitializing) {
+
+  if (authLoading || isLoadingHouseholds || isInitializing || isSlotsLoading) {
     return (
       <IonPage>
         <IonContent className="ion-padding ion-text-center" style={{ '--background': 'var(--ion-background-color)' }}>
@@ -123,6 +124,10 @@ export default function AppRoutes() {
             const activeHouseholdId = routerState?.householdId || cachedHouseholdId;
             const activeApartmentId = routerState?.apartmentId || cachedApartmentId;
             const activeAdminFlag = routerState?.isAdminModeActive ?? isAdminModeActive;
+            // it should never happen
+            if (!slots) {
+              return <Redirect to={ROUTES.HOUSEHOLD_SETUP} />;
+            }
 
             if (session && activeHouseholdId && activeApartmentId) {
               return (
@@ -131,6 +136,7 @@ export default function AppRoutes() {
                   apartmentId={activeApartmentId} 
                   householdTimezone={householdTimezone} 
                   isAdminMode={activeAdminFlag}
+                  slotsPolicy={slots}
                 >
                   <Dashboard />
                 </BookingProvider>

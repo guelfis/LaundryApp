@@ -1,9 +1,10 @@
+import { HouseholdSlot } from '../lib/databaseTypes';
 import { getSlotLabel } from '../utils/slotsUtils';
 
 interface SlotsGridProps {
-  slots: number[][];
-  selectedSlots: number[][];
-  onToggleSlot: (slot: number[]) => void;
+  slots: HouseholdSlot[];
+  selectedSlots: HouseholdSlot[];
+  onToggleSlot: (slot: HouseholdSlot) => void;
 }
 
 export default function SlotsGrid({ slots, selectedSlots, onToggleSlot }: SlotsGridProps) {
@@ -11,7 +12,7 @@ export default function SlotsGrid({ slots, selectedSlots, onToggleSlot }: SlotsG
     <div className="grid grid-cols-3 gap-2 mt-1">
       {slots.map((slot) => {
         const label = getSlotLabel(slot);
-        const isSelected = selectedSlots.some(s => s[0] === slot[0] && s[1] === slot[1]);
+        const isSelected = selectedSlots.some(s => s.start === slot.start && s.end === slot.end);
         return (
           <button
             key={`slot-btn-${label}`}

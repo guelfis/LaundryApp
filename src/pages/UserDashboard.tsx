@@ -2,11 +2,10 @@ import {  useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import SectionText from "../baseComponents/SectionText";
 import { useApartmentMembers, useApartments, usePendingRequests } from "../hooks/useApartments";
-import { useUpcomingBookings, useBookings } from "../hooks/useBookings";
+import { useUpcomingBookings, useBookings, useBookingFilters } from "../hooks/useBookings";
 import { checkIsAdminApartment } from "../auth/authUtils";
 import { Calendar } from "lucide-react"; 
 import { LoadingSpinner } from "../baseComponents/LoadingSpinner";
-import { SLOTS } from "../constants/dates";
 import { AggregatedSlotInfo, emptySlotFallback, getAggregatedBookingsMap, getCurrentSlotKey, getSlotKey, parseSlotRowToSelection, SlotTimeState } from "../utils/slotsUtils";
 import { SlotStatus } from "../constants/SlotStatus";
 import DashboardSlotCard from "../components/DashboardSlotCard";
@@ -14,6 +13,7 @@ import { getBuildingCurrentDateTime, getDate, getDateStringFromDate, getTimeSlot
 import SlotCard from "../baseComponents/SlotCard";
 
 import BookingModal from "../bookingModals/BookingModal";
+import { HouseholdSlot } from "../lib/databaseTypes";
 
 interface UserDashboardProps {
   householdId: string;
@@ -28,10 +28,10 @@ export default function UserDashboard({ householdId, householdTimezone, apartmen
   // Shared React calendar grid hooks variables
   const [selectedSlot, setSelectedSlot] = useState<{ 
     dateString: string, 
-    slotTimes: number[], 
+    slot: HouseholdSlot, 
     slotTimeState: SlotTimeState,
     nextSlotAvailable: boolean,
-    nextSlotTimes: number[] | null
+    nextSlot: HouseholdSlot | null
   } | null>(null);
   const [selectedBooking, setSelectedBooking] = useState<AggregatedSlotInfo>(emptySlotFallback());
 
@@ -49,6 +49,7 @@ export default function UserDashboard({ householdId, householdTimezone, apartmen
     return { morning, evening };
   }, []);
 
+  const {slotsPolicy} = useBookingFilters();
   const { data: members = [] } = useApartmentMembers(apartmentId, { enabled: !!apartmentId  });
   const { data: requests = [] } = usePendingRequests(apartmentId, { enabled: !!apartmentId  });
   const { data: bookings = [] } = useBookings(householdId, queryRange.morning, queryRange.evening);
@@ -71,7 +72,7 @@ export default function UserDashboard({ householdId, householdTimezone, apartmen
 
 
   const ongoingState = useMemo(() => {
-    const currentSlotKey = getCurrentSlotKey(SLOTS);
+    const currentSlotKey = getCurrentSlotKey(slotsPolicy.slots);
 
     if (!currentSlotKey) {
       return { bookingId: null, slotStatus: SlotStatus.AFTER_HOURS, slotKey: null, nextSlotAvailable: false, nextSlotConfig: null };
@@ -82,13 +83,13 @@ export default function UserDashboard({ householdId, householdTimezone, apartmen
     const bClock = getBuildingCurrentDateTime(householdTimezone);
 
     // 2. Identify the active slot array item index 
-    const currentSlotIndex = SLOTS.findIndex(([start, end]) => bClock.hour >= start && bClock.hour < end);
-    const nextSlotConfig = SLOTS[currentSlotIndex + 1] || null;
+    const currentSlotIndex = slotsPolicy.slots.findIndex(({ start, end }) => bClock.hour >= start && bClock.hour < end);
+    const nextSlotConfig = slotsPolicy.slots[currentSlotIndex + 1] || null;
     let isNextAvailable = false;
 
     // 3. Evaluate the subsequent consecutive slot properties
     if ( activeBooking.status === SlotStatus.AVAILABLE && nextSlotConfig) {
-      const nextSlotKey = getSlotKey(bClock.day, bClock.monthIndex, bClock.year, nextSlotConfig[0]);
+      const nextSlotKey = getSlotKey(bClock.day, bClock.monthIndex, bClock.year, nextSlotConfig.start);
       const nextSlotInfo = aggregatedBookingsMap[nextSlotKey] ?? emptySlotFallback();
       
       if (nextSlotInfo.status === SlotStatus.AVAILABLE) {
@@ -103,9 +104,9 @@ export default function UserDashboard({ householdId, householdTimezone, apartmen
       nextSlotAvailable: isNextAvailable,
       nextSlotConfig
     };
-  }, [aggregatedBookingsMap, householdTimezone]);
+  }, [aggregatedBookingsMap, householdTimezone, slotsPolicy.slots]);
 
-  const handleOpenModal = (slotInfo: AggregatedSlotInfo, nextAvailable = false, nextTimes: number[] | null = null) => {
+  const handleOpenModal = (slotInfo: AggregatedSlotInfo, nextAvailable = false, nextslot: HouseholdSlot| null = null) => {
     const parsedSelection = parseSlotRowToSelection(
       slotInfo.startTime, 
       slotInfo.endTime, 
@@ -116,7 +117,7 @@ export default function UserDashboard({ householdId, householdTimezone, apartmen
       setSelectedSlot({
         ...parsedSelection,
         nextSlotAvailable: nextAvailable,
-        nextSlotTimes: nextTimes
+        nextSlot: nextslot
       });
       setSelectedBooking(slotInfo);
     }
@@ -161,12 +162,12 @@ export default function UserDashboard({ householdId, householdTimezone, apartmen
                 
                 // 1. REUSE THE UNIFIED WALL-CLOCK HELPER 
                 const bClock = getBuildingCurrentDateTime(householdTimezone);
-                const currentSlotConfig = SLOTS.find(([start, end]) => bClock.hour >= start && bClock.hour < end);
+                const currentSlotConfig = slotsPolicy.slots.find(({ start, end }) => bClock.hour >= start && bClock.hour < end);
                 
                 if (currentSlotConfig) {
                   // 2. Generate pristine date boundaries without parsing discrepancies 
-                  const fallbackStart = new Date(bClock.year, bClock.monthIndex, bClock.day, currentSlotConfig[0]);
-                  const fallbackEnd = new Date(bClock.year, bClock.monthIndex, bClock.day, currentSlotConfig[1]);
+                  const fallbackStart = new Date(bClock.year, bClock.monthIndex, bClock.day, currentSlotConfig.start);
+                  const fallbackEnd = new Date(bClock.year, bClock.monthIndex, bClock.day, currentSlotConfig.end);
                   
                   bookingInfo.startTime = fallbackStart.toISOString();
                   bookingInfo.endTime = fallbackEnd.toISOString();
@@ -216,7 +217,7 @@ export default function UserDashboard({ householdId, householdTimezone, apartmen
             selectedSlot={selectedSlot}
             currentSlot={selectedBooking}
             nextSlotAvailable={selectedSlot.nextSlotAvailable}
-            nextSlotTimes={selectedSlot.nextSlotTimes}
+            nextSlot={selectedSlot.nextSlot}
           />
         )}
       

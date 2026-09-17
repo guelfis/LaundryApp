@@ -10,14 +10,15 @@ import { useState, useEffect } from 'react';
 import { SlotBadge } from '../components/SlotBadge';
 import { SlotSpecsCard } from '../components/SlotSpecCard';
 import SuggestionToggle from '../components/SuggestionToggle';
+import { HouseholdSlot } from '../lib/databaseTypes';
 
 interface BookingModalProps {
   isOpen: boolean;
   onClose: () => void;
-  selectedSlot: { dateString: string; slotTimes: number[], slotTimeState: SlotTimeState; } | null;
+  selectedSlot: { dateString: string; slot: HouseholdSlot, slotTimeState: SlotTimeState; } | null;
   currentSlot: AggregatedSlotInfo;
   nextSlotAvailable?: boolean; // Pass true from the parent grid if the next chronological slot row is empty
-  nextSlotTimes?: number[] | null;   // e.g., [10, 11]
+  nextSlot?: HouseholdSlot| null;   // e.g., [10, 11]
 }
 
 export default function BookingModal({ 
@@ -26,7 +27,7 @@ export default function BookingModal({
   selectedSlot, 
   currentSlot,
   nextSlotAvailable = false,
-  nextSlotTimes
+  nextSlot
 }: BookingModalProps) {
 
   const { t } = useTranslation();
@@ -46,16 +47,16 @@ export default function BookingModal({
   const handleBook = async () => {
   if (!apartmentId) return;
   try {
-    const finalSlotTimes = bookConsecutive && nextSlotTimes 
-      ? [...selectedSlot.slotTimes, ...nextSlotTimes]
-      : selectedSlot.slotTimes;
+    const finalSlot = bookConsecutive && nextSlot
+      ? [selectedSlot.slot, nextSlot]
+      : [selectedSlot.slot];
 
     const slots: Slot[] = [];
 
     // 2. Loop through the flat array in pairs of 2 to extract [start, end] for each atomic slot
-    for (let i = 0; i < finalSlotTimes.length; i += 2) {
-      slots.push({ startHour: finalSlotTimes[i], endHour: finalSlotTimes[i + 1] });
-    }
+    finalSlot.forEach((slot) => {
+      slots.push({ startHour: slot.start, endHour: slot.end });
+    });
 
     // 3. Fire the mutation with matching parallel arrays
     // Single booking passes: startHour:, endHour: [10]
@@ -87,9 +88,9 @@ export default function BookingModal({
     }
   };
   
-  const displaySlotLabel = bookConsecutive && nextSlotTimes
-    ? `${selectedSlot.slotTimes[0]} - ${nextSlotTimes[nextSlotTimes.length - 1]}`
-    : getSlotLabel(selectedSlot.slotTimes);
+  const displaySlotLabel = bookConsecutive && nextSlot
+    ? `${selectedSlot.slot.start} - ${nextSlot.end}`
+    : getSlotLabel(selectedSlot.slot);
 
   const isYours = currentSlot.status === SlotStatus.BOOKED_BY_USER;
   const isBooked = currentSlot.status === SlotStatus.BOOKED;
@@ -112,11 +113,11 @@ export default function BookingModal({
         <SlotSpecsCard dateString={selectedSlot.dateString} slotLabel={displaySlotLabel} />
 
         {/* CONSECUTIVE SUGGESTION ENGINE: Renders only if slot is empty and next one is free */}
-        {currentSlot.status === SlotStatus.AVAILABLE && nextSlotAvailable && nextSlotTimes && selectedSlot.slotTimeState === 'future' && !isAdminMode && (
+        {currentSlot.status === SlotStatus.AVAILABLE && nextSlotAvailable && nextSlot && selectedSlot.slotTimeState === 'future' && !isAdminMode && (
           <SuggestionToggle
             checked={bookConsecutive}
             onToggle={setBookConsecutive}
-            title={`${t('slotModal.suggest_consecutive', 'Book Consecutive Slot')} (${getSlotLabel(nextSlotTimes)})`}
+            title={`${t('slotModal.suggest_consecutive', 'Book Consecutive Slot')} (${getSlotLabel(nextSlot)})`}
             description={t('slotModal.suggest_consecutive_desc', 'Book this slot as well')}
           />
         )}

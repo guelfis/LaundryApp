@@ -2,7 +2,6 @@ import { LoadingSpinner } from '../baseComponents/LoadingSpinner';
 import { SlotStatus } from '../constants/SlotStatus';
 import { cn } from '../utils/cn';
 import { useApartments } from '../hooks/useApartments';
-import { SLOTS } from '../constants/dates';
 import { AggregatedSlotInfo, emptySlotFallback, getAggregatedBookingsMap, getSlotKey, getSlotLabel, getSlotTimeState, SlotTimeState } from '../utils/slotsUtils';
 import { generateMonthRows } from '../utils/calendarUtils';
 import { useBookingFilters, useMonthBookings } from '../hooks/useBookings';
@@ -11,6 +10,7 @@ import BookingModal from '../bookingModals/BookingModal';
 import { getDate, getDateString, getLocalizedDaysOfWeek } from '../utils/datesGetter';
 import { useTranslation } from 'react-i18next';
 import { useIonViewDidEnter } from '@ionic/react';
+import { HouseholdSlot } from '../lib/databaseTypes';
 
 const dayColStyles = "w-24 shrink-0 px-4 py-3";
 
@@ -75,11 +75,11 @@ export default function CalendarGrid({ activeMonth, viewDate }: CalendarGridProp
   const { t } = useTranslation();
   const days = getLocalizedDaysOfWeek();
   const todayRowRef = useRef<HTMLDivElement | null>(null);
-  const [selectedSlot, setSelectedSlot] = useState<{ dateString: string, slotTimes: number[], slotTimeState: SlotTimeState, nextSlotAvailable: boolean, nextSlotTimes: number[] | null } | null>(null);
+  const [selectedSlot, setSelectedSlot] = useState<{ dateString: string, slot: HouseholdSlot, slotTimeState: SlotTimeState, nextSlotAvailable: boolean, nextSlot: HouseholdSlot | null } | null>(null);
   
   const [selectedBooking, setSelectedBooking] = useState<AggregatedSlotInfo>(emptySlotFallback);
 
-  const { householdId, apartmentId } = useBookingFilters();
+  const { householdId, apartmentId, slotsPolicy } = useBookingFilters();
   const activeYear = viewDate.getFullYear();
   const { data: bookings = [], isLoading } = useMonthBookings(householdId, viewDate); 
   const { data: apartments = [] } = useApartments(householdId);
@@ -114,8 +114,8 @@ export default function CalendarGrid({ activeMonth, viewDate }: CalendarGridProp
     }
   }, [activeMonth, isLoading]);
 
-  const handleOpenModal = (dayNum: number, slotTimes: number[], slotInfo: AggregatedSlotInfo, slotTimeState: SlotTimeState, nextSlotAvailable: boolean, nextSlotTimes: number[] | null ) => {
-    setSelectedSlot({ dateString: getDateString(dayNum, activeMonth, activeYear), slotTimes: slotTimes , slotTimeState:slotTimeState, nextSlotAvailable, nextSlotTimes });
+  const handleOpenModal = (dayNum: number, slot: HouseholdSlot, slotInfo: AggregatedSlotInfo, slotTimeState: SlotTimeState, nextSlotAvailable: boolean, nextSlot: HouseholdSlot | null ) => {
+    setSelectedSlot({ dateString: getDateString(dayNum, activeMonth, activeYear), slot , slotTimeState:slotTimeState, nextSlotAvailable, nextSlot });
     setSelectedBooking(slotInfo);
   };
 
@@ -128,7 +128,7 @@ export default function CalendarGrid({ activeMonth, viewDate }: CalendarGridProp
           <div className={cn(dayColStyles, "text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider border-r border-gray-200 dark:border-slate-800")}>
             {t('calendarGrid.day')}
           </div>
-          {SLOTS.map((slot) => {
+          {slotsPolicy.slots.map((slot) => {
             const label = getSlotLabel(slot);
             return (
               <div key={label} className="flex-1 min-w-fit whitespace-nowrap px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider text-center border-r border-gray-200 last:border-r-0">
@@ -167,29 +167,27 @@ export default function CalendarGrid({ activeMonth, viewDate }: CalendarGridProp
               >
                 <DayCell dayName={dayName} dayNum={dayNum} isToday={isToday} dayOfWeekIndex={dayOfWeekIndex} />
                 
-                {SLOTS.map((slot, col) => {
-                  const slotKey = getSlotKey(dayNum, activeMonth, activeYear, slot[0]);
+                {slotsPolicy.slots.map((slot, col) => {
+                  const slotKey = getSlotKey(dayNum, activeMonth, activeYear, slot.start);
                   const slotInfo = aggregatedBookingsMap[slotKey] ?? emptySlotFallback();
-                  const startTime = getDate(dayNum, activeMonth, activeYear, slot[0]);
-                  const endTime = getDate(dayNum, activeMonth, activeYear, slot[1]);
+                  const startTime = getDate(dayNum, activeMonth, activeYear, slot.start);
+                  const endTime = getDate(dayNum, activeMonth, activeYear, slot.end);
                   const slotTimeState = getSlotTimeState(startTime, endTime);
                   const isCurrentTimeSlot = slotTimeState === 'live';
                   
                   // compute availability for the next chronological slot only if the current slot is free 
                   const nextSlotIndex = col + 1;
-                  const nextSlotConfig = SLOTS[nextSlotIndex]; // Verifies if a subsequent daily slot column configuration exists
+                  const nextSlotConfig = slotsPolicy.slots[nextSlotIndex]; // Verifies if a subsequent daily slot column configuration exists
                   
                   let isNextAvailable = false;
-                  let nextSlotTimesArray: number[] | null = null;
 
                   // Calculate data availability targets only if not in Admin Mode and current slot is free
                   if (slotInfo.status === SlotStatus.AVAILABLE && nextSlotConfig) {
-                    const nextSlotLookupKey = getSlotKey(dayNum, activeMonth, activeYear, nextSlotConfig[0]);
+                    const nextSlotLookupKey = getSlotKey(dayNum, activeMonth, activeYear, nextSlotConfig.start);
                     const nextSlotInfo = aggregatedBookingsMap[nextSlotLookupKey] ?? emptySlotFallback();
                     
                     if (nextSlotInfo.status === SlotStatus.AVAILABLE) {
                       isNextAvailable = true;
-                      nextSlotTimesArray = nextSlotConfig;
                     }
                   }
 
@@ -198,7 +196,7 @@ export default function CalendarGrid({ activeMonth, viewDate }: CalendarGridProp
                       key={col} 
                       slotStatus={slotInfo.status}
                       isCurrentTimeSlot={isCurrentTimeSlot}
-                      onClick={() => handleOpenModal(dayNum, slot, slotInfo, slotTimeState, isNextAvailable, nextSlotTimesArray)}
+                      onClick={() => handleOpenModal(dayNum, slot, slotInfo, slotTimeState, isNextAvailable, nextSlotConfig)}
                     />
                   );
                 })}
@@ -216,7 +214,7 @@ export default function CalendarGrid({ activeMonth, viewDate }: CalendarGridProp
           selectedSlot={selectedSlot}
           currentSlot={selectedBooking}
           nextSlotAvailable={selectedSlot.nextSlotAvailable}
-          nextSlotTimes={selectedSlot.nextSlotTimes}
+          nextSlot={selectedSlot.nextSlot}
         />
       )}
     </div>

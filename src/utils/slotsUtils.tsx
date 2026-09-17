@@ -1,5 +1,5 @@
 import { SlotStatus } from '../constants/SlotStatus';
-import { Booking } from '../lib/databaseTypes';
+import { Booking, HouseholdSlot, SlotsPolicy } from '../lib/databaseTypes';
 import i18n from '../locales/i18n';
 import { getBuildingHour, getDateString } from './datesGetter';
 import { getHouseholdTimezone } from './getters';
@@ -13,7 +13,7 @@ export const getSlotKey = (day: number, month: number, year: number, slotStartHo
  * Resolves the dynamic localized unique slotKey identifier for the current moment based on the building's clock.
  * Returns null if the current hour falls outside of operational boundaries (e.g., at night).
  */
-export const getCurrentSlotKey = (slots: number[][]): string | null => {
+export const getCurrentSlotKey = (slots: HouseholdSlot[]): string | null => {
   const today = new Date();
   const timezone = getHouseholdTimezone();
   
@@ -30,17 +30,17 @@ export const getCurrentSlotKey = (slots: number[][]): string | null => {
   const currentBuildingHour = parseInt(parts.find(p => p.type === 'hour')!.value, 10);
   
   // 2. Scan your static source operational metrics using the building's current hour
-  const activeSlot = slots.find(([start, end]) => currentBuildingHour >= start && currentBuildingHour < end);
+  const activeSlot = slots.find((slot) => currentBuildingHour >= slot.start && currentBuildingHour < slot.end);
   
   // Safety Fallback: Exit cleanly if opened outside operational columns (e.g., past 22:00 building time)
   if (!activeSlot) return null;
 
   // 3. Return the clean synchronized layout lookup key token string
-  return getSlotKey(dayNum, monthIndex, year, activeSlot[0]);
+  return getSlotKey(dayNum, monthIndex, year, activeSlot.start);
 };
 
-export const getSlotLabel = (interval: number[]): string => {
-    return `${interval[0]} - ${interval[1]}`;
+export const getSlotLabel = (interval: HouseholdSlot): string => {
+    return `${interval.start} - ${interval.end}`;
 };
 
 export type SlotTimeState = 'past' | 'live' | 'future';
@@ -191,7 +191,7 @@ export function getSlotTimeState(startTime: Date, endTime: Date): SlotTimeState 
 
 export interface ParsedSlotSelection {
   dateString: string;
-  slotTimes: number[];
+  slot: HouseholdSlot;
   slotTimeState: SlotTimeState;
 }
 
@@ -231,7 +231,70 @@ export function parseSlotRowToSelection(
 
   return {
     dateString: getDateString(dayNum, activeMonth, year),
-    slotTimes: [startHour, endHour],
+    slot: { id: '', start: startHour, end: endHour },
     slotTimeState: getSlotTimeState(startDate, endDate)
   };
+}
+
+/**
+ * Checks if two timestamps are consecutive, skipping over unreservable night gaps.
+ */
+function isConsecutiveSlot(endIsoString: string, nextStartIsoString: string, householdSlots: SlotsPolicy): boolean {
+  if (endIsoString === nextStartIsoString) return true;
+
+  const endDate = new Date(endIsoString);
+  const nextDate = new Date(nextStartIsoString);
+
+  const openingHour = householdSlots.startHour; // 7
+  const closingHour = householdSlots.endHour; // 22
+
+  // If the previous block finishes at the facility closing hour (22:00)
+  if (endDate.getHours() === closingHour) {
+    const expectedNextMorning = new Date(endDate.getTime());
+    expectedNextMorning.setDate(expectedNextMorning.getDate() + 1);
+    expectedNextMorning.setHours(openingHour, 0, 0, 0);
+
+    // If the next slot targets exactly the morning opening time, bridge them
+    return nextDate.getTime() === expectedNextMorning.getTime();
+  }
+
+  return false;
+}
+
+/**
+ * Aggregates individual shifts into continuous blocks, bridging over night gaps.
+ */
+export function aggregateAdminMaintenanceBlocks(bookings: Booking[], householdSlots: SlotsPolicy): Booking[] {
+  
+  if (bookings.length === 0) return [];
+  // 2. Arrange chronologically by start window boundaries
+  const sorted = [...bookings].sort(
+    (a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime()
+  );
+
+  const aggregatedBlocks: Booking[] = [];
+  let currentBlock = { ...sorted[0] };
+
+  for (let i = 1; i < sorted.length; i++) {
+    const nextBooking = sorted[i];
+
+    const currentEndTS = new Date(currentBlock.end_time).getTime();
+    const nextStartTS = new Date(nextBooking.start_time).getTime();
+
+    // 3. Connect if there is a timestamp overlap or a valid night operational gap
+    if (nextStartTS <= currentEndTS || isConsecutiveSlot(currentBlock.end_time, nextBooking.start_time, householdSlots)) {
+      const nextEndTS = new Date(nextBooking.end_time).getTime();
+      if (nextEndTS > currentEndTS) {
+        currentBlock.end_time = nextBooking.end_time;
+      }
+    } else {
+      // Clean logical daytime gap discovered -> close and save preceding group
+      aggregatedBlocks.push(currentBlock);
+      currentBlock = { ...nextBooking };
+    }
+  }
+
+  // Push final open structural element
+  aggregatedBlocks.push(currentBlock);
+  return aggregatedBlocks;
 }

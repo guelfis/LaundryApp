@@ -1,15 +1,14 @@
 import { IonToast, IonDatetime, IonModal } from '@ionic/react';
 import BottomModal from '../baseComponents/BottomModal';
 import ModalButton from '../baseComponents/ModalButton';
-import { SLOTS } from '../constants/dates';
-import { Slot, useBookingActions } from '../hooks/useBookings';
+import { Slot, useBookingActions, useBookingFilters } from '../hooks/useBookings';
 import { useTranslation } from 'react-i18next';
 import { useState, useEffect, useMemo } from 'react';
 import SuggestionToggle from '../components/SuggestionToggle';
 import SlotsGrid from '../components/SlotsGrid';
 import NotesArea from '../components/NotesArea';
 import { DatePicker } from '../baseComponents/DatePicker';
-import { Booking } from '../lib/databaseTypes';
+import { Booking, HouseholdSlot } from '../lib/databaseTypes';
 import { calculateMaxEndDate, getAvailableSlotsForDate, getFirstAvailableStartDate, processAdminBlocks, toggleSlotInCollection } from '../utils/adminModalUtils';
 
 interface AdminBlockModalProps {
@@ -21,14 +20,15 @@ interface AdminBlockModalProps {
 
 export default function AdminBlockModal({ isOpen, onClose, bookings, apartmentId }: AdminBlockModalProps) {
   const { t } = useTranslation();
+  const { slotsPolicy } = useBookingFilters();
   const { bookSlot, isBooking } = useBookingActions();
 
   // TODO: it uses upcoming bookings to generate available slots, but it doesn't currently take into account the current slot
   
   //  Generate the dictionary of admin blocks for quick lookup and validation
   const adminBlocksMap = useMemo(() => {
-    return processAdminBlocks(bookings, SLOTS);
-  }, [bookings]);
+    return processAdminBlocks(bookings, slotsPolicy.slots);
+  }, [bookings, slotsPolicy]);
 
   
   // Unified visual interaction states matching your grid template
@@ -53,16 +53,16 @@ export default function AdminBlockModal({ isOpen, onClose, bookings, apartmentId
   };
 
   const availableSlotsForStartDay = useMemo(() => {
-    return getAvailableSlotsForDate(startDate, adminBlocksMap, SLOTS);
-  }, [startDate, adminBlocksMap]);
+    return getAvailableSlotsForDate(startDate, adminBlocksMap, slotsPolicy.slots);
+  }, [startDate, adminBlocksMap, slotsPolicy.slots]);
 
   const availableSlotsForEndDay = useMemo(() => {
-    return getAvailableSlotsForDate(endDate, adminBlocksMap, SLOTS);
-  }, [endDate, adminBlocksMap]);
+    return getAvailableSlotsForDate(endDate, adminBlocksMap, slotsPolicy.slots);
+  }, [endDate, adminBlocksMap, slotsPolicy.slots]);
 
   // Converted to arrays to support picking multiple slots for a single day!
-  const [selectedStartSlots, setSelectedStartSlots] = useState<number[][]>([]);
-  const [selectedEndSlots, setSelectedEndSlots] = useState<number[][]>([]);
+  const [selectedStartSlots, setSelectedStartSlots] = useState<HouseholdSlot[]>([]);
+  const [selectedEndSlots, setSelectedEndSlots] = useState<HouseholdSlot[]>([]);
   const [notes, setNotes] = useState<string>('');
 
   const [toastMessage, setToastMessage] = useState<string>('');
@@ -78,11 +78,11 @@ export default function AdminBlockModal({ isOpen, onClose, bookings, apartmentId
   }, [isOpen]);
 
   // Helper toggle to add or remove slots from the administrative array list
-  const toggleStartSlotSelection = (slot: number[]) => {
+  const toggleStartSlotSelection = (slot: HouseholdSlot) => {
     setSelectedStartSlots(prev => toggleSlotInCollection(prev, slot));
   };
 
-  const toggleEndSlotSelection = (slot: number[]) => {
+  const toggleEndSlotSelection = (slot: HouseholdSlot) => {
     setSelectedEndSlots(prev => toggleSlotInCollection(prev, slot));
   };
 
@@ -117,7 +117,7 @@ export default function AdminBlockModal({ isOpen, onClose, bookings, apartmentId
       if (!isMultiDay) {
         // CASE A: Single day block -> Push all selected atomic slots into parallel parameter arrays
         selectedStartSlots.forEach(slot => {
-          slots.push({ startHour: slot[0], endHour: slot[1] });
+          slots.push({ startHour: slot.start, endHour: slot.end });
         });
 
         await bookSlot({
@@ -136,8 +136,8 @@ export default function AdminBlockModal({ isOpen, onClose, bookings, apartmentId
         while (currentDay <= finalDay) {
           const dateStrToken = currentDay.toISOString().split('T')[0];
 
-          SLOTS.forEach((slotConfig) => {
-            slots.push({ startHour: slotConfig[0], endHour: slotConfig[1] });
+          slotsPolicy.slots.forEach((slotConfig) => {
+            slots.push({ startHour: slotConfig.start, endHour: slotConfig.end });
           });
 
           await bookSlot({
