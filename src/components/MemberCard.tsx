@@ -8,7 +8,6 @@ interface MemberCardProps {
   onClick?: () => void;
 }
 
-// 
 export const MemberCard: React.FC<MemberCardProps> = ({
   avatarContent,
   avatarBgClass,
@@ -18,15 +17,15 @@ export const MemberCard: React.FC<MemberCardProps> = ({
   isClickable,
   onClick,
 }) => {
-  const RowComponent = isClickable ? 'button' : 'div';
-
   return (
-    <RowComponent
-      {...(isClickable ? { onClick, type: 'button' } : {})}
+    <button
+      type="button"
+      disabled={!isClickable}
+      onClick={isClickable ? onClick : undefined}
       className={`flex items-center justify-between py-3 border-b border-gray-200 dark:border-slate-800 last:border-b-0 min-h-[64px] w-full text-left transition-all ${
         isClickable
-          ? 'active:scale-[0.99] active:bg-gray-50/50 dark:active:bg-slate-800/30 px-2 -mx-2 rounded-xl'
-          : ''
+          ? 'active:scale-[0.99] active:bg-gray-50/50 dark:active:bg-slate-800/30 px-2 -mx-2 rounded-xl cursor-pointer'
+          : 'cursor-default'
       }`}
     >
       {/* Left Box: Avatar + Info */}
@@ -44,7 +43,6 @@ export const MemberCard: React.FC<MemberCardProps> = ({
           </span>
         </div>
       </div>
-
-    </RowComponent>
+    </button>
   );
 };
