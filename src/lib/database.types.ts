@@ -388,6 +388,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      assert_apartment_membership: {
+        Args: { authenticated_user_id: string; target_apartment_id: string }
+        Returns: undefined
+      }
       assign_user_to_apartment: {
         Args: { h_code: string; target_apt_id: string }
         Returns: undefined
