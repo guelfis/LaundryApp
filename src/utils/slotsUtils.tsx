@@ -238,24 +238,52 @@ export function parseSlotRowToSelection(
 
 /**
  * Checks if two timestamps are consecutive, skipping over unreservable night gaps.
+ * Uses the building timezone to remain perfectly consistent with the rest of the application.
  */
-function isConsecutiveSlot(endIsoString: string, nextStartIsoString: string, householdSlots: SlotsPolicy): boolean {
+function isConsecutiveSlot(
+  endIsoString: string, 
+  nextStartIsoString: string, 
+  householdSlots: SlotsPolicy
+): boolean {
   if (endIsoString === nextStartIsoString) return true;
 
   const endDate = new Date(endIsoString);
   const nextDate = new Date(nextStartIsoString);
+  
+  const timezone = getHouseholdTimezone();
+  const openingHour = householdSlots.startHour; 
+  const closingHour = householdSlots.endHour; 
 
-  const openingHour = householdSlots.startHour; // 7
-  const closingHour = householdSlots.endHour; // 22
+  // Extract wall-clock hour matching the building's physical location
+  const formatter = new Intl.DateTimeFormat('en-US', {
+    timeZone: timezone,
+    hour: 'numeric',
+    hour12: false
+  });
 
-  // If the previous block finishes at the facility closing hour (22:00)
-  if (endDate.getHours() === closingHour) {
+  const endBuildingHour = parseInt(formatter.format(endDate), 10);
+
+  // If the previous block finishes exactly at the facility closing hour
+  if (endBuildingHour === closingHour) {
+    // 1. Calculate when the next opening window should be in the building's timezone
     const expectedNextMorning = new Date(endDate.getTime());
-    expectedNextMorning.setDate(expectedNextMorning.getDate() + 1);
-    expectedNextMorning.setHours(openingHour, 0, 0, 0);
+    
+    // Move 1 day forward safely using absolute milliseconds to keep the exact hour position
+    expectedNextMorning.setTime(expectedNextMorning.getTime() + 24 * 60 * 60 * 1000);
+    
+    // 2. Validate if the next booking matches this expected next morning slot exactly
+    const nextParts = new Intl.DateTimeFormat('en-US', {
+      timeZone: timezone,
+      year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', hour12: false
+    }).formatToParts(nextDate);
 
-    // If the next slot targets exactly the morning opening time, bridge them
-    return nextDate.getTime() === expectedNextMorning.getTime();
+    const nextBuildingHour = parseInt(nextParts.find(p => p.type === 'hour')!.value, 10);
+    
+    // Compare dates components via simple strings to avoid local runtime engine discrepancies
+    const expectedDateStr = new Intl.DateTimeFormat('en-US', { timeZone: timezone, year: 'numeric', month: 'numeric', day: 'numeric' }).format(expectedNextMorning);
+    const nextDateStr = new Intl.DateTimeFormat('en-US', { timeZone: timezone, year: 'numeric', month: 'numeric', day: 'numeric' }).format(nextDate);
+
+    return nextBuildingHour === openingHour && expectedDateStr === nextDateStr;
   }
 
   return false;
@@ -265,15 +293,16 @@ function isConsecutiveSlot(endIsoString: string, nextStartIsoString: string, hou
  * Aggregates individual shifts into continuous blocks, bridging over night gaps.
  */
 export function aggregateAdminMaintenanceBlocks(bookings: Booking[], householdSlots: SlotsPolicy): Booking[] {
-  
   if (bookings.length === 0) return [];
-  // 2. Arrange chronologically by start window boundaries
+  
+  // Arrange chronologically by absolute timeline positions
   const sorted = [...bookings].sort(
     (a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime()
   );
 
   const aggregatedBlocks: Booking[] = [];
-  let currentBlock = { ...sorted[0] };
+  // Deep copy properties to ensure zero shared side-effects down the road
+  let currentBlock = JSON.parse(JSON.stringify(sorted[0]));
 
   for (let i = 1; i < sorted.length; i++) {
     const nextBooking = sorted[i];
@@ -281,7 +310,7 @@ export function aggregateAdminMaintenanceBlocks(bookings: Booking[], householdSl
     const currentEndTS = new Date(currentBlock.end_time).getTime();
     const nextStartTS = new Date(nextBooking.start_time).getTime();
 
-    // 3. Connect if there is a timestamp overlap or a valid night operational gap
+    // Connect if there is a timestamp overlap or a valid building night operational gap
     if (nextStartTS <= currentEndTS || isConsecutiveSlot(currentBlock.end_time, nextBooking.start_time, householdSlots)) {
       const nextEndTS = new Date(nextBooking.end_time).getTime();
       if (nextEndTS > currentEndTS) {
@@ -290,11 +319,10 @@ export function aggregateAdminMaintenanceBlocks(bookings: Booking[], householdSl
     } else {
       // Clean logical daytime gap discovered -> close and save preceding group
       aggregatedBlocks.push(currentBlock);
-      currentBlock = { ...nextBooking };
+      currentBlock = JSON.parse(JSON.stringify(nextBooking));
     }
   }
 
-  // Push final open structural element
   aggregatedBlocks.push(currentBlock);
   return aggregatedBlocks;
 }

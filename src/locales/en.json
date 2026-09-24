@@ -165,9 +165,11 @@
     "no_bookings": "No upcoming apartment bookings logged yet."
   },
   "adminDashboard": {
-    "btn_admin_block": "Block the laudry",
+    "btn_admin_block": "Block the laundry",
     "admin_action": "Administration",
-    "block_laundry": "Block the laundry for the entire building for maintanance of repairs"
+    "block_laundry": "Block the laundry for the entire building for maintenance of repairs",
+    "next_blocks": "Next Blocks",
+    "no_active_maintenance": "No scheduled maintenance blocks"
   },
   "dashboardSlotCard": {
     "laundry_free": "Laundry Room is Free",

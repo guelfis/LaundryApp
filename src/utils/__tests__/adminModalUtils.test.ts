@@ -7,12 +7,13 @@ import {
   AdminBlocksMap
 } from '../adminModalUtils';
 import { Booking } from '../../lib/databaseTypes';
+import { standardSlots } from '../../constants/dates';
 
 describe('Admin Booking Utility Suite', () => {
   const ADMIN_ID = 'admin-uuid-123';
   
   // Custom master slots matching your layout boundaries
-  const MASTER_SLOTS = [[7, 12], [12, 17], [17, 22]]; 
+  const MASTER_SLOTS = [[7, 12], [12, 17], [17, 22]];
 
   // Factory helper to quickly build full valid Booking objects for testing assertions
   const createMockBooking = (fields: Partial<Booking>): Booking => ({
@@ -37,7 +38,7 @@ describe('Admin Booking Utility Suite', () => {
         createMockBooking({ start_time: '2026-08-25T07:00:00Z', end_time: '2026-08-25T12:00:00Z', apartment_id: ADMIN_ID }), // Partial block
       ];
 
-      const result = processAdminBlocks(mockBookings, MASTER_SLOTS, new Date('2026-08-24T14:30:00Z'));
+      const result = processAdminBlocks(mockBookings, standardSlots, new Date('2026-08-24T14:30:00Z'));
 
       // August 24 has 3 admin blocks, matching total master slot capacity
       expect(result['2026-08-24'].isFullyBooked).toBe(true);
@@ -76,15 +77,15 @@ describe('Admin Booking Utility Suite', () => {
 
     it('should filter out passed slots but allow the current ongoing slot when date is today', () => {
       const mockBlocksMap: AdminBlocksMap = {};
-      const result = getAvailableSlotsForDate('2026-08-24', mockBlocksMap, MASTER_SLOTS, mockAnchorTime);
+      const result = getAvailableSlotsForDate('2026-08-24', mockBlocksMap, standardSlots, mockAnchorTime);
 
       // Current hour is 14. 
       // [7, 12] should be hidden (already completed)
       // [12, 17] should remain visible (ends at 17, which is > 14)
       // [17, 22] should remain visible (future slot)
-      expect(result).not.toContainEqual([7, 12]);
-      expect(result).toContainEqual([12, 17]);
-      expect(result).toContainEqual([17, 22]);
+      expect(result).not.toContainEqual({ id: "morning", start: 7, end: 12 });
+      expect(result).toContainEqual({ id: "afternoon", start: 12, end: 17 });
+      expect(result).toContainEqual({ id: "evening", start: 17, end: 22 });
     });
 
     it('should allow all non-blocked slots for future dates regardless of current time', () => {
@@ -92,11 +93,11 @@ describe('Admin Booking Utility Suite', () => {
         '2026-08-25': { blockedSlots: [[7, 12]], isFullyBooked: false }
       };
       
-      const result = getAvailableSlotsForDate('2026-08-25', mockBlocksMap, MASTER_SLOTS, mockAnchorTime);
+      const result = getAvailableSlotsForDate('2026-08-25', mockBlocksMap, standardSlots, mockAnchorTime);
 
-      expect(result).not.toContainEqual([7, 12]); // Explicitly blocked by admin profile data
-      expect(result).toContainEqual([12, 17]);    // Free future slot option
-      expect(result).toContainEqual([17, 22]);    // Free future slot option
+      expect(result).not.toContainEqual({ id: "morning", start: 7, end: 12 }); // Explicitly blocked by admin profile data
+      expect(result).toContainEqual({ id: "afternoon", start: 12, end: 17 });    // Free future slot option
+      expect(result).toContainEqual({ id: "evening", start: 17, end: 22 });    // Free future slot option
     });
   });
 

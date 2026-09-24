@@ -166,7 +166,9 @@
   "adminDashboard": {
     "btn_admin_block": "Blocca la Lavanderia",
     "admin_action": "Amministrazione",
-    "block_laundry": "Blocca la lavanderia per tutto il condominio per manutenzione o riparazioni"
+    "block_laundry": "Blocca la lavanderia per tutto il condominio per manutenzione o riparazioni",
+    "next_blocks": "Prossimi Blocchi",
+    "no_active_maintenance": "Nessuna manutenzione programmata"
   },
   "dashboardSlotCard": {
     "your_session": "Tua Sessione Attiva",

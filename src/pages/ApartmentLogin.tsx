@@ -13,7 +13,7 @@ import CreateApartmentModal from '../apartmentSetup/CreateApartmentModal';
 import { useTranslation } from 'react-i18next';
 import { getCleanStorageItem } from '../auth/authUtils';
 import { ROUTES } from '../routes/routes.constants';
-import { addOutline, constructOutline, logOutOutline } from 'ionicons/icons';
+import { addOutline, buildOutline, logOutOutline } from 'ionicons/icons';
 import { IonIcon, IonText, IonButton, IonToast } from '@ionic/react';
 import { useDeleteLeaveHousehold, useGetUserHouselds } from '../hooks/useHousehold';
 import SlotCard from '../baseComponents/SlotCard';
@@ -200,7 +200,7 @@ export default function ApartmentLogin() {
             <SlotCard 
               onClick={enterAsAdmin}
               title={t('apartmentLogin.enter_admin')}
-              icon={<IonIcon icon={constructOutline} style={{ fontSize: '20px', color: '#d97706' }} />}
+              icon={<IonIcon icon={buildOutline} style={{ fontSize: '20px', color: '#d97706' }} />}
               style={{ borderColor: 'var(--ion-color-step-200, #333333)' }}
               endContent={
                 <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">

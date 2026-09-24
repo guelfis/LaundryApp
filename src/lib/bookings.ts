@@ -39,7 +39,7 @@ export async function getBookingById(id: string) {
   return data;
 }
 
-export async function getUpcomingBookings(apartmentId: string, maxEntries: number = 5) {
+export async function getUpcomingBookings(apartmentId: string, maxEntries: number = 50) {
   const { data, error } = await supabase
     .from('booking')
     .select('*')
