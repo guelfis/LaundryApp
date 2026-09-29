@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getBookingsByHousehold, releaseLaundrySlot, bookLaundrySlot, getUpcomingBookings } from '../lib/bookings';
+import { getBookingsByHousehold, releaseLaundrySlot, bookLaundrySlot, getUpcomingBookings, getUpcomingAdminBookings } from '../lib/bookings';
 import { useContext } from 'react';
 import { BookingContext } from '../contexts/BookingContext';
 
@@ -103,5 +103,14 @@ export function useUpcomingBookings(apartmentId: string , options?: { enabled?: 
     queryKey: ['upcoming-bookings', apartmentId],
     queryFn: () => getUpcomingBookings(apartmentId!),
     enabled: options?.enabled ?? !!apartmentId,
+  });
+}
+
+
+export function useUpcomingAdminBookings(options?: { enabled?: boolean }) {
+  return useQuery({
+    queryKey: ['upcoming-admin-bookings'],
+    queryFn: () => getUpcomingAdminBookings(),
+    enabled: options?.enabled ?? true,
   });
 }

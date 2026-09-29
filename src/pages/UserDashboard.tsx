@@ -2,11 +2,11 @@ import {  useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import SectionText from "../baseComponents/SectionText";
 import { useApartmentMembers, useApartments, usePendingRequests } from "../hooks/useApartments";
-import { useUpcomingBookings, useBookings, useBookingFilters } from "../hooks/useBookings";
+import { useUpcomingBookings, useBookings, useBookingFilters, useUpcomingAdminBookings } from "../hooks/useBookings";
 import { checkIsAdminApartment } from "../auth/authUtils";
 import { Calendar } from "lucide-react"; 
 import { LoadingSpinner } from "../baseComponents/LoadingSpinner";
-import { AggregatedSlotInfo, emptySlotFallback, getAggregatedBookingsMap, getCurrentSlotKey, getSlotKey, parseSlotRowToSelection, SlotTimeState } from "../utils/slotsUtils";
+import { aggregateAdminMaintenanceBlocks, AggregatedSlotInfo, emptySlotFallback, getAggregatedBookingsMap, getCurrentSlotKey, getSlotKey, parseSlotRowToSelection, SlotTimeState } from "../utils/slotsUtils";
 import { SlotStatus } from "../constants/SlotStatus";
 import DashboardSlotCard from "../components/DashboardSlotCard";
 import { getBuildingCurrentDateTime, getDate, getDateStringFromDate, getTimeSlotString } from "../utils/datesGetter"; 
@@ -14,6 +14,7 @@ import SlotCard from "../baseComponents/SlotCard";
 
 import BookingModal from "../bookingModals/BookingModal";
 import { HouseholdSlot } from "../lib/databaseTypes";
+import AggregatedMaintenanceBlock from "../components/AggregatedMaintenanceBlock";
 
 interface UserDashboardProps {
   householdId: string;
@@ -52,9 +53,13 @@ export default function UserDashboard({ householdId, householdTimezone, apartmen
   const {slotsPolicy} = useBookingFilters();
   const { data: members = [] } = useApartmentMembers(apartmentId, { enabled: !!apartmentId  });
   const { data: requests = [] } = usePendingRequests(apartmentId, { enabled: !!apartmentId  });
+  // Fetch bookings for the current day
   const { data: bookings = [] } = useBookings(householdId, queryRange.morning, queryRange.evening);
   const { data: apartments = [] } = useApartments(householdId);
+  // Fetch upcoming bookings for the apartment
   const { data: upcomingBookings = [], isLoading } = useUpcomingBookings(apartmentId);
+  // Fetch upcoming maintenance blocks for the household
+  const { data: upcomingMaintenance = [], isLoading: isLoadingMaintenance } = useUpcomingAdminBookings();
 
   const isUserAdmin = useMemo(() => checkIsAdminApartment(members, currentUserId), [members, currentUserId]);
 
@@ -69,6 +74,11 @@ export default function UserDashboard({ householdId, householdTimezone, apartmen
   const upcomingAggregated = useMemo(() => {
     return getAggregatedBookingsMap(upcomingBookings, apartmentsMap, apartmentId);
   }, [upcomingBookings, apartmentsMap, apartmentId]);
+
+  // 2. Filter down to admin blockouts only, then run our aggregation algorithm
+  const aggregatedMaintenance = useMemo(() => {
+    return aggregateAdminMaintenanceBlocks(upcomingMaintenance, slotsPolicy);
+  }, [upcomingMaintenance, slotsPolicy]);
 
 
   const ongoingState = useMemo(() => {
@@ -124,7 +134,7 @@ export default function UserDashboard({ householdId, householdTimezone, apartmen
   };
 
 
-  if (isLoading) {
+  if (isLoading || isLoadingMaintenance) {
     return (
       <div className="flex flex-1 items-center justify-center h-[60vh]">
         <LoadingSpinner />
@@ -209,6 +219,9 @@ export default function UserDashboard({ householdId, householdTimezone, apartmen
             <p className="text-xs text-gray-400 pl-1 mt-1">{t("userDashboard.no_bookings")}</p>
           )}
         </div>
+
+        {/* 5. UPCOMING MAINTENANCE BLOCKS LIST */}
+        <AggregatedMaintenanceBlock sectionTitle={t("userDashboard.next_maintenance")} aggregatedBlocks={aggregatedMaintenance} />
 
         {selectedSlot && (
           <BookingModal

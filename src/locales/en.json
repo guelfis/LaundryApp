@@ -162,7 +162,8 @@
     "live_status": "Live Status",
     "next_reservations": "Next Reservations",
     "mine": "Mine",
-    "no_bookings": "No upcoming apartment bookings logged yet."
+    "no_bookings": "No upcoming apartment bookings logged yet.",
+    "next_maintenance": "Next Maintenance Blocks"
   },
   "adminDashboard": {
     "btn_admin_block": "Block the laundry",

@@ -39,7 +39,7 @@ export async function getBookingById(id: string) {
   return data;
 }
 
-export async function getUpcomingBookings(apartmentId: string, maxEntries: number = 50) {
+export async function getUpcomingBookings(apartmentId: string, maxEntries: number = 5) {
   const { data, error } = await supabase
     .from('booking')
     .select('*')
@@ -47,6 +47,20 @@ export async function getUpcomingBookings(apartmentId: string, maxEntries: numbe
     .gte('start_time', 'now()') // Uses centralized DB UTC clock
     .order('start_time', { ascending: true })
     .limit(maxEntries); // ⚡️ Restricts the database payload size
+
+  if (error) throw error;
+  return data;
+}
+
+// only queries admin blocks
+export async function getUpcomingAdminBookings(maxEntries: number = 50) {
+  const { data, error } = await supabase
+    .from('booking')
+    .select('*')
+    .eq('status', 'admin')       // Target ONLY maintenance blockouts
+    .gte('end_time', 'now()')    // Changed to end_time so active blocks today don't vanish prematurely
+    .order('start_time', { ascending: true })
+    .limit(maxEntries);
 
   if (error) throw error;
   return data;

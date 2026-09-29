@@ -161,7 +161,8 @@
     "live_status": "Stato in Tempo Reale",
     "next_reservations": "Prossime Prenotazioni",
     "mine": "Mio",
-    "no_bookings": "Nessuna prenotazione futura registrata nell'appartamento."
+    "no_bookings": "Nessuna prenotazione futura registrata nell'appartamento.",
+    "next_maintenance": "Prossime Manutenzioni"
   },
   "adminDashboard": {
     "btn_admin_block": "Blocca la Lavanderia",

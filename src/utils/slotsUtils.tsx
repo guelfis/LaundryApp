@@ -295,17 +295,14 @@ function isConsecutiveSlot(
 export function aggregateAdminMaintenanceBlocks(bookings: Booking[], householdSlots: SlotsPolicy): Booking[] {
   if (bookings.length === 0) return [];
   
-  // Arrange chronologically by absolute timeline positions
-  const sorted = [...bookings].sort(
-    (a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime()
-  );
+  // bookings are expected to be pre-sorted by start_time in ascending order by the query
 
   const aggregatedBlocks: Booking[] = [];
   // Deep copy properties to ensure zero shared side-effects down the road
-  let currentBlock = JSON.parse(JSON.stringify(sorted[0]));
+  let currentBlock = JSON.parse(JSON.stringify(bookings[0]));
 
-  for (let i = 1; i < sorted.length; i++) {
-    const nextBooking = sorted[i];
+  for (let i = 1; i < bookings.length; i++) {
+    const nextBooking = bookings[i];
 
     const currentEndTS = new Date(currentBlock.end_time).getTime();
     const nextStartTS = new Date(nextBooking.start_time).getTime();
