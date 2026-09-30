@@ -1,7 +1,7 @@
 import { IonToast, IonDatetime, IonModal } from '@ionic/react';
 import BottomModal from '../baseComponents/BottomModal';
 import ModalButton from '../baseComponents/ModalButton';
-import { Slot, useBookingActions, useBookingFilters } from '../hooks/useBookings';
+import { useBookingActions, useBookingFilters } from '../hooks/useBookings';
 import { useTranslation } from 'react-i18next';
 import { useState, useEffect, useMemo } from 'react';
 import SuggestionToggle from '../components/SuggestionToggle';
@@ -9,7 +9,7 @@ import SlotsGrid from '../components/SlotsGrid';
 import NotesArea from '../components/NotesArea';
 import { DatePicker } from '../baseComponents/DatePicker';
 import { Booking, HouseholdSlot } from '../lib/databaseTypes';
-import { calculateMaxEndDate, getAvailableSlotsForDate, getFirstAvailableStartDate, processAdminBlocks, toggleSlotInCollection } from '../utils/adminModalUtils';
+import { calculateMaxEndDate, calculatePayloadsForBooking, getAvailableSlotsForDate, getFirstAvailableStartDate, processAdminBlocks, toggleSlotInCollection } from '../utils/adminModalUtils';
 
 interface AdminBlockModalProps {
   isOpen: boolean;
@@ -77,12 +77,28 @@ export default function AdminBlockModal({ isOpen, onClose, bookings, apartmentId
     }
   }, [isOpen]);
 
+  useEffect(() => {
+    setSelectedStartSlots([]);
+  }, [startDate]);
+
+  useEffect(() => {
+    setSelectedEndSlots([]);
+}, [endDate, isMultiDay]);
+
   // Helper toggle to add or remove slots from the administrative array list
   const toggleStartSlotSelection = (slot: HouseholdSlot) => {
+    // Check if the slot is actually available right now
+    const isAvailable = availableSlotsForStartDay.some(s => s.id === slot.id);
+    if (!isAvailable) return; // Prevent selection of already booked slots
+
     setSelectedStartSlots(prev => toggleSlotInCollection(prev, slot));
   };
 
   const toggleEndSlotSelection = (slot: HouseholdSlot) => {
+    // Check if the slot is actually available right now
+    const isAvailable = availableSlotsForEndDay.some(s => s.id === slot.id);
+    if (!isAvailable) return; // Prevent selection of already booked slots
+
     setSelectedEndSlots(prev => toggleSlotInCollection(prev, slot));
   };
 
@@ -112,45 +128,20 @@ export default function AdminBlockModal({ isOpen, onClose, bookings, apartmentId
     }
 
     try {
-      const slots: Slot[] = [];
+      // 1. Extract pure processing arrays from state inputs
+      const bookingPayloads = calculatePayloadsForBooking({
+        apartmentId,
+        isMultiDay,
+        startDate,
+        endDate,
+        selectedStartSlots,
+        selectedEndSlots,
+        allSlotsConfig: slotsPolicy.slots
+      });
 
-      if (!isMultiDay) {
-        // CASE A: Single day block -> Push all selected atomic slots into parallel parameter arrays
-        selectedStartSlots.forEach(slot => {
-          slots.push({ startHour: slot.start, endHour: slot.end });
-        });
-
-        await bookSlot({
-          apartmentId: apartmentId,
-          dateStr: startDate,
-          slotHours: slots,
-          isAdminBlock: true
-        });
-      } else {
-        // CASE B: Multiple days calculation range loop engine
-        const currentDay = new Date(startDate);
-        const finalDay = new Date(endDate);
-        currentDay.setHours(0, 0, 0, 0);
-        finalDay.setHours(23, 59, 59, 999);
-
-        while (currentDay <= finalDay) {
-          const dateStrToken = currentDay.toISOString().split('T')[0];
-
-          slotsPolicy.slots.forEach((slotConfig) => {
-            slots.push({ startHour: slotConfig.start, endHour: slotConfig.end });
-          });
-
-          await bookSlot({
-            apartmentId: apartmentId,
-            dateStr: dateStrToken,
-            slotHours: slots,
-            isAdminBlock: true
-          });
-
-          slots.length = 0; // Clear the slots array for the next day
-
-          currentDay.setDate(currentDay.getDate() + 1);
-        }
+      // 2. Map payload items sequentially into atomic database updates
+      for (const payload of bookingPayloads) {
+        await bookSlot(payload);
       }
 
       setToastMessage(t('adminBlockModal.success'));
@@ -161,6 +152,7 @@ export default function AdminBlockModal({ isOpen, onClose, bookings, apartmentId
       setToastColor('danger');
     }
   };
+
 
    return (
     <BottomModal

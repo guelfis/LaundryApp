@@ -1,4 +1,7 @@
+import { Slot } from "../hooks/useBookings";
 import { Booking, HouseholdSlot } from "../lib/databaseTypes";
+import { getBuildingCurrentDateTime } from "./datesGetter";
+import { getHouseholdTimezone } from "./getters";
 
 export interface DayBlockSummary {
   blockedSlots: number[][];
@@ -106,25 +109,34 @@ export function getAvailableSlotsForDate(
   dateStr: string,
   adminBlocksMap: AdminBlocksMap,
   masterSlots: HouseholdSlot[],
-  currentDateSource: Date = new Date()
 ): HouseholdSlot[] {
-  const todayStr = currentDateSource.toISOString().split('T')[0];
-  const currentHour = currentDateSource.getHours();
+  const timezone = getHouseholdTimezone();
+  
+  // 1. Get the current wall-clock date and hour EXACTLY at the building location
+  const buildingDateTime = getBuildingCurrentDateTime(timezone);
+  
+  // Format today's date string using the building's calendar components (YYYY-MM-DD)
+  const todayStr = `${buildingDateTime.year}-${String(buildingDateTime.monthIndex + 1).padStart(2, '0')}-${String(buildingDateTime.day).padStart(2, '0')}`;
+  const currentHour = buildingDateTime.hour;
 
-  // 1. Filter out slots that have already finished if the day is today
-  let slotsToFilter = masterSlots;
-  if (dateStr === todayStr) {
-    // Changing slot.start to slot.end keeps the current active slot open for selection
-    slotsToFilter = masterSlots.filter(slot => slot.end > currentHour);
-  }
+  // 2. Extract the blocked intervals tracked for this specific calendar day
+  const dayData = adminBlocksMap[dateStr];
+  const blockedIntervals = dayData ? dayData.blockedSlots : [];
 
-  // 2. Filter out slots that the admin has already reserved
-  const blockData = adminBlocksMap[dateStr];
-  if (!blockData) return slotsToFilter;
+  // 3. Filter the master slots using the synchronized building hour reference points
+  return masterSlots.filter(slot => {
+    // Scenario A: If the slot is scheduled for today, filter it out if it already ended at the building
+    if (dateStr === todayStr && slot.end <= currentHour) {
+      return false;
+    }
 
-  return slotsToFilter.filter(slot => 
-    !blockData.blockedSlots.some(blocked => blocked[0] === slot.start && blocked[1] === slot.end)
-  );
+    // Scenario B: Check if this slot matches any blocked interval recorded in adminBlocksMap
+    const isBlocked = blockedIntervals.some(
+      blocked => blocked[0] === slot.start && blocked[1] === slot.end
+    );
+
+    return !isBlocked;
+  });
 }
 
 /**
@@ -149,4 +161,112 @@ export function getFirstAvailableStartDate(
   }
 
   return dateStrToken;
+}
+
+export interface BookingPayload {
+  apartmentId: string;
+  dateStr: string;
+  slotHours: Slot[];
+  isAdminBlock: boolean;
+}
+
+export interface SlotConfig {
+  start: number;
+  end: number;
+}
+
+interface CalculatePayloadsParams {
+  apartmentId: string;
+  isMultiDay: boolean;
+  startDate: string; // Format: "YYYY-MM-DD"
+  endDate: string;   // Format: "YYYY-MM-DD"
+  selectedStartSlots: { start: number; end: number }[];
+  selectedEndSlots: { start: number; end: number }[];
+  allSlotsConfig: SlotConfig[];
+}
+
+/**
+ * Increments a standard "YYYY-MM-DD" date string by an explicit number of days,
+ * cleanly side-stepping any native JavaScript timezone runtime translation bugs.
+ */
+export function addDaysToDateString(dateStr: string, days: number): string {
+  const [year, month, day] = dateStr.split('-').map(Number);
+  // Using noon (12:00) provides a bulletproof padding buffer against daylight saving time shifts
+  const targetDate = new Date(Date.UTC(year, month - 1, day, 12, 0, 0));
+  
+  targetDate.setUTCDate(targetDate.getUTCDate() + days);
+  
+  const y = targetDate.getUTCFullYear();
+  const m = String(targetDate.getUTCMonth() + 1).padStart(2, '0');
+  const d = String(targetDate.getUTCDate()).padStart(2, '0');
+  
+  return `${y}-${m}-${d}`;
+}
+
+/**
+ * Calculates the exact booking payloads required for single or multi-day admin blocks.
+ * Operates purely on layout string evaluations to preserve localized building integrity.
+ */
+export function calculatePayloadsForBooking({
+  apartmentId,
+  isMultiDay,
+  startDate,
+  endDate,
+  selectedStartSlots,
+  selectedEndSlots,
+  allSlotsConfig,
+}: CalculatePayloadsParams): BookingPayload[] {
+  const payloads: BookingPayload[] = [];
+
+  // CASE A: Single Day Block
+  if (!isMultiDay) {
+    const slots: Slot[] = selectedStartSlots.map(slot => ({
+      startHour: slot.start,
+      endHour: slot.end
+    }));
+
+    if (slots.length > 0) {
+      payloads.push({ apartmentId, dateStr: startDate, slotHours: slots, isAdminBlock: true });
+    }
+    return payloads;
+  }
+
+  // CASE B: Multi-Day Range Block
+  let currentDateStr = startDate;
+
+  // Loop safely until the date string sequentially advances past the target end date
+  while (currentDateStr <= endDate) {
+    const slotsForThisDay: Slot[] = [];
+
+    if (currentDateStr === startDate) {
+      // 1. Initial boundary day: Apply only selected start slots (e.g., evening slots)
+      selectedStartSlots.forEach(slot => {
+        slotsForThisDay.push({ startHour: slot.start, endHour: slot.end });
+      });
+    } else if (currentDateStr === endDate) {
+      // 2. Final boundary day: Apply only selected end slots (e.g., morning slots)
+      selectedEndSlots.forEach(slot => {
+        slotsForThisDay.push({ startHour: slot.start, endHour: slot.end });
+      });
+    } else {
+      // 3. Intermediate days: Block all template system slots entirely
+      allSlotsConfig.forEach(slotConfig => {
+        slotsForThisDay.push({ startHour: slotConfig.start, endHour: slotConfig.end });
+      });
+    }
+
+    if (slotsForThisDay.length > 0) {
+      payloads.push({
+        apartmentId,
+        dateStr: currentDateStr,
+        slotHours: slotsForThisDay,
+        isAdminBlock: true,
+      });
+    }
+
+    // Step ahead exactly 1 calendar day string
+    currentDateStr = addDaysToDateString(currentDateStr, 1);
+  }
+
+  return payloads;
 }
