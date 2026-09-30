@@ -6,10 +6,10 @@ import { useUpcomingBookings, useBookings, useBookingFilters, useUpcomingAdminBo
 import { checkIsAdminApartment } from "../auth/authUtils";
 import { Calendar } from "lucide-react"; 
 import { LoadingSpinner } from "../baseComponents/LoadingSpinner";
-import { aggregateAdminMaintenanceBlocks, AggregatedSlotInfo, emptySlotFallback, getAggregatedBookingsMap, getCurrentSlotKey, getSlotKey, parseSlotRowToSelection, SlotTimeState } from "../utils/slotsUtils";
+import { aggregateAdminMaintenanceBlocks, AggregatedSlotInfo, emptySlotFallback, getAggregatedBookingsMap, getCurrentSlotKey, getSlotKey, getSlotTimeState, SlotTimeState } from "../utils/slotsUtils";
 import { SlotStatus } from "../constants/SlotStatus";
 import DashboardSlotCard from "../components/DashboardSlotCard";
-import { getBuildingCurrentDateTime, getDate, getDateStringFromDate, getTimeSlotString } from "../utils/datesGetter"; 
+import { getBuildingCurrentDateTime, getDate, getDateStringFromDate } from "../utils/datesGetter"; 
 import SlotCard from "../baseComponents/SlotCard";
 
 import BookingModal from "../bookingModals/BookingModal";
@@ -28,7 +28,7 @@ export default function UserDashboard({ householdId, householdTimezone, apartmen
 
   // Shared React calendar grid hooks variables
   const [selectedSlot, setSelectedSlot] = useState<{ 
-    dateString: string, 
+    dateStr: string,
     slot: HouseholdSlot, 
     slotTimeState: SlotTimeState,
     nextSlotAvailable: boolean,
@@ -117,20 +117,20 @@ export default function UserDashboard({ householdId, householdTimezone, apartmen
   }, [aggregatedBookingsMap, householdTimezone, slotsPolicy.slots]);
 
   const handleOpenModal = (slotInfo: AggregatedSlotInfo, nextAvailable = false, nextslot: HouseholdSlot| null = null) => {
-    const parsedSelection = parseSlotRowToSelection(
-      slotInfo.startTime, 
-      slotInfo.endTime, 
-      householdTimezone
-    );
+    const slotTimeState = getSlotTimeState(slotInfo.dateStr, slotInfo.startHour, slotInfo.endHour);
 
-    if (parsedSelection) {
-      setSelectedSlot({
-        ...parsedSelection,
-        nextSlotAvailable: nextAvailable,
-        nextSlot: nextslot
-      });
-      setSelectedBooking(slotInfo);
-    }
+    setSelectedSlot({
+      dateStr: slotInfo.dateStr,
+      slot:{
+        id:'',
+        start: slotInfo.startHour,
+        end: slotInfo.endHour
+      },
+      slotTimeState,
+      nextSlotAvailable: nextAvailable,
+      nextSlot: nextslot
+    });
+    setSelectedBooking(slotInfo);
   };
 
 
@@ -176,11 +176,9 @@ export default function UserDashboard({ householdId, householdTimezone, apartmen
                 
                 if (currentSlotConfig) {
                   // 2. Generate pristine date boundaries without parsing discrepancies 
-                  const fallbackStart = new Date(bClock.year, bClock.monthIndex, bClock.day, currentSlotConfig.start);
-                  const fallbackEnd = new Date(bClock.year, bClock.monthIndex, bClock.day, currentSlotConfig.end);
-                  
-                  bookingInfo.startTime = fallbackStart.toISOString();
-                  bookingInfo.endTime = fallbackEnd.toISOString();
+                  bookingInfo.dateStr = `${bClock.year}-${bClock.monthIndex}-${bClock.day}`;
+                  bookingInfo.startHour = currentSlotConfig.start;
+                  bookingInfo.endHour = currentSlotConfig.end;
                 }
               }
               // Open the modal with verified parameters and consecutive slot flags
@@ -196,12 +194,9 @@ export default function UserDashboard({ householdId, householdTimezone, apartmen
           {upcomingBookings.length > 0 ? (
             <div >
               {Object.values(upcomingAggregated).map((slotInfo) => {
-                const dateObj = new Date(slotInfo.startTime ?? "");
-                const localizedDate = getDateStringFromDate(dateObj);
-                const timeRangeString = getTimeSlotString(
-                  dateObj,
-                  new Date(slotInfo.endTime ?? "")
-                );
+                
+                const localizedDate = getDateStringFromDate(new Date(`${slotInfo.dateStr}T00:00:00Z`));
+                const timeRangeString = `${slotInfo.startHour}-${slotInfo.endHour}`
 
                 return (
                   <SlotCard 

@@ -1,16 +1,6 @@
 import i18n from '../locales/i18n'; 
 import { getHouseholdTimezone } from './getters';
  
-/**
- * Extracts the exact numeric hour of a date object interpreted within the building's localized timezone.
- */
-export const getBuildingHour = (date: Date): number => {
-  const timezone = getHouseholdTimezone();
-  return parseInt(
-    date.toLocaleTimeString('en-US', { timeZone: timezone, hour: 'numeric', hour12: false }), 
-    10
-  );
-};
 
 export function getDaysInMonth(monthIndex: number, year: number) {
   // Using day 0 of the next month extracts the last day of the target month natively
@@ -70,18 +60,6 @@ export function getDateStringFromDate(date: Date ): string {
   });
 }
 
-export const getTimeSlotString = (startHour: Date, endHour: Date): string => {
-    const timezone = getHouseholdTimezone();
-    const formatBuildingHour = (date: Date) => {
-      return date.toLocaleTimeString('en-US', { 
-        timeZone: timezone, 
-        hour: 'numeric', 
-        minute: '2-digit', 
-        hour12: false 
-      });
-    };
-    return `${formatBuildingHour(startHour)} - ${formatBuildingHour(endHour)}`;
-};
 
 // Generates localized month names dynamically without data mutations
 export const getLocalizedMonths = (): string[] => {

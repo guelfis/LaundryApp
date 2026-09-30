@@ -1,7 +1,8 @@
 import { Slot } from "../hooks/useBookings";
-import { Booking, HouseholdSlot } from "../lib/databaseTypes";
+import { HouseholdSlot } from "../lib/databaseTypes";
 import { getBuildingCurrentDateTime } from "./datesGetter";
 import { getHouseholdTimezone } from "./getters";
+import { NormalizedBooking } from "./normalizeBookings";
 
 export interface DayBlockSummary {
   blockedSlots: number[][];
@@ -14,7 +15,7 @@ export type AdminBlocksMap = Record<string, DayBlockSummary>;
  * Parses all admin bookings into a reactive data map and calculates constraints.
  */
 export function processAdminBlocks(
-  bookings: Booking[],
+  bookings: NormalizedBooking[],
   masterSlots: HouseholdSlot[],
   currentDateSource: Date = new Date() // Injectable for clean unit testing
 ) {
@@ -35,28 +36,21 @@ export function processAdminBlocks(
 
   // 2. Map out active admin bookings from the database
   bookings.forEach((b) => {
-    if (!b.start_time || !b.end_time) return;
-
-    const dateKey = b.start_time.split('T')[0];
+    if (!b.startHour || !b.endHour) return;
     
     // Extract hours cleanly from ISO strings
-    const startHourStr = b.start_time.split('T')[1]?.split(':')[0];
-    const endHourStr = b.end_time.split('T')[1]?.split(':')[0];
-    
-    const startH = startHourStr ? parseInt(startHourStr, 10) : new Date(b.start_time).getHours();
-    const endH = endHourStr ? parseInt(endHourStr, 10) : new Date(b.end_time).getHours();
-    const slotTuple = [startH, endH];
+    const slotTuple = [b.startHour, b.endHour];
 
-    if (!blocksMap[dateKey]) {
-      blocksMap[dateKey] = { blockedSlots: [], isFullyBooked: false };
+    if (!blocksMap[b.dateStr]) {
+      blocksMap[b.dateStr] = { blockedSlots: [], isFullyBooked: false };
     }
     
     // Avoid duplicate tuple entries
-    const alreadyExists = blocksMap[dateKey].blockedSlots.some(
-      s => s[0] === startH && s[1] === endH
+    const alreadyExists = blocksMap[b.dateStr].blockedSlots.some(
+      s => s[0] === b.startHour && s[1] === b.endHour
     );
     if (!alreadyExists) {
-      blocksMap[dateKey].blockedSlots.push(slotTuple);
+      blocksMap[b.dateStr].blockedSlots.push(slotTuple);
     }
   });
 

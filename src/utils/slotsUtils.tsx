@@ -1,8 +1,10 @@
 import { SlotStatus } from '../constants/SlotStatus';
-import { Booking, HouseholdSlot, SlotsPolicy } from '../lib/databaseTypes';
+import { HouseholdSlot, SlotsPolicy } from '../lib/databaseTypes';
 import i18n from '../locales/i18n';
-import { getBuildingHour, getDateString } from './datesGetter';
+import { addDaysToDateString } from './adminModalUtils';
+import { getBuildingCurrentDateTime } from './datesGetter';
 import { getHouseholdTimezone } from './getters';
+import { NormalizedBooking } from './normalizeBookings';
 
 export const getSlotKey = (day: number, month: number, year: number, slotStartHour: number) => {
   // Format standard string dictionary mapping reference token: "2026-5-25-17"
@@ -17,7 +19,7 @@ export const getCurrentSlotKey = (slots: HouseholdSlot[]): string | null => {
   const today = new Date();
   const timezone = getHouseholdTimezone();
   
-  // 1. Convert the universal current moment into the exact time matching the building's physical wall-clock [google:4]
+  // Convert the current live device moment into the exact numerical values matching the building's physical clock
   const formatter = new Intl.DateTimeFormat('en-US', {
     timeZone: timezone,
     year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', hour12: false
@@ -29,13 +31,9 @@ export const getCurrentSlotKey = (slots: HouseholdSlot[]): string | null => {
   const dayNum = parseInt(parts.find(p => p.type === 'day')!.value, 10);
   const currentBuildingHour = parseInt(parts.find(p => p.type === 'hour')!.value, 10);
   
-  // 2. Scan your static source operational metrics using the building's current hour
   const activeSlot = slots.find((slot) => currentBuildingHour >= slot.start && currentBuildingHour < slot.end);
-  
-  // Safety Fallback: Exit cleanly if opened outside operational columns (e.g., past 22:00 building time)
   if (!activeSlot) return null;
 
-  // 3. Return the clean synchronized layout lookup key token string
   return getSlotKey(dayNum, monthIndex, year, activeSlot.start);
 };
 
@@ -49,66 +47,56 @@ export interface AggregatedSlotInfo {
   id: string;
   status: SlotStatus;
   bookedBy: string | null;
-  startTime: string | null;
-  endTime: string | null;
+  dateStr: string;   // Building local day "YYYY-MM-DD"
+  startHour: number; // Building local start hour
+  endHour: number;
   apartmentId: string | null;
   displaySubstring: string;
   notes?: string | null;
 }
 
 /**
- * Groups and indexes raw database arrays into mapped keys by translating UTC records into the building's timezone [google:4].
+ * Groups and indexes raw database arrays into mapped keys by translating UTC records into the building's timezone.
  */
 export const getAggregatedBookingsMap = (
-  bookings: Booking[], 
+  bookings: NormalizedBooking[], // Strictly typed to receive your normalized interfaces
   apartments: Record<string, string>,
   currentApartmentId: string | null,
 ): Record<string, AggregatedSlotInfo> => {
   
   const finalMap: Record<string, AggregatedSlotInfo> = {};
-  const grouped: Record<string, Booking[]> = {};
-  const timezone = getHouseholdTimezone();
+  const grouped: Record<string, NormalizedBooking[]> = {};
   
   bookings.forEach((b) => {
-    const d = new Date(b.start_time);
-    
-    // 1. EXTRACT BUILDING DATETIME METRICS: Translates universal dates into local building variables [google:4]
-    const formatter = new Intl.DateTimeFormat('en-US', { 
-      timeZone: timezone, 
-      year: 'numeric', 
-      month: 'numeric', 
-      day: 'numeric' 
-    });
-    const parts = formatter.formatToParts(d);
-    
-    const bYear = parseInt(parts.find(p => p.type === 'year')!.value, 10);
-    const bMonth = parseInt(parts.find(p => p.type === 'month')!.value, 10) - 1; // Normalize to 0-indexed month
-    const bDay = parseInt(parts.find(p => p.type === 'day')!.value, 10);
-    const bHour = getBuildingHour(d); // Translates 15:00 UTC cleanly into 17 
+    if (!b.startHour) return;
 
-    const key = getSlotKey(bDay, bMonth, bYear, bHour);
+    // Fast parsing since format is guaranteed to be YYYY-MM-DDTHH:mm:ss
+    const [yearStr, monthStr, dayStr] = b.dateStr.split('-');
+    
+    const bYear = parseInt(yearStr, 10);
+    const bMonth = parseInt(monthStr, 10) - 1; // Normalize to 0-indexed month for compatibility with getSlotKey
+    const bDay = parseInt(dayStr, 10);
+    
+    const key = getSlotKey(bDay, bMonth, bYear, b.startHour);
     if (!grouped[key]) grouped[key] = [];
     grouped[key].push(b);
   });
 
-  // 2. Reduce the groups into aggregated display nodes
+  // Reduce the groups into aggregated display nodes
   Object.entries(grouped).forEach(([key, slotBookings]) => {
-    // 1. PRIORITY CHECK: Look for an admin blockout first!
     const adminBooking = slotBookings.find((b) => b.status === 'admin');
-    // 2. TENANT CHECK: Fallback to look for a standard active tenant booking
     const tenantBooking = slotBookings.find((b) => b.status === 'active');
     
     if (adminBooking) {
-      
-      // Check if the current user actually had a personal booking hidden underneath this admin block
       const userWasOverridden = tenantBooking && tenantBooking.apartment_id === currentApartmentId;
 
       finalMap[key] = {
-        id: adminBooking.id, // Keep the admin booking ID so the admin can click and delete it
+        id: adminBooking.id,
         status: userWasOverridden ? SlotStatus.OVERRIDDEN : SlotStatus.NOT_RESERVABLE,
         bookedBy: i18n.t('slotStatus.not_reservable'),
-        startTime: adminBooking.start_time,
-        endTime: adminBooking.end_time,
+        dateStr: adminBooking.dateStr,
+        startHour: adminBooking.startHour,
+        endHour: adminBooking.endHour,
         apartmentId: adminBooking.apartment_id,
         displaySubstring: userWasOverridden 
           ? i18n.t('slotSubstring.not_reservable_override') 
@@ -117,6 +105,7 @@ export const getAggregatedBookingsMap = (
       };
       return;
     }
+
     if (tenantBooking) {
       const apartmentName = apartments[tenantBooking.apartment_id ?? ''];
       const booked_by_user = tenantBooking.apartment_id === currentApartmentId;
@@ -125,8 +114,9 @@ export const getAggregatedBookingsMap = (
         id: tenantBooking.id,
         status: booked_by_user ? SlotStatus.BOOKED_BY_USER : SlotStatus.BOOKED,
         bookedBy: apartmentName,
-        startTime: tenantBooking.start_time,
-        endTime: tenantBooking.end_time,
+        dateStr: tenantBooking.dateStr,
+        startHour: tenantBooking.startHour,
+        endHour: tenantBooking.endHour,
         apartmentId: tenantBooking.apartment_id,
         displaySubstring: booked_by_user 
           ? i18n.t('slotSubstring.booked_by_you') 
@@ -137,15 +127,15 @@ export const getAggregatedBookingsMap = (
     }
 
     const releasedBooking = slotBookings.find((b) => b.status === 'released');
-    
     if (releasedBooking) {
       const name = apartments[releasedBooking.apartment_id ?? ''] || i18n.t('slotSubstring.another_apartment');
       finalMap[key] = {
         id: releasedBooking.id,
         status: SlotStatus.RELEASED,
         bookedBy: name,
-        startTime: releasedBooking.start_time,
-        endTime: releasedBooking.end_time,
+        dateStr: releasedBooking.dateStr,
+        startHour: releasedBooking.startHour,
+        endHour: releasedBooking.endHour,
         apartmentId: releasedBooking.apartment_id,
         displaySubstring: i18n.t('slotSubstring.released'),
       };
@@ -155,85 +145,49 @@ export const getAggregatedBookingsMap = (
 
   return finalMap;
 };
-
-export const emptySlotFallback = (): AggregatedSlotInfo => ({
+export const emptySlotFallback = (date?:string, start?:number, end?:number): AggregatedSlotInfo => ({
   id:'',
   status: SlotStatus.AVAILABLE,
   bookedBy: null,
-  startTime: null,
-  endTime: null,
+  dateStr: date ? date : "",
+  startHour: start ? start : 0,
+  endHour: end ? end :0,
   apartmentId: null,
   displaySubstring: i18n.t('slotSubstring.available'),
 });
 
 /**
- * Calculates time status by comparing pure absolute Unix epoch milliseconds [google:1].
- * Highly resilient against timezone shifting as it measures absolute elapsed time [google:1].
+ * Calculates time status by comparing pure absolute Unix epoch milliseconds.
+ * Highly resilient against timezone shifting as it measures absolute elapsed time.
  */
-export function getSlotTimeState(startTime: Date, endTime: Date): SlotTimeState {
-  if (!startTime || !endTime) return 'past';
+export function getSlotTimeState(dateStr: string, startHour: number, endHour: number): SlotTimeState {
+  if (dateStr == "") return 'past';
+ 
 
-  const today = new Date();
-  const nowTime = today.getTime();
-  const startTimer = startTime.getTime();
-  const endTimer = endTime.getTime();
-
-  if (nowTime >= startTimer && nowTime < endTimer) {
-    return 'live';
-  }
+  const timezone = getHouseholdTimezone();
+  const { year, monthIndex, day, hour } = getBuildingCurrentDateTime(timezone);
   
-  if (nowTime >= endTimer) {
+  const currentMonthStr = String(monthIndex + 1).padStart(2, '0');
+  const currentDayStr = String(day).padStart(2, '0');
+  const currentBuildingDateStr = `${year}-${currentMonthStr}-${currentDayStr}`;
+
+  if (dateStr < currentBuildingDateStr) {
     return 'past';
   }
 
-  return 'future';
-}
+  if (dateStr > currentBuildingDateStr) {
+    return 'future';
+  }
 
-export interface ParsedSlotSelection {
-  dateString: string;
-  slot: HouseholdSlot;
-  slotTimeState: SlotTimeState;
-}
-
-/**
- * Transforms a raw database record's start/end timestamps into 
- * localized calendar grid components matching the building clock .
- */
-export function parseSlotRowToSelection(
-  startTimeStr: string | null,
-  endTimeStr: string | null,
-  householdTimezone: string
-): ParsedSlotSelection | null {
-  if (!startTimeStr || !endTimeStr) return null;
-
-  const startDate = new Date(startTimeStr);
-  const endDate = new Date(endTimeStr);
-
-  // Synchronize wall-clock outputs with the property's physical location 
-  const formatter = new Intl.DateTimeFormat('en-US', {
-    timeZone: householdTimezone,
-    year: 'numeric', 
-    month: 'numeric', 
-    day: 'numeric', 
-    hour: 'numeric', 
-    hour12: false
-  });
+  if (hour >= startHour && hour < endHour) {
+    return 'live';
+  }
   
-  const parts = formatter.formatToParts(startDate);
-  const endParts = formatter.formatToParts(endDate);
+  if (hour < startHour) {
+    return 'future'; 
+  }
 
-  const year = parseInt(parts.find(p => p.type === 'year')!.value, 10);
-  const activeMonth = parseInt(parts.find(p => p.type === 'month')!.value, 10) - 1; // Normalize to 0-indexed month
-  const dayNum = parseInt(parts.find(p => p.type === 'day')!.value, 10);
-  
-  const startHour = parseInt(parts.find(p => p.type === 'hour')!.value, 10);
-  const endHour = parseInt(endParts.find(p => p.type === 'hour')!.value, 10);
-
-  return {
-    dateString: getDateString(dayNum, activeMonth, year),
-    slot: { id: '', start: startHour, end: endHour },
-    slotTimeState: getSlotTimeState(startDate, endDate)
-  };
+  return 'past';
 }
 
 /**
@@ -241,85 +195,103 @@ export function parseSlotRowToSelection(
  * Uses the building timezone to remain perfectly consistent with the rest of the application.
  */
 function isConsecutiveSlot(
-  endIsoString: string, 
-  nextStartIsoString: string, 
+  currentDate: string,
+  currentEndHour: number,
+  nextDate: string,
+  nextStartHour:number,
   householdSlots: SlotsPolicy
 ): boolean {
-  if (endIsoString === nextStartIsoString) return true;
+  if (currentDate == nextDate && currentEndHour == nextStartHour) return true;
 
-  const endDate = new Date(endIsoString);
-  const nextDate = new Date(nextStartIsoString);
-  
-  const timezone = getHouseholdTimezone();
   const openingHour = householdSlots.startHour; 
   const closingHour = householdSlots.endHour; 
 
-  // Extract wall-clock hour matching the building's physical location
-  const formatter = new Intl.DateTimeFormat('en-US', {
-    timeZone: timezone,
-    hour: 'numeric',
-    hour12: false
-  });
-
-  const endBuildingHour = parseInt(formatter.format(endDate), 10);
-
-  // If the previous block finishes exactly at the facility closing hour
-  if (endBuildingHour === closingHour) {
-    // 1. Calculate when the next opening window should be in the building's timezone
-    const expectedNextMorning = new Date(endDate.getTime());
+  // Se il blocco precedente finisce esattamente all'ora di chiusura della struttura...
+  if (currentEndHour === closingHour) {
+    // Calcoliamo il giorno successivo usando la stringa pura per evitare cambi d'ora/fuso
+    const expectedNextMorningDateStr = addDaysToDateString(currentDate, 1);
     
-    // Move 1 day forward safely using absolute milliseconds to keep the exact hour position
-    expectedNextMorning.setTime(expectedNextMorning.getTime() + 24 * 60 * 60 * 1000);
-    
-    // 2. Validate if the next booking matches this expected next morning slot exactly
-    const nextParts = new Intl.DateTimeFormat('en-US', {
-      timeZone: timezone,
-      year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', hour12: false
-    }).formatToParts(nextDate);
-
-    const nextBuildingHour = parseInt(nextParts.find(p => p.type === 'hour')!.value, 10);
-    
-    // Compare dates components via simple strings to avoid local runtime engine discrepancies
-    const expectedDateStr = new Intl.DateTimeFormat('en-US', { timeZone: timezone, year: 'numeric', month: 'numeric', day: 'numeric' }).format(expectedNextMorning);
-    const nextDateStr = new Intl.DateTimeFormat('en-US', { timeZone: timezone, year: 'numeric', month: 'numeric', day: 'numeric' }).format(nextDate);
-
-    return nextBuildingHour === openingHour && expectedDateStr === nextDateStr;
+    // È consecutivo se il blocco successivo inizia il mattino dopo all'orario di apertura
+    return nextStartHour === openingHour && nextDate === expectedNextMorningDateStr;
   }
 
   return false;
 }
 
+export interface AggregatedBookings {
+  apartment_id: string | null;
+  startDate: string;
+  startHour: number;
+  endDate: string;
+  endHour: number;
+  id: string;
+  bookings_ids: string[];
+  notes: string | null;
+}
+
 /**
  * Aggregates individual shifts into continuous blocks, bridging over night gaps.
  */
-export function aggregateAdminMaintenanceBlocks(bookings: Booking[], householdSlots: SlotsPolicy): Booking[] {
+export function aggregateAdminMaintenanceBlocks(bookings: NormalizedBooking[], householdSlots: SlotsPolicy): AggregatedBookings[] {
   if (bookings.length === 0) return [];
   
   // bookings are expected to be pre-sorted by start_time in ascending order by the query
-
-  const aggregatedBlocks: Booking[] = [];
-  // Deep copy properties to ensure zero shared side-effects down the road
-  let currentBlock = JSON.parse(JSON.stringify(bookings[0]));
+  const aggregatedBlocks: AggregatedBookings[] = [];
+  
+  let currentBlock: AggregatedBookings = {
+    apartment_id: bookings[0].apartment_id,
+    startDate: bookings[0].dateStr,
+    startHour: bookings[0].startHour,
+    endDate: bookings[0].dateStr,
+    endHour: bookings[0].endHour,
+    id: bookings[0].id,
+    bookings_ids: [bookings[0].id],
+    notes: bookings[0].notes || "", // Initialize as string to easily append safely
+  };
 
   for (let i = 1; i < bookings.length; i++) {
     const nextBooking = bookings[i];
 
-    const currentEndTS = new Date(currentBlock.end_time).getTime();
-    const nextStartTS = new Date(nextBooking.start_time).getTime();
+    const isSameDay = currentBlock.endDate === nextBooking.dateStr;
 
-    // Connect if there is a timestamp overlap or a valid building night operational gap
-    if (nextStartTS <= currentEndTS || isConsecutiveSlot(currentBlock.end_time, nextBooking.start_time, householdSlots)) {
-      const nextEndTS = new Date(nextBooking.end_time).getTime();
-      if (nextEndTS > currentEndTS) {
-        currentBlock.end_time = nextBooking.end_time;
+    // Removed the strict isSameDay restriction from the outer condition 
+    // to allow isConsecutiveSlot to bridge across night/day gaps if needed
+    const isOverlappingOrAdjacent = 
+      (isSameDay && nextBooking.startHour <= currentBlock.endHour) || 
+      isConsecutiveSlot(currentBlock.endDate, currentBlock.endHour, nextBooking.dateStr, nextBooking.startHour, householdSlots);
+
+    if (isOverlappingOrAdjacent) {
+      // Update the boundary values
+      currentBlock.endDate = nextBooking.dateStr;
+      // Make sure we take the latest end hour if they overlap non-sequentially
+      currentBlock.endHour = Math.max(currentBlock.endHour, nextBooking.endHour);
+      currentBlock.bookings_ids.push(nextBooking.id);
+      
+      if (nextBooking.notes) {
+        currentBlock.notes = currentBlock.notes 
+          ? `${currentBlock.notes}\n${nextBooking.notes}` 
+          : nextBooking.notes;
       }
     } else {
-      // Clean logical daytime gap discovered -> close and save preceding group
+      // Commit the finished block
       aggregatedBlocks.push(currentBlock);
-      currentBlock = JSON.parse(JSON.stringify(nextBooking));
+      
+      // Initialize the next block
+      currentBlock = {
+        apartment_id: nextBooking.apartment_id,
+        startDate: nextBooking.dateStr,
+        startHour: nextBooking.startHour,
+        endDate: nextBooking.dateStr,
+        endHour: nextBooking.endHour,
+        id: nextBooking.id,
+        bookings_ids: [nextBooking.id],
+        notes: nextBooking.notes || "",
+      };
     }
   }
 
+  // Always push the trailing active block after loop completion
   aggregatedBlocks.push(currentBlock);
+  
   return aggregatedBlocks;
 }

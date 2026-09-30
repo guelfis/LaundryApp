@@ -8,13 +8,14 @@ import SuggestionToggle from '../components/SuggestionToggle';
 import SlotsGrid from '../components/SlotsGrid';
 import NotesArea from '../components/NotesArea';
 import { DatePicker } from '../baseComponents/DatePicker';
-import { Booking, HouseholdSlot } from '../lib/databaseTypes';
+import { HouseholdSlot } from '../lib/databaseTypes';
 import { calculateMaxEndDate, calculatePayloadsForBooking, getAvailableSlotsForDate, getFirstAvailableStartDate, processAdminBlocks, toggleSlotInCollection } from '../utils/adminModalUtils';
+import { NormalizedBooking } from '../utils/normalizeBookings';
 
 interface AdminBlockModalProps {
   isOpen: boolean;
   onClose: () => void;
-  bookings: Booking[]; // Pass the list of all admin bookings from the parent component
+  bookings: NormalizedBooking[]; // Pass the list of all admin bookings from the parent component
   apartmentId: string; // Optional, in case you want to filter bookings by apartment
 }
 

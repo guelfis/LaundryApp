@@ -8,8 +8,8 @@ import {
   addDaysToDateString,         
   AdminBlocksMap
 } from '../adminModalUtils';
-import { Booking } from '../../lib/databaseTypes';
 import { standardSlots } from '../../constants/dates';
+import { NormalizedBooking } from '../normalizeBookings';
 
 describe('Admin Booking Utility Suite', () => {
   const ADMIN_ID = 'admin-uuid-123';
@@ -18,26 +18,27 @@ describe('Admin Booking Utility Suite', () => {
   const MASTER_SLOTS = [[7, 12], [12, 17], [17, 22]];
 
   // Factory helper to quickly build full valid Booking objects for testing assertions
-  const createMockBooking = (fields: Partial<Booking>): Booking => ({
+  const createMockBooking = (fields: Partial<NormalizedBooking>): NormalizedBooking => ({
     id: 'mock-id-' + Math.random(),
     apartment_id: null,
     created_at: new Date().toISOString(),
     created_by: null,
-    start_time: '',
-    end_time: '',
+    dateStr:'',
+    startHour: 0,
+    endHour: 0,
     notes: null,
-    released_at: null,
+    released_at: 0,
     status: 'admin',
     ...fields
   });
 
   describe('processAdminBlocks', () => {
     it('should correctly map admin bookings and identify fully booked days', () => {
-      const mockBookings: Booking[] = [
-        createMockBooking({ start_time: '2026-08-24T07:00:00Z', end_time: '2026-08-24T12:00:00Z', apartment_id: ADMIN_ID }),
-        createMockBooking({ start_time: '2026-08-24T12:00:00Z', end_time: '2026-08-24T17:00:00Z', apartment_id: ADMIN_ID }),
-        createMockBooking({ start_time: '2026-08-24T17:00:00Z', end_time: '2026-08-24T22:00:00Z', apartment_id: ADMIN_ID }),
-        createMockBooking({ start_time: '2026-08-25T07:00:00Z', end_time: '2026-08-25T12:00:00Z', apartment_id: ADMIN_ID }), // Partial block
+      const mockBookings: NormalizedBooking[] = [
+        createMockBooking({ id: '1', dateStr:'2026-08-24', startHour:7 , endHour: 12, apartment_id: ADMIN_ID }),
+        createMockBooking({ id: '2', dateStr:'2026-08-24', startHour:12 , endHour: 17, apartment_id: ADMIN_ID}),
+        createMockBooking({ id: '3', dateStr:'2026-08-24', startHour:17 , endHour: 22, apartment_id: ADMIN_ID }),
+        createMockBooking({ id: '4', dateStr:'2026-08-25', startHour:7 , endHour: 12, apartment_id: ADMIN_ID}),
       ];
 
       const result = processAdminBlocks(mockBookings, standardSlots, new Date('2026-08-24T14:30:00Z'));

@@ -15,7 +15,7 @@ import { HouseholdSlot } from '../lib/databaseTypes';
 interface BookingModalProps {
   isOpen: boolean;
   onClose: () => void;
-  selectedSlot: { dateString: string; slot: HouseholdSlot, slotTimeState: SlotTimeState; } | null;
+  selectedSlot: { dateStr: string, slot: HouseholdSlot, slotTimeState: SlotTimeState; } | null;
   currentSlot: AggregatedSlotInfo;
   nextSlotAvailable?: boolean; // Pass true from the parent grid if the next chronological slot row is empty
   nextSlot?: HouseholdSlot| null;   // e.g., [10, 11]
@@ -63,7 +63,7 @@ export default function BookingModal({
     // Consecutive booking passes: startHour:, endHour: [10, 12]
     await bookSlot({
       apartmentId,
-      dateStr: selectedSlot.dateString, 
+      dateStr: selectedSlot.dateStr, 
       slotHours: slots,
       isAdminBlock: isAdminMode 
     });
@@ -110,7 +110,7 @@ export default function BookingModal({
         </div>
 
         {/* 2. SPECIFICATION BLOCK: Clean, Scannable Grid Card */}
-        <SlotSpecsCard dateString={selectedSlot.dateString} slotLabel={displaySlotLabel} />
+        <SlotSpecsCard dateString={selectedSlot.dateStr} slotLabel={displaySlotLabel} />
 
         {/* CONSECUTIVE SUGGESTION ENGINE: Renders only if slot is empty and next one is free */}
         {currentSlot.status === SlotStatus.AVAILABLE && nextSlotAvailable && nextSlot && selectedSlot.slotTimeState === 'future' && !isAdminMode && (
