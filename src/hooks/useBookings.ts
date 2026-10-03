@@ -77,6 +77,7 @@ export function useBookingActions() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['bookings'] });
       queryClient.invalidateQueries({ queryKey: ['upcoming-bookings'] });
+      queryClient.invalidateQueries({ queryKey: ['upcoming-admin-bookings'] });
       queryClient.invalidateQueries({ queryKey: ['next-available-slots'] });
     }
   });
@@ -86,6 +87,7 @@ export function useBookingActions() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['bookings'] });
       queryClient.invalidateQueries({ queryKey: ['upcoming-bookings'] });
+      queryClient.invalidateQueries({ queryKey: ['upcoming-admin-bookings'] });
       queryClient.invalidateQueries({ queryKey: ['next-available-slots'] });
     }
   });

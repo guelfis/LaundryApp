@@ -4,6 +4,7 @@ import Button from "../baseComponents/Button";
 import SectionText from "../baseComponents/SectionText";
 import AdminBookingModal from "../bookingModals/AdminBookingModal";
 import AggregatedMaintenanceBlock from "../components/AggregatedMaintenanceBlock";
+import AggregatedMaintenanceDetailModal from "../bookingModals/AggregatedMaintenanceDetailModal";
 import { LoadingSpinner } from "../baseComponents/LoadingSpinner";
 import { useBookingFilters, useUpcomingAdminBookings } from "../hooks/useBookings";
 import { aggregateAdminMaintenanceBlocks } from "../utils/slotsUtils"; 
@@ -17,6 +18,7 @@ interface AdminDashboardProps {
 export default function AdminDashboard({ apartmentId }: AdminDashboardProps) {
   const { t } = useTranslation();
   const [isAdminModalOpen, setIsAdminModalOpen] = useState<boolean>(false);
+  const [selectedBlockSlotIds, setSelectedBlockSlotIds] = useState<string[]>([]);
 
   // 1. Fetch upcoming blocks and filtering policies
   const { data: upcomingBookings = [], isLoading } = useUpcomingAdminBookings();
@@ -26,6 +28,19 @@ export default function AdminDashboard({ apartmentId }: AdminDashboardProps) {
   const aggregatedBlocks = useMemo(() => {
     return aggregateAdminMaintenanceBlocks(upcomingBookings, slotsPolicy);
   }, [upcomingBookings, slotsPolicy]);
+
+  // 3. Fast O(1) indexed dictionary for instant slot lookup
+  const bookingsById = useMemo(() => {
+    return Object.fromEntries(upcomingBookings.map((b) => [b.id, b]));
+  }, [upcomingBookings]);
+
+  // 4. Derive currently selected aggregated block by checking if any constituent slot belongs to the group
+  const selectedBlock = useMemo(() => {
+    if (selectedBlockSlotIds.length === 0) return null;
+    return aggregatedBlocks.find(
+      (b) => b.bookings_ids.some((id) => selectedBlockSlotIds.includes(id))
+    ) || null;
+  }, [aggregatedBlocks, selectedBlockSlotIds]);
 
   if (isLoading) {
       return (
@@ -51,7 +66,16 @@ export default function AdminDashboard({ apartmentId }: AdminDashboardProps) {
       </div>
 
       {/* AGGREGATED UPCOMING MAINTENANCE BLOCKS */}
-      <AggregatedMaintenanceBlock sectionTitle={t("adminDashboard.next_blocks")} aggregatedBlocks={aggregatedBlocks} />
+      <AggregatedMaintenanceBlock 
+        sectionTitle={t("adminDashboard.next_blocks")} 
+        aggregatedBlocks={aggregatedBlocks} 
+        onClickBlock={(blockId) => {
+          const clickedBlock = aggregatedBlocks.find((b) => b.id === blockId);
+          if (clickedBlock) {
+            setSelectedBlockSlotIds(clickedBlock.bookings_ids);
+          }
+        }}
+      />
 
       {isAdminModalOpen && (
         <AdminBookingModal
@@ -59,6 +83,15 @@ export default function AdminDashboard({ apartmentId }: AdminDashboardProps) {
           onClose={() => setIsAdminModalOpen(false)}
           bookings={upcomingBookings}
           apartmentId={apartmentId}
+        />
+      )}
+
+      {selectedBlock && (
+        <AggregatedMaintenanceDetailModal
+          isOpen={!!selectedBlock}
+          onClose={() => setSelectedBlockSlotIds([])}
+          block={selectedBlock}
+          bookingsById={bookingsById}
         />
       )}
     </div>

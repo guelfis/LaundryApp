@@ -230,6 +230,5 @@ export default function UserDashboard({ householdId, householdTimezone, apartmen
         )}
       
       </div>
-);
-
+  );
 }

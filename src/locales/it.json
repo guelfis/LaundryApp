@@ -171,6 +171,15 @@
     "next_blocks": "Prossimi Blocchi",
     "no_active_maintenance": "Nessuna manutenzione programmata"
   },
+  "aggregatedMaintenanceModal": {
+    "title": "Blocco Manutenzione",
+    "total_slots": "Slot Totali",
+    "scheduled": "Programmato",
+    "btn_delete_slot": "Elimina",
+    "btn_delete_all": "Elimina Intero Blocco",
+    "toast_deleted": "Slot eliminato con successo.",
+    "all_deleted": "Blocco di manutenzione eliminato con successo."
+  },
   "dashboardSlotCard": {
     "your_session": "Tua Sessione Attiva",
     "your_session_desc": "Prenotato sotto il tuo profilo.",

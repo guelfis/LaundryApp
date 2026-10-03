@@ -172,6 +172,15 @@
     "next_blocks": "Next Blocks",
     "no_active_maintenance": "No scheduled maintenance blocks"
   },
+  "aggregatedMaintenanceModal": {
+    "title": "Maintenance Block",
+    "total_slots": "Total Slots",
+    "scheduled": "Scheduled",
+    "btn_delete_slot": "Delete",
+    "btn_delete_all": "Delete Entire Block",
+    "toast_deleted": "Slot deleted successfully.",
+    "all_deleted": "Maintenance block deleted successfully."
+  },
   "dashboardSlotCard": {
     "laundry_free": "Laundry Room is Free",
     "laundry_free_desc": "No active bookings.",
