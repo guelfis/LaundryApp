@@ -177,7 +177,7 @@
     "total_slots": "Total Slots",
     "scheduled": "Scheduled",
     "btn_delete_slot": "Delete",
-    "btn_delete_all": "Delete Entire Block",
+    "btn_delete_all": "Delete Block",
     "toast_deleted": "Slot deleted successfully.",
     "all_deleted": "Maintenance block deleted successfully."
   },

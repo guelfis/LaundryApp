@@ -111,7 +111,11 @@ export default function AggregatedMaintenanceDetailModal({
   const isBusy = !!loadingSlotId || isDeletingAll;
 
   return (
-    <BottomModal isOpen={isOpen} onClose={onClose} title={t('aggregatedMaintenanceModal.title')}>
+    <BottomModal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={t('aggregatedMaintenanceModal.title')}
+    >
       <div className="space-y-6 mt-4 mb-4">
         {/* 1. SLOT SUMMARY BADGE (StatusDot with Scheduled label) */}
         <div className="flex items-center justify-between px-1">

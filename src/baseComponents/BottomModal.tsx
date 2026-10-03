@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { IonModal, IonContent } from '@ionic/react';
+import { IonModal, IonContent, IonHeader, IonTitle } from '@ionic/react';
 
 interface BottomModalProps {
   isOpen: boolean;
@@ -8,7 +8,12 @@ interface BottomModalProps {
   title?: string;
 }
 
-export default function BottomModal({ isOpen, onClose, children, title }: BottomModalProps) {
+export default function BottomModal({
+  isOpen,
+  onClose,
+  children,
+  title,
+}: BottomModalProps) {
   const modalRef = useRef<HTMLIonModalElement>(null);
 
   return (
@@ -27,32 +32,27 @@ export default function BottomModal({ isOpen, onClose, children, title }: Bottom
         '--max-width': '448px', 
       }}
     >
+    {title && (
+      <IonHeader >
+        <IonTitle style={{marginTop: '32px', marginBottom: '8px', color: 'var(--ion-text-color)'}}>{title}</IonTitle>
+      </IonHeader>
+      )}
       {/* 
         2. IONCONTENT SCROLL BUFFER: Ensures if content overflowing height limits,
         touchscreen momentum gestures handle scrolling gracefully inside the pill sheet.
       */}
       <IonContent 
+        scrollY={true}
         style={{
           '--background': 'var(--ion-background-color)',
           '--color': 'var(--ion-text-color)'
         }}
       >
-        <div style={{ padding: '32px', paddingTop: '32px', paddingBottom: '16px' }}>
+        <div style={{ padding: '24px', paddingTop: '8px', paddingBottom: '16px' }}>
           
           {/* Title Element with integrated system text dark/light color shifts */}
-          {title && (
-            <h2 
-              style={{ 
-                fontSize: '1.25rem', 
-                fontWeight: 'bold', 
-                marginBottom: '24px',
-                marginTop: '0px',
-                color: 'var(--ion-text-color)' 
-              }}
-            >
-              {title}
-            </h2>
-          )}
+          
+     
           
           {/* Consumer Children Render Target Injection */}
           {children}

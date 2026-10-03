@@ -176,7 +176,7 @@
     "total_slots": "Slot Totali",
     "scheduled": "Programmato",
     "btn_delete_slot": "Elimina",
-    "btn_delete_all": "Elimina Intero Blocco",
+    "btn_delete_all": "Elimina Blocco",
     "toast_deleted": "Slot eliminato con successo.",
     "all_deleted": "Blocco di manutenzione eliminato con successo."
   },
