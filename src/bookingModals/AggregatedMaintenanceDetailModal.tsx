@@ -116,7 +116,7 @@ export default function AggregatedMaintenanceDetailModal({
       onClose={onClose}
       title={t('aggregatedMaintenanceModal.title')}
     >
-      <div className="space-y-6 mt-4 mb-4">
+      <div className="space-y-5 mb-4">
         {/* 1. SLOT SUMMARY BADGE (StatusDot with Scheduled label) */}
         <div className="flex items-center justify-between px-1">
           <span className="text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--ion-color-step-400)' }}>
