@@ -1,4 +1,6 @@
 
+import i18n from '../locales/i18n';
+
 interface FormattedMaintenanceBlock {
   title: string;
   subtitle: string;
@@ -6,30 +8,32 @@ interface FormattedMaintenanceBlock {
 
 /**
  * Transforms absolute maintenance ISO strings into clean, responsive card layouts.
- * Outputs readable structures like "Sep 29 – 30, 2026"
+ * Outputs readable structures like "Sep 29 – 30, 2026" or "Oct 8, 2026"
  */
 export function formatMaintenanceBlockDisplay(startDate: string, startHour: number, endDate:string, endHour:number): FormattedMaintenanceBlock {
+  if (!startDate || !endDate) {
+    return { title: '', subtitle: '' };
+  }
 
   // dates are in the format "year-month-day"
-  // 2. Core calendar tokens
-  
   const startDateArray = startDate.split('-');
   const endDateArray = endDate.split('-');
   const startYear = startDateArray[0]; // "2026"
-  const endYear = endDateArray[0];   // "2026"
-  const startDay = startDateArray.slice(-1);
-  const endDay = endDateArray.slice(-1);
+  const endYear = endDateArray[0];     // "2026"
+  const startDay = parseInt(startDateArray[2], 10);
+  const endDay = parseInt(endDateArray[2], 10);
 
-  // 2. Safely get the short month name ("Sep") using a neutral UTC date string
-  // Adding "T00:00:00Z" guarantees JavaScript parses it exactly as written without timezone shifts
-  const startDateObj = new Date(`${startDate}T00:00:00Z`)
-  const startMonthStr = startDateObj.toLocaleDateString('en-US', { month: 'short', timeZone: 'UTC' });
-  const endMonthStr = new Date(`${endDate}T00:00:00Z`).toLocaleDateString('en-US', { month: 'short', timeZone: 'UTC' });
+  // Safely get the short month name ("Sep", "Oct") using neutral UTC date strings
+  const startDateObj = new Date(`${startDate}T00:00:00Z`);
+  const endDateObj = new Date(`${endDate}T00:00:00Z`);
+  const locale = i18n.language || 'en-US';
+  const startMonthStr = startDateObj.toLocaleDateString(locale, { month: 'short', timeZone: 'UTC' });
+  const endMonthStr = endDateObj.toLocaleDateString(locale, { month: 'short', timeZone: 'UTC' });
 
-  const isMultiDay = startDay !== endDay || startMonthStr !== endMonthStr || startYear !== endYear;
+  const isMultiDay = startDate !== endDate;
 
   // 3. Dynamic Title Generation
-  let title = startDateObj.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }); // Single day default
+  let title = `${startMonthStr} ${startDay}, ${startYear}`; // Single day default: "Oct 8, 2026"
   
   if (isMultiDay) {
     if (startYear !== endYear) {
