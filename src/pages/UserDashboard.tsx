@@ -176,7 +176,9 @@ export default function UserDashboard({ householdId, householdTimezone, apartmen
                 
                 if (currentSlotConfig) {
                   // 2. Generate pristine date boundaries without parsing discrepancies 
-                  bookingInfo.dateStr = `${bClock.year}-${bClock.monthIndex}-${bClock.day}`;
+                  const currentMonthStr = String(bClock.monthIndex + 1).padStart(2, '0');
+                  const currentDayStr = String(bClock.day).padStart(2, '0');
+                  bookingInfo.dateStr = `${bClock.year}-${currentMonthStr}-${currentDayStr}`;
                   bookingInfo.startHour = currentSlotConfig.start;
                   bookingInfo.endHour = currentSlotConfig.end;
                 }

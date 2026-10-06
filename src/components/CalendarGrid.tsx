@@ -7,7 +7,7 @@ import { generateMonthRows } from '../utils/calendarUtils';
 import { useBookingFilters, useMonthBookings } from '../hooks/useBookings';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import BookingModal from '../bookingModals/BookingModal';
-import { getDateString, getLocalizedDaysOfWeek } from '../utils/datesGetter';
+import { getLocalizedDaysOfWeek } from '../utils/datesGetter';
 import { useTranslation } from 'react-i18next';
 import { useIonViewDidEnter } from '@ionic/react';
 import { HouseholdSlot } from '../lib/databaseTypes';
@@ -115,7 +115,8 @@ export default function CalendarGrid({ activeMonth, viewDate }: CalendarGridProp
   }, [activeMonth, isLoading]);
 
   const handleOpenModal = (dayNum: number, slot: HouseholdSlot, slotInfo: AggregatedSlotInfo, slotTimeState: SlotTimeState, nextSlotAvailable: boolean, nextSlot: HouseholdSlot | null ) => {
-    setSelectedSlot({ dateStr: getDateString(dayNum, activeMonth, activeYear), slot , slotTimeState:slotTimeState, nextSlotAvailable, nextSlot });
+    const isoDate = `${activeYear}-${String(activeMonth + 1).padStart(2, '0')}-${String(dayNum).padStart(2, '0')}`;
+    setSelectedSlot({ dateStr: isoDate, slot , slotTimeState:slotTimeState, nextSlotAvailable, nextSlot });
     setSelectedBooking(slotInfo);
   };
 
@@ -169,7 +170,7 @@ export default function CalendarGrid({ activeMonth, viewDate }: CalendarGridProp
                 
                 {slotsPolicy.slots.map((slot, col) => {
                   const slotKey = getSlotKey(dayNum, activeMonth, activeYear, slot.start);
-                  const date = `${activeYear}-${String(activeMonth + 1).padStart(2, '0')}-${dayNum}`
+                  const date = `${activeYear}-${String(activeMonth + 1).padStart(2, '0')}-${String(dayNum).padStart(2, '0')}`;
                   const slotInfo = aggregatedBookingsMap[slotKey] ?? emptySlotFallback(date, slot.start, slot.end);
                   const slotTimeState = getSlotTimeState(slotInfo.dateStr, slotInfo.startHour, slotInfo.endHour);
                   const isCurrentTimeSlot = slotTimeState === 'live';
