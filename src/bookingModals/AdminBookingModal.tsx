@@ -1,4 +1,4 @@
-import { IonToast, IonDatetime, IonModal } from '@ionic/react';
+import { IonToast } from '@ionic/react';
 import BottomModal from '../baseComponents/BottomModal';
 import ModalButton from '../baseComponents/ModalButton';
 import { useBookingActions, useBookingFilters } from '../hooks/useBookings';
@@ -9,7 +9,15 @@ import SlotsGrid from '../components/SlotsGrid';
 import NotesArea from '../components/NotesArea';
 import { DatePicker } from '../baseComponents/DatePicker';
 import { HouseholdSlot } from '../lib/databaseTypes';
-import { calculateMaxEndDate, calculatePayloadsForBooking, getAvailableSlotsForDate, getFirstAvailableStartDate, processAdminBlocks, toggleSlotInCollection } from '../utils/adminModalUtils';
+import {
+  calculateMaxEndDate,
+  calculatePayloadsForBooking,
+  getAvailableSlotsForDate,
+  getFirstAvailableStartDate,
+  getPastSlotsForDate,
+  getSlotsInPeriodForDate,
+  processAdminBlocks,
+} from '../utils/adminModalUtils';
 import { NormalizedBooking } from '../utils/normalizeBookings';
 
 interface AdminBlockModalProps {
@@ -24,24 +32,29 @@ export default function AdminBlockModal({ isOpen, onClose, bookings, apartmentId
   const { slotsPolicy } = useBookingFilters();
   const { bookSlot, isBooking } = useBookingActions();
 
-  // TODO: it uses upcoming bookings to generate available slots, but it doesn't currently take into account the current slot
-  
-  //  Generate the dictionary of admin blocks for quick lookup and validation
+  // Generate the dictionary of admin blocks for quick lookup and validation
   const adminBlocksMap = useMemo(() => {
     return processAdminBlocks(bookings, slotsPolicy.slots);
   }, [bookings, slotsPolicy]);
 
-  
   // Unified visual interaction states matching your grid template
   const [isMultiDay, setIsMultiDay] = useState(false);
-  
-  // Format as strings instead of split arrays to ensure clean IonDatetime string tracking
-  const [startDate, setStartDate] = useState<string>(new Date().toISOString().split('T')[0]);
-  const [endDate, setEndDate] = useState<string>(new Date().toISOString().split('T')[0]);
   
   const absoluteMinStartDate = useMemo(() => {
     return getFirstAvailableStartDate(adminBlocksMap);
   }, [adminBlocksMap]);
+
+  // Format as strings instead of split arrays to ensure clean IonDatetime string tracking
+  const [startDate, setStartDate] = useState<string>(() => absoluteMinStartDate || new Date().toISOString().split('T')[0]);
+  const [endDate, setEndDate] = useState<string>(() => absoluteMinStartDate || new Date().toISOString().split('T')[0]);
+
+  // Start slot and final/end slot for the maintenance period
+  const [startSlot, setStartSlot] = useState<HouseholdSlot | null>(null);
+  const [endSlot, setEndSlot] = useState<HouseholdSlot | null>(null);
+  const [notes, setNotes] = useState<string>('');
+
+  const [toastMessage, setToastMessage] = useState<string>('');
+  const [toastColor, setToastColor] = useState<'success' | 'warning' | 'danger'>('success');
 
   const maxEndDate = useMemo(() => {
     return calculateMaxEndDate(startDate, adminBlocksMap);
@@ -61,57 +74,129 @@ export default function AdminBlockModal({ isOpen, onClose, bookings, apartmentId
     return getAvailableSlotsForDate(endDate, adminBlocksMap, slotsPolicy.slots);
   }, [endDate, adminBlocksMap, slotsPolicy.slots]);
 
-  // Converted to arrays to support picking multiple slots for a single day!
-  const [selectedStartSlots, setSelectedStartSlots] = useState<HouseholdSlot[]>([]);
-  const [selectedEndSlots, setSelectedEndSlots] = useState<HouseholdSlot[]>([]);
-  const [notes, setNotes] = useState<string>('');
+  const pastSlotsForStartDay = useMemo(() => {
+    return getPastSlotsForDate(startDate, slotsPolicy.slots);
+  }, [startDate, slotsPolicy.slots]);
 
-  const [toastMessage, setToastMessage] = useState<string>('');
-  const [toastColor, setToastColor] = useState<'success' | 'warning' | 'danger'>('success');
+  const pastSlotsForEndDay = useMemo(() => {
+    return getPastSlotsForDate(endDate, slotsPolicy.slots, startDate, startSlot);
+  }, [endDate, slotsPolicy.slots, startDate, startSlot]);
+
+  // Compute constituent slots in the requested period for start day
+  const startDaySlotsInPeriod = useMemo(() => {
+    if (!startSlot) return [];
+    if (!isMultiDay) {
+      return getSlotsInPeriodForDate(startDate, startDate, startDate, startSlot, endSlot || startSlot, slotsPolicy.slots);
+    }
+    if (startDate === endDate && endSlot) {
+      return getSlotsInPeriodForDate(startDate, startDate, endDate, startSlot, endSlot, slotsPolicy.slots);
+    }
+    return slotsPolicy.slots.filter(s => s.start >= startSlot.start);
+  }, [startSlot, endSlot, isMultiDay, startDate, endDate, slotsPolicy.slots]);
+
+  // Compute constituent slots in the requested period for end day
+  const endDaySlotsInPeriod = useMemo(() => {
+    if (!endSlot) return [];
+    if (startDate === endDate && startSlot) {
+      return getSlotsInPeriodForDate(endDate, startDate, endDate, startSlot, endSlot, slotsPolicy.slots);
+    }
+    return slotsPolicy.slots.filter(s => s.end <= endSlot.end);
+  }, [startSlot, endSlot, startDate, endDate, slotsPolicy.slots]);
 
   useEffect(() => {
     if (isOpen) {
       setIsMultiDay(false);
-      setSelectedStartSlots([]);
-      setSelectedEndSlots([]);
+      setStartSlot(null);
+      setEndSlot(null);
       setNotes('');
+      if (absoluteMinStartDate) {
+        setStartDate(absoluteMinStartDate);
+        setEndDate(absoluteMinStartDate);
+      }
     }
-  }, [isOpen]);
+  }, [isOpen, absoluteMinStartDate]);
 
   useEffect(() => {
-    setSelectedStartSlots([]);
+    setStartSlot(null);
+    if (!isMultiDay) {
+      setEndSlot(null);
+    }
   }, [startDate]);
 
   useEffect(() => {
-    setSelectedEndSlots([]);
-}, [endDate, isMultiDay]);
+    if (isMultiDay) {
+      setEndSlot(null);
+    }
+  }, [endDate]);
 
-  // Helper toggle to add or remove slots from the administrative array list
-  const toggleStartSlotSelection = (slot: HouseholdSlot) => {
-    // Check if the slot is actually available right now
-    const isAvailable = availableSlotsForStartDay.some(s => s.id === slot.id);
-    if (!isAvailable) return; // Prevent selection of already booked slots
+  useEffect(() => {
+    if (isMultiDay && endDate < startDate) {
+      setEndDate(startDate);
+    }
+  }, [startDate, isMultiDay, endDate]);
 
-    setSelectedStartSlots(prev => toggleSlotInCollection(prev, slot));
+  const handleToggleMultiDay = (checked: boolean) => {
+    setIsMultiDay(checked);
+    if (checked) {
+      if (endDate < startDate) {
+        setEndDate(startDate);
+      }
+      if (!endSlot && startSlot) {
+        setEndSlot(startSlot);
+      }
+    } else {
+      setEndDate(startDate);
+      if (startSlot && !endSlot) {
+        setEndSlot(startSlot);
+      }
+    }
   };
 
-  const toggleEndSlotSelection = (slot: HouseholdSlot) => {
-    // Check if the slot is actually available right now
-    const isAvailable = availableSlotsForEndDay.some(s => s.id === slot.id);
-    if (!isAvailable) return; // Prevent selection of already booked slots
+  // Single-day period selection: Click 1 slot sets single slot; Click 2nd slot sets [min, max] range
+  const handleToggleSingleDaySlot = (slot: HouseholdSlot) => {
+    if (!startSlot) {
+      setStartSlot(slot);
+      setEndSlot(slot);
+    } else if (startSlot.start === endSlot?.start && startSlot.end === endSlot?.end) {
+      if (slot.start === startSlot.start && slot.end === startSlot.end) {
+        setStartSlot(null);
+        setEndSlot(null);
+      } else {
+        const first = slot.start < startSlot.start ? slot : startSlot;
+        const second = slot.start < startSlot.start ? startSlot : slot;
+        setStartSlot(first);
+        setEndSlot(second);
+      }
+    } else {
+      // Reset to clicked slot
+      setStartSlot(slot);
+      setEndSlot(slot);
+    }
+  };
 
-    setSelectedEndSlots(prev => toggleSlotInCollection(prev, slot));
+  // Multi-day start slot selection (from this slot to end of start day)
+  const handleToggleStartSlot = (slot: HouseholdSlot) => {
+    if (startSlot && startSlot.start === slot.start && startSlot.end === slot.end) {
+      setStartSlot(null);
+    } else {
+      setStartSlot(slot);
+    }
+  };
+
+  // Multi-day final slot selection (from start of end day up to this slot)
+  const handleToggleEndSlot = (slot: HouseholdSlot) => {
+    if (endSlot && endSlot.start === slot.start && endSlot.end === slot.end) {
+      setEndSlot(null);
+    } else {
+      setEndSlot(slot);
+    }
   };
 
   const isDateSelected = () => {
-   if (selectedStartSlots.length === 0){
-    return false;
-   }
-   if (isMultiDay && selectedEndSlots.length === 0) {
-    return false;
-   }
-   return true;
-  }
+    if (!startSlot) return false;
+    if (isMultiDay && !endSlot) return false;
+    return true;
+  };
 
   if (!isOpen) return null;
 
@@ -129,18 +214,24 @@ export default function AdminBlockModal({ isOpen, onClose, bookings, apartmentId
     }
 
     try {
-      // 1. Extract pure processing arrays from state inputs
       const bookingPayloads = calculatePayloadsForBooking({
         apartmentId,
         isMultiDay,
         startDate,
         endDate,
-        selectedStartSlots,
-        selectedEndSlots,
-        allSlotsConfig: slotsPolicy.slots
+        startSlot,
+        endSlot: isMultiDay ? endSlot : (endSlot || startSlot),
+        allSlotsConfig: slotsPolicy.slots,
+        adminBlocksMap,
       });
 
-      // 2. Map payload items sequentially into atomic database updates
+      if (bookingPayloads.length === 0) {
+        setToastMessage(t('adminBlockModal.error_already_blocked'));
+        setToastColor('warning');
+        return;
+      }
+
+      // Map payload items sequentially into atomic database updates
       for (const payload of bookingPayloads) {
         await bookSlot(payload);
       }
@@ -154,8 +245,7 @@ export default function AdminBlockModal({ isOpen, onClose, bookings, apartmentId
     }
   };
 
-
-   return (
+  return (
     <BottomModal
       isOpen={isOpen}
       onClose={onClose}
@@ -173,21 +263,30 @@ export default function AdminBlockModal({ isOpen, onClose, bookings, apartmentId
             isDateEnabled={isDateEnabled}
             minDate={absoluteMinStartDate}
           />
+
+          <p className="text-xs font-semibold text-gray-500 pl-1 mt-1">
+            {isMultiDay
+              ? t('adminBlockModal.start_slot_label', 'Start time (from this slot onwards):')
+              : t('adminBlockModal.single_day_slot_label', 'Select time period for this day:')}
+          </p>
           
           <SlotsGrid 
-            slots={availableSlotsForStartDay} 
-            selectedSlots={selectedStartSlots} 
-            onToggleSlot={toggleStartSlotSelection} 
+            slots={slotsPolicy.slots}
+            availableSlots={availableSlotsForStartDay}
+            disabledSlots={pastSlotsForStartDay}
+            selectedSlots={startDaySlotsInPeriod} 
+            onToggleSlot={isMultiDay ? handleToggleStartSlot : handleToggleSingleDaySlot}
+            startSlot={startSlot}
+            endSlot={isMultiDay ? null : endSlot}
           />
         </div>
 
         {/* 2. MULTI-DAY ACCORDION TOGGLE CHECKBOX */}
         <SuggestionToggle
           checked={isMultiDay}
-          onToggle={setIsMultiDay}
+          onToggle={handleToggleMultiDay}
           title={t('adminBlockModal.multiple_days')}
         />
-        
 
         {/* 3. DYNAMIC END DATE FORM MATRIX SECTION */}
         {isMultiDay && (
@@ -201,17 +300,41 @@ export default function AdminBlockModal({ isOpen, onClose, bookings, apartmentId
               maxDate={maxEndDate}
               isDateEnabled={isDateEnabled}
             />
+
+            <p className="text-xs font-semibold text-gray-500 pl-1 mt-1">
+              {t('adminBlockModal.end_slot_label', 'End time (up to this slot):')}
+            </p>
             
-          
             <SlotsGrid 
-              slots={availableSlotsForEndDay} 
-              selectedSlots={selectedEndSlots} 
-              onToggleSlot={toggleEndSlotSelection} 
+              slots={slotsPolicy.slots}
+              availableSlots={availableSlotsForEndDay}
+              disabledSlots={pastSlotsForEndDay}
+              selectedSlots={endDaySlotsInPeriod} 
+              onToggleSlot={handleToggleEndSlot}
+              startSlot={null}
+              endSlot={endSlot}
             />
           </div>
         )}
 
-        {/* 4. OPTIONAL NOTES FIELD */}
+        {/* 4. DYNAMIC PERIOD SUMMARY BANNER */}
+        {isDateSelected() && (
+          <div className="p-3.5 rounded-xl border bg-gray-50/50 dark:bg-zinc-800/50 space-y-1 text-xs">
+            <div className="font-semibold text-gray-700 dark:text-gray-200 flex items-center justify-between">
+              <span>{t('adminBlockModal.period_summary')}</span>
+              <span className="text-pink-600 dark:text-pink-400 font-bold">
+                {!isMultiDay
+                  ? `${startDate}: ${startSlot?.start}:00 – ${(endSlot || startSlot)?.end}:00`
+                  : `${startDate} (${startSlot?.start}:00) – ${endDate} (${endSlot?.end}:00)`}
+              </span>
+            </div>
+            <p className="text-[11px] text-gray-500 dark:text-gray-400">
+              {t('adminBlockModal.already_blocked_note')}
+            </p>
+          </div>
+        )}
+
+        {/* 5. OPTIONAL NOTES FIELD */}
         <NotesArea 
           label={t('adminBlockModal.notes_label')}
           placeholder={t('adminBlockModal.notes_placeholder')}
@@ -220,7 +343,7 @@ export default function AdminBlockModal({ isOpen, onClose, bookings, apartmentId
         />
       </div>
 
-      {/* 5. ACTION CONTROLS & SUB-MODALS */}
+      {/* 6. ACTION CONTROLS */}
       <div className="flex flex-col gap-4 pb-4">
         <ModalButton variant="danger" disabled={isBooking || !isDateSelected()} onClick={handleApplyBlock}>
           {t('adminBlockModal.btn_apply')}
@@ -229,31 +352,6 @@ export default function AdminBlockModal({ isOpen, onClose, bookings, apartmentId
         <ModalButton variant="secondary" disabled={isBooking} onClick={onClose}>
           {t('common.button_close')}
         </ModalButton>
-
-        <IonModal keepContentsMounted={true}>
-          <IonDatetime 
-            id="admin-start-picker-id" 
-            presentation="date" 
-            value={startDate}
-            onIonChange={e => {
-              const val = e.detail.value as string;
-              if (val) setStartDate(val.split('T')[0]);
-            }} 
-          />
-        </IonModal>
-        
-        <IonModal keepContentsMounted={true}>
-          <IonDatetime 
-            id="admin-end-picker-id" 
-            presentation="date" 
-            min={startDate}
-            value={endDate}
-            onIonChange={e => {
-              const val = e.detail.value as string;
-              if (val) setEndDate(val.split('T')[0]);
-            }} 
-          />
-        </IonModal>
 
         <IonToast isOpen={!!toastMessage} message={toastMessage} duration={3000} onDidDismiss={() => setToastMessage('')} color={toastColor} />
       </div>

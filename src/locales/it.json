@@ -12,7 +12,8 @@
     "leaving": "Leaving ...",
     "info": "Info",
     "save": "Salva Modifiche",
-    "btn_send": "Invia"
+    "btn_send": "Invia",
+    "done": "Fine"
   },
   "app": {
     "title": "Pianificatore Lavanderia",
@@ -187,6 +188,8 @@
     "all_deleted": "Blocco di manutenzione eliminato con successo."
   },
   "dashboardSlotCard": {
+    "laundry_free": "La lavanderia è libera",
+    "laundry_free_desc": "Nessuna prenotazione attiva.",
     "your_session": "Tua Sessione Attiva",
     "your_session_desc": "Prenotato sotto il tuo profilo.",
     "slot_occupied": "Slot Occupato",
@@ -355,6 +358,14 @@
     "notes_placeholder": "es. Pulizia profonda, Fuori servizio...",
     "btn_apply": "Blocca la lavanderia",
     "error_incomplete": "Per favore seleziona tutti i limiti di data e ora.",
-    "success": "Lavanderia bloccata con successo"
+    "success": "Lavanderia bloccata con successo",
+    "error_admin_missing": "Errore: Non sei un amministratore dell'edificio",
+    "start_slot_label": "Orario di inizio (da questa fascia in poi):",
+    "end_slot_label": "Orario di fine (fino a questa fascia compresa):",
+    "single_day_slot_label": "Seleziona la fascia o il periodo per questo giorno:",
+    "period_summary": "Periodo selezionato:",
+    "already_blocked_note": "Gli slot già bloccati rimarranno attivi senza conflitti.",
+    "blocked_badge": "Bloccato",
+    "error_already_blocked": "Il periodo selezionato è già completamente bloccato."
   }
 }

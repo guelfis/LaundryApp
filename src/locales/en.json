@@ -359,6 +359,13 @@
     "btn_apply": "Block Laundry",
     "error_incomplete": "Please configure all date and hour boundaries first.",
     "success": "Laundry Blocked successfully",
-    "error_admin_missing": "Error: You are not an admin of the building"
+    "error_admin_missing": "Error: You are not an admin of the building",
+    "start_slot_label": "Start time (from this slot onwards):",
+    "end_slot_label": "End time (up to this slot):",
+    "single_day_slot_label": "Select time period for this day:",
+    "period_summary": "Selected Period:",
+    "already_blocked_note": "Existing blocks in this period will remain in place without conflicts.",
+    "blocked_badge": "Blocked",
+    "error_already_blocked": "The selected period is already completely blocked."
   }
 }

@@ -12,6 +12,20 @@ export interface DayBlockSummary {
 export type AdminBlocksMap = Record<string, DayBlockSummary>;
 
 /**
+ * Checks whether a given slot interval overlaps with any blocked intervals.
+ * Two intervals [A, B] and [C, D] overlap if Math.max(A, C) < Math.min(B, D).
+ */
+export function isSlotOverlappingBlocked(
+  slotStart: number,
+  slotEnd: number,
+  blockedIntervals: number[][]
+): boolean {
+  return blockedIntervals.some(
+    ([bStart, bEnd]) => Math.max(slotStart, bStart) < Math.min(slotEnd, bEnd)
+  );
+}
+
+/**
  * Parses all admin bookings into a reactive data map and calculates constraints.
  */
 export function processAdminBlocks(
@@ -22,8 +36,10 @@ export function processAdminBlocks(
   const blocksMap: AdminBlocksMap = {};
   
   // 1. Pre-populate TODAY with slots that have already finished
-  const todayStr = currentDateSource.toISOString().split('T')[0];
-  const currentHour = currentDateSource.getHours();
+  const timezone = getHouseholdTimezone();
+  const buildingDateTime = getBuildingCurrentDateTime(timezone, currentDateSource);
+  const todayStr = `${buildingDateTime.year}-${String(buildingDateTime.monthIndex + 1).padStart(2, '0')}-${String(buildingDateTime.day).padStart(2, '0')}`;
+  const currentHour = buildingDateTime.hour;
 
   blocksMap[todayStr] = { blockedSlots: [], isFullyBooked: false };
   
@@ -36,7 +52,10 @@ export function processAdminBlocks(
 
   // 2. Map out active admin bookings from the database
   bookings.forEach((b) => {
-    if (!b.startHour || !b.endHour) return;
+    if (typeof b.startHour !== 'number' || typeof b.endHour !== 'number') return;
+    if (b.status && b.status !== 'admin') return;
+    if (b.released_at) return;
+    if (!b.dateStr) return;
     
     // Extract hours cleanly from ISO strings
     const slotTuple = [b.startHour, b.endHour];
@@ -56,9 +75,11 @@ export function processAdminBlocks(
 
   // 3. Flag days that are completely full (either by database blocks or past time)
   Object.keys(blocksMap).forEach((dateStr) => {
-    if (blocksMap[dateStr].blockedSlots.length >= masterSlots.length) {
-      blocksMap[dateStr].isFullyBooked = true;
-    }
+    blocksMap[dateStr].isFullyBooked =
+      masterSlots.length > 0 &&
+      masterSlots.every(slot =>
+        isSlotOverlappingBlocked(slot.start, slot.end, blocksMap[dateStr].blockedSlots)
+      );
   });
 
   return blocksMap;
@@ -124,13 +145,47 @@ export function getAvailableSlotsForDate(
       return false;
     }
 
-    // Scenario B: Check if this slot matches any blocked interval recorded in adminBlocksMap
-    const isBlocked = blockedIntervals.some(
-      blocked => blocked[0] === slot.start && blocked[1] === slot.end
-    );
+    // Scenario B: Check if this slot overlaps any blocked interval recorded in adminBlocksMap
+    const isBlocked = isSlotOverlappingBlocked(slot.start, slot.end, blockedIntervals);
 
     return !isBlocked;
   });
+}
+
+/**
+ * Returns slots that have already passed for a given date in the building timezone.
+ */
+export function getPastSlotsForDate(
+  dateStr: string,
+  masterSlots: HouseholdSlot[],
+  startDate: string | null = null,
+  startSlot: HouseholdSlot | null = null
+): HouseholdSlot[] {
+  const timezone = getHouseholdTimezone();
+  const buildingDateTime = getBuildingCurrentDateTime(timezone);
+  const todayStr = `${buildingDateTime.year}-${String(buildingDateTime.monthIndex + 1).padStart(2, '0')}-${String(buildingDateTime.day).padStart(2, '0')}`;
+  const currentHour = buildingDateTime.hour;
+
+  if (dateStr < todayStr) {
+    return [...masterSlots];
+  }
+  if (dateStr === todayStr) {
+    return masterSlots.filter(slot => slot.end <= currentHour);
+  }
+  if (startDate) {
+    // If dateStr is before the startDate altogether, all slots are "past / invalid"
+    if (dateStr < startDate) {
+      return [...masterSlots];
+    }
+
+    // If checking the exact same date as startDate (or an end date evaluating against startDate),
+    // treat slots ending at or before the start hour as past/unavailable
+    if (dateStr === startDate) {
+      const startHour = startSlot ? startSlot.end : 0;
+      return masterSlots.filter(slot => slot.start < startHour || slot.end <= startHour);
+    }
+  }
+  return [];
 }
 
 /**
@@ -145,13 +200,15 @@ export function getFirstAvailableStartDate(
   adminBlocksMap: AdminBlocksMap,
   fallbackToday: Date = new Date()
 ): string {
-  const checkDay = new Date(fallbackToday);
-  let dateStrToken = checkDay.toISOString().split('T')[0];
+  const timezone = getHouseholdTimezone();
+  const b = getBuildingCurrentDateTime(timezone, fallbackToday);
+  const checkDay = new Date(Date.UTC(b.year, b.monthIndex, b.day, 12, 0, 0));
+  let dateStrToken = `${checkDay.getUTCFullYear()}-${String(checkDay.getUTCMonth() + 1).padStart(2, '0')}-${String(checkDay.getUTCDate()).padStart(2, '0')}`;
 
   // Loop forward day by day. If the day is fully booked by the admin, step to the next calendar date
   while (adminBlocksMap[dateStrToken]?.isFullyBooked) {
-    checkDay.setDate(checkDay.getDate() + 1);
-    dateStrToken = checkDay.toISOString().split('T')[0];
+    checkDay.setUTCDate(checkDay.getUTCDate() + 1);
+    dateStrToken = `${checkDay.getUTCFullYear()}-${String(checkDay.getUTCMonth() + 1).padStart(2, '0')}-${String(checkDay.getUTCDate()).padStart(2, '0')}`;
   }
 
   return dateStrToken;
@@ -167,16 +224,6 @@ export interface BookingPayload {
 export interface SlotConfig {
   start: number;
   end: number;
-}
-
-interface CalculatePayloadsParams {
-  apartmentId: string;
-  isMultiDay: boolean;
-  startDate: string; // Format: "YYYY-MM-DD"
-  endDate: string;   // Format: "YYYY-MM-DD"
-  selectedStartSlots: { start: number; end: number }[];
-  selectedEndSlots: { start: number; end: number }[];
-  allSlotsConfig: SlotConfig[];
 }
 
 /**
@@ -198,67 +245,137 @@ export function addDaysToDateString(dateStr: string, days: number): string {
 }
 
 /**
+ * Calculates all slots falling within a time period for a given day.
+ */
+export function getSlotsInPeriodForDate(
+  dateStr: string,
+  startDate: string,
+  endDate: string,
+  startSlot: SlotConfig,
+  endSlot: SlotConfig,
+  allSlotsConfig: HouseholdSlot[]
+): HouseholdSlot[] {
+  if (dateStr < startDate || dateStr > endDate) {
+    return [];
+  }
+
+  // Sort all slots by start hour to ensure chronological order
+  const sortedSlots = [...allSlotsConfig].sort((a, b) => a.start - b.start);
+
+  if (startDate === endDate) {
+    const periodStart = Math.min(startSlot.start, endSlot.start);
+    const periodEnd = Math.max(startSlot.end, endSlot.end);
+    return sortedSlots.filter(
+      slot => slot.start >= periodStart && slot.end <= periodEnd
+    );
+  }
+
+  if (dateStr === startDate) {
+    return sortedSlots.filter(slot => slot.start >= startSlot.start);
+  }
+
+  if (dateStr === endDate) {
+    return sortedSlots.filter(slot => slot.end <= endSlot.end);
+  }
+
+  // Intermediate days: all template slots are included
+  return sortedSlots;
+}
+
+export interface CalculatePayloadsParams {
+  apartmentId: string;
+  isMultiDay: boolean;
+  startDate: string; // Format: "YYYY-MM-DD"
+  endDate: string;   // Format: "YYYY-MM-DD"
+  startSlot?: SlotConfig | null;
+  endSlot?: SlotConfig | null;
+  selectedStartSlots?: SlotConfig[];
+  selectedEndSlots?: SlotConfig[];
+  allSlotsConfig: HouseholdSlot[];
+  adminBlocksMap?: AdminBlocksMap;
+}
+
+/**
  * Calculates the exact booking payloads required for single or multi-day admin blocks.
- * Operates purely on layout string evaluations to preserve localized building integrity.
+ * Operates on continuous time periods from startSlot to endSlot, skipping already-blocked slots.
  */
 export function calculatePayloadsForBooking({
   apartmentId,
   isMultiDay,
   startDate,
   endDate,
+  startSlot,
+  endSlot,
   selectedStartSlots,
   selectedEndSlots,
   allSlotsConfig,
+  adminBlocksMap,
 }: CalculatePayloadsParams): BookingPayload[] {
   const payloads: BookingPayload[] = [];
 
-  // CASE A: Single Day Block
-  if (!isMultiDay) {
-    const slots: Slot[] = selectedStartSlots.map(slot => ({
-      startHour: slot.start,
-      endHour: slot.end
-    }));
+  // Resolve effective startSlot
+  let effectiveStartSlot = startSlot;
+  if (!effectiveStartSlot && selectedStartSlots && selectedStartSlots.length > 0) {
+    const sorted = [...selectedStartSlots].sort((a, b) => a.start - b.start);
+    effectiveStartSlot = sorted[0];
+  }
 
-    if (slots.length > 0) {
-      payloads.push({ apartmentId, dateStr: startDate, slotHours: slots, isAdminBlock: true });
-    }
+  // Resolve effective endSlot
+  let effectiveEndSlot = endSlot;
+  if (!effectiveEndSlot && selectedEndSlots && selectedEndSlots.length > 0) {
+    const sorted = [...selectedEndSlots].sort((a, b) => a.end - b.end);
+    effectiveEndSlot = sorted[sorted.length - 1];
+  } else if (!effectiveEndSlot && selectedStartSlots && selectedStartSlots.length > 0) {
+    const sorted = [...selectedStartSlots].sort((a, b) => a.end - b.end);
+    effectiveEndSlot = sorted[sorted.length - 1];
+  }
+
+  if (!effectiveStartSlot || !effectiveEndSlot) {
     return payloads;
   }
 
-  // CASE B: Multi-Day Range Block
+  const filterAvailableSlots = (dateStr: string, candidateSlots: HouseholdSlot[]): Slot[] => {
+    if (!adminBlocksMap || !adminBlocksMap[dateStr]) {
+      return candidateSlots.map(slot => ({
+        startHour: slot.start,
+        endHour: slot.end,
+      }));
+    }
+
+    const blockedIntervals = adminBlocksMap[dateStr].blockedSlots;
+    return candidateSlots
+      .filter(slot => !isSlotOverlappingBlocked(slot.start, slot.end, blockedIntervals))
+      .map(slot => ({
+        startHour: slot.start,
+        endHour: slot.end,
+      }));
+  };
+
+  const actualEndDate = isMultiDay ? endDate : startDate;
   let currentDateStr = startDate;
 
   // Loop safely until the date string sequentially advances past the target end date
-  while (currentDateStr <= endDate) {
-    const slotsForThisDay: Slot[] = [];
+  while (currentDateStr <= actualEndDate) {
+    const candidateSlots = getSlotsInPeriodForDate(
+      currentDateStr,
+      startDate,
+      actualEndDate,
+      effectiveStartSlot,
+      effectiveEndSlot,
+      allSlotsConfig
+    );
 
-    if (currentDateStr === startDate) {
-      // 1. Initial boundary day: Apply only selected start slots (e.g., evening slots)
-      selectedStartSlots.forEach(slot => {
-        slotsForThisDay.push({ startHour: slot.start, endHour: slot.end });
-      });
-    } else if (currentDateStr === endDate) {
-      // 2. Final boundary day: Apply only selected end slots (e.g., morning slots)
-      selectedEndSlots.forEach(slot => {
-        slotsForThisDay.push({ startHour: slot.start, endHour: slot.end });
-      });
-    } else {
-      // 3. Intermediate days: Block all template system slots entirely
-      allSlotsConfig.forEach(slotConfig => {
-        slotsForThisDay.push({ startHour: slotConfig.start, endHour: slotConfig.end });
-      });
-    }
+    const unblockedSlots = filterAvailableSlots(currentDateStr, candidateSlots);
 
-    if (slotsForThisDay.length > 0) {
+    if (unblockedSlots.length > 0) {
       payloads.push({
         apartmentId,
         dateStr: currentDateStr,
-        slotHours: slotsForThisDay,
+        slotHours: unblockedSlots,
         isAdminBlock: true,
       });
     }
 
-    // Step ahead exactly 1 calendar day string
     currentDateStr = addDaysToDateString(currentDateStr, 1);
   }
 
