@@ -383,6 +383,38 @@ export type Database = {
           },
         ]
       }
+      user_fcm_tokens: {
+        Row: {
+          created_at: string | null
+          device_type: Database["public"]["Enums"]["device_platform"]
+          fcm_token: string
+          id: string
+          profile_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          device_type?: Database["public"]["Enums"]["device_platform"]
+          fcm_token: string
+          id?: string
+          profile_id: string
+        }
+        Update: {
+          created_at?: string | null
+          device_type?: Database["public"]["Enums"]["device_platform"]
+          fcm_token?: string
+          id?: string
+          profile_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_fcm_tokens_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -522,6 +554,7 @@ export type Database = {
     Enums: {
       apartment_role: "admin" | "member"
       booking_status: "active" | "released" | "admin"
+      device_platform: "web" | "android" | "ios"
       household_role: "admin" | "member"
       ticket_type_enum: "bug" | "support"
     }
@@ -656,6 +689,7 @@ export const Constants = {
     Enums: {
       apartment_role: ["admin", "member"],
       booking_status: ["active", "released", "admin"],
+      device_platform: ["web", "android", "ios"],
       household_role: ["admin", "member"],
       ticket_type_enum: ["bug", "support"],
     },
