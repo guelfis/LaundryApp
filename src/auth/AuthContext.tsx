@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { Session, User, AuthError } from '@supabase/supabase-js';
+import { requestNotificationPermission } from '../services/notificationService';
 
 interface AuthContextType {
   session: Session | null;
@@ -16,9 +17,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
+  // 1. Isolated effect dedicated ONLY to Firebase registration.
+  // It triggers safely only when the authenticated user object genuinely changes.
   useEffect(() => {
+    if (user?.id) {
+      // Fires asynchronously without blocking the primary UI state rendering
+      requestNotificationPermission(user.id);
+    }
+  }, [user?.id]); // Only runs when a real user ID shifts (login/logout/mount)
+
+  // 2. Pure authentication synchronization effect (No side effects allowed here)
+  useEffect(() => {
+    let mounted = true;
+
     // Check for existing session on mount
     supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!mounted) return;
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
@@ -26,18 +40,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     // Subscribe to auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!mounted) return;
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signOut = () => supabase.auth.signOut();
 
   return (
-    <AuthContext.Provider value={{ session, user,loading, signOut }}>
+    <AuthContext.Provider value={{ session, user, loading, signOut }}>
       {children}
     </AuthContext.Provider>
   );

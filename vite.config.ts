@@ -11,19 +11,21 @@ const packageJson = JSON.parse(
   readFileSync(resolve(__dirname, './package.json'), 'utf-8')
 );
 
-// https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
     react(),
     VitePWA({
+      strategies: 'injectManifest', // 1. Switches to custom Service Worker building mode
+      srcDir: 'src',                // 2. Looks for your custom source code inside src/
+      filename: 'firebase-messaging-sw.js', // 3. Compiles src/firebase-messaging-sw.js
       registerType: 'autoUpdate',
       injectRegister: 'script',
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
       manifest: {
         name: 'Laundry Planner',
         short_name: 'LaundryApp',
-        theme_color: '#121212',       // System status bar color defaults
-        background_color: '#121212',  // Splash screen background color
+        theme_color: '#121212',
+        background_color: '#121212',
         display: 'standalone',
         orientation: 'portrait',
         icons: [
@@ -45,18 +47,13 @@ export default defineConfig({
     exclude: ['lucide-react'],
   },
   define: {
-    // Inject ONLY the version string into the app
     __APP_VERSION__: JSON.stringify(packageJson.version),
   },
   test: {
-    // Enable global API like 'describe', 'test', and 'expect' without importing them
     globals: true, 
-    // Simulate a browser environment in the terminal
     environment: 'jsdom',
-    // Path to the setup file executed before running tests
     setupFiles: './src/setupTests.js',
     alias: {
-      // Redirects the bundler to an absolute path to avoid resolving mobile source files
       'react-native-localize': resolve(__dirname, './src/__mocks__/react-native-localize.ts'),
     },
   },
