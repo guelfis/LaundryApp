@@ -205,6 +205,11 @@
     "title": "Traveling Mode Active",
     "description": "Your device is set to {{userTz}}. The dashboard schedules are locked to the physical building's timezone ({{buildingTz}}) so you can manage slots accurately."
   },
+  "notificationsBanner":{
+    "title": "Notifications Disabled",
+    "description": "Click enable to receive notifications.",
+    "enable_btn": "Enable"
+  },
   "useHousehold":{
     "success": "Building created successfully. Code assigned:",
     "failure": "Failed to commit landlord building setup:"

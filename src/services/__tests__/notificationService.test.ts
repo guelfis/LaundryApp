@@ -1,16 +1,16 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { register, Messaging } from "firebase/messaging";
 
-// 1. Mock 'firebaseConfig' FIRST to completely prevent the real getMessaging() from running
+// 1. Mock 'firebaseConfig' to prevent the real initialization from breaking
 vi.mock("../../firebaseConfig", () => ({
   messaging: { mockInstance: "fcm_messaging_context_id" } as unknown as Messaging,
 }));
 
-// 2. Partially mock firebase/messaging, keeping actual exports intact but stubbing registration
-vi.mock("firebase/messaging", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("firebase/messaging")>();
+// 2. STABLE TOTAL MOCK: Mock firebase/messaging explicitly to isolate functionality
+vi.mock("firebase/messaging", () => {
   return {
-    ...actual,
+    getMessaging: vi.fn(),
+    isSupported: vi.fn(() => Promise.resolve(true)),
     register: vi.fn(() => Promise.resolve()),
     onRegistered: vi.fn((_, callback: (id: string) => Promise<void>) => {
       customGlobal.triggerFirebaseRegistration = callback;
@@ -27,7 +27,7 @@ vi.mock("../../lib/supabase", () => ({
   },
 }));
 
-// Import the service file after setting up environmental mocks
+// Import the items under test after injecting baseline environment mocks
 import { requestNotificationPermission } from "../notificationService";
 import { supabase } from "../../lib/supabase";
 
@@ -43,6 +43,14 @@ describe("requestNotificationPermission workflow", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     delete customGlobal.triggerFirebaseRegistration;
+    
+    // Explicitly stub window context structures to satisfy the service guards
+    vi.stubGlobal("Notification", {
+      requestPermission: vi.fn(),
+    });
+    vi.stubGlobal("navigator", {
+      serviceWorker: {},
+    });
   });
 
   it("should exit immediately and do nothing if notification permission is denied", async () => {
@@ -71,7 +79,7 @@ describe("requestNotificationPermission workflow", () => {
 
     const fakeInstallationId = "mock-firebase-fid-token-xyz-98765";
 
-    // Defer the execution loop to let requestNotificationPermission evaluate register() first
+    // Defer the trigger to ensure registration promise setup yields cleanly
     await new Promise<void>((resolve) => {
       setTimeout(async () => {
         if (customGlobal.triggerFirebaseRegistration) {

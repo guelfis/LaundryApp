@@ -205,6 +205,11 @@
     "title": "Modalità Viaggio Attiva",
     "description": "Il tuo dispositivo è impostato su {{userTz}}. Gli orari del dashboard sono bloccati al fuso orario dell'edificio ({{buildingTz}}) così puoi gestire gli slot con precisione."
   },
+  "NotificationsBanner": {
+    "title": "Notifiche Disabilitate",
+    "description": "Clicca abilita per ricevere notifiche.",
+    "enable_btn": "Abilita"
+  },
   "useHousehold":{
     "success": "Household creata con successo. Codice assegnato:",
     "failure": "Errore nella creazione del setup dell'household:"

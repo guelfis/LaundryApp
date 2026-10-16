@@ -10,6 +10,7 @@ import { ROUTES } from '../routes/routes.constants';
 import { useBookingFilters } from '../hooks/useBookings';
 import UserDashboard from './UserDashboard';
 import AdminDashboard from './AdminDashboard';
+import { NotificationBanner } from '../components/NotificationBanner';
 
 
 
@@ -36,6 +37,7 @@ export default function DashboardBase() {
     >
       <div className="w-full px-4 py-2 flex flex-col gap-6 flex-1 overflow-y-auto">
         {/* Common Global Elements */}
+        {currentUserId && <NotificationBanner profileId={currentUserId} />}
         {travelingStatus.isTraveling && (
           <TravelingBanner userTz={travelingStatus.userTimezone} buildingTz={householdTimezone} />
         )}
